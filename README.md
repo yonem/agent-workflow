@@ -51,7 +51,8 @@ Documenter：判断・結果・教訓を記録
 │   ├── current-task.md
 │   └── development-improvement.md
 ├── rules/
-│   └── commit-convention.md
+│   ├── commit-convention.md
+│   └── worker-task-settings.md
 ├── worker-definitions/
 │   ├── planner.md
 │   ├── implementer.md
@@ -70,6 +71,10 @@ Documenter：判断・結果・教訓を記録
 ## 役割
 
 `Owner` は人間の承認者です。Planner、Implementer、Tester、Security Operator、Reviewer、Documenter が worker として作業します。各 worker の詳細は対応する `worker-definitions/*.md` を参照してください。
+
+## Workerタスク設定
+
+各 worker の Codex タスクは `gpt-5.6-luna` を使用します。推論レベルは Planner、Implementer、Security Operator、Reviewer が `high`、Tester、Documenter が `medium` です。詳細は `rules/worker-task-settings.md` を参照してください。
 
 | 役割 | 主な責任 | コード変更 |
 | --- | --- | --- |

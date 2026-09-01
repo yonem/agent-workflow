@@ -41,7 +41,7 @@
 - `docs/development-improvement.md`: Documenterが開発全体の改善に向けて積み上げる記録
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
 - `result/`: workerが後続工程へ渡すタスク単位の結果ファイル。worker別のサブフォルダは作成せず、各タスクで上書きする
-- `rules/`: コミット規約などの恒久的な開発ルール
+- `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
 
 ## workerの流れ
 
@@ -62,6 +62,7 @@ Documenter
 
 - `result/plan.md`、`changes.md`、`test.md`、`security.md`、`review.md` はworkerごとに固定し、各タスクで上書きする
 - `docs/development-improvement.md` は上書きせず、開発全体の改善記録として追記する
+- worker タスクのモデルは `gpt-5.6-luna` に統一し、推論レベルは `rules/worker-task-settings.md` に従う
 - Plannerは計画承認前に実装を開始しない
 - 計画外の変更が必要になった場合は作業を停止して報告する
 - Security Operatorは秘密情報、個人情報、危険な外部操作、公開上の懸念を確認する
