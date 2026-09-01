@@ -30,6 +30,8 @@ Documenter：判断・結果・教訓を記録
 
 各 worker の役割、作業領域、受け取るファイル、結果ファイル、後工程への受け渡しは `worker-definitions/` の Markdown ファイルで定義します。タスク単位の結果は root 直下の `result/` に固定ファイル名で上書き保存し、Documenter の開発全体ログだけは `docs/development-improvement.md` に積み上げます。
 
+各 worker は完了時に親タスクへ、判定・結果ファイル・未確認事項・次の worker を報告します。親タスクは報告と結果ファイルを確認してから次工程へ接続します。Reviewer が修正依頼と判定した場合は Implementer に戻し、Tester、Security Operator、Reviewer の確認を再実行します。詳細は `rules/worker-task-settings.md` を参照してください。
+
 ## 使い方
 
 1. `docs/current-task.md` をプロジェクトの要件に合わせて記入する

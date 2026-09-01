@@ -10,6 +10,7 @@
 - コミットは1目的にまとめ、コミットメッセージ規約に従う
 - workerの役割、作業領域、入出力は `worker-definitions/` の定義に従う
 - worker間の正式な引き継ぎは会話ではなく `result/` の結果ファイルで行う
+- 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
 
 ## 禁止事項
 
@@ -66,6 +67,8 @@ Documenter
 - Plannerは計画承認前に実装を開始しない
 - 計画外の変更が必要になった場合は作業を停止して報告する
 - Security Operatorは秘密情報、個人情報、危険な外部操作、公開上の懸念を確認する
+- Reviewerが修正依頼と判定した場合は、Implementer、Tester、Security Operator、Reviewerの確認サイクルを再実行する
+- Reviewerの受入後にDocumenterへ接続し、Documenter完了後に親タスクがOwnerへ最終報告する
 
 ## 停止条件
 

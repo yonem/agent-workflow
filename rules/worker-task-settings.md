@@ -17,3 +17,14 @@
 - 推論レベルを変更する場合は、変更理由を `docs/development-improvement.md` に記録する
 - タスク作成時は該当する `worker-definitions/*.md` とこの設定を入力として確認する
 - 設定変更後に作成するタスクから新しい設定を適用する
+
+## 完了報告と次工程への接続
+
+- 各 worker は作業完了時に、親タスクへ完了報告を行う
+- 完了報告には、判定、実施内容、結果ファイルのパス、未確認事項、次に実行すべき worker を含める
+- 親タスクは結果ファイルと完了報告を確認してから、次の worker に作業を依頼する
+- Tester と Security Operator は並行して実行できるが、両方の完了報告を受けてから Reviewer に接続する
+- Reviewer が「修正依頼」と判定した場合は、指摘内容を Implementer に戻し、修正後に Tester、Security Operator、Reviewer の確認サイクルを再実行する
+- Reviewer が受入判定した場合は、Documenter に接続する
+- Documenter の完了報告を受けた後、親タスクは Owner に最終結果を報告する
+- worker が停止条件に該当した場合は、完了扱いにせず、理由と Owner に求める判断を親タスクへ報告する
