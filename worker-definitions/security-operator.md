@@ -13,15 +13,22 @@
 ## 入力
 
 - Implementer の変更内容
+- `result/plan.md`
 - `result/changes.md`
 - `result/test.md`
+- `docs/current-task.md`
+- `AGENTS.md`
 - `rules/commit-convention.md`
+- `rules/worker-task-settings.md`
+- タスクで指定された `rules/` 配下のファイル
 
 ## 実施する作業
 
 - 秘密情報・個人情報・顧客固有情報の混入を確認する
 - 計画外の外部書き込み、本番操作、危険な変更を確認する
 - ライセンスと公開上の懸念を確認する
+- 計画、実装差分、テスト結果の整合性を確認する
+- 確認対象、確認方法、未確認範囲を記録する
 
 ## resultへ格納するファイル
 
@@ -35,3 +42,5 @@
 
 - 確認範囲、確認結果、残存リスクが記録されている
 - 懸念がある場合は判定を保留して Owner に報告する
+- 判定は「問題なし」「懸念あり」「保留」のいずれかとする
+- 最終応答と `result/security.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態を記載する
