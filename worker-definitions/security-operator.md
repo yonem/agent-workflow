@@ -18,9 +18,7 @@
 - `result/test.md`
 - `docs/current-task.md`
 - `AGENTS.md`
-- `rules/commit-convention.md`
-- `rules/worker-task-settings.md`
-- タスクで指定された `rules/` 配下のファイル
+- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 
 ## 実施する作業
 
@@ -29,6 +27,8 @@
 - ライセンスと公開上の懸念を確認する
 - 計画、実装差分、テスト結果の整合性を確認する
 - 確認対象、確認方法、未確認範囲を記録する
+- 外部入力、エラー・ログ境界、認証元、権限範囲、認証・認可エラー、一時障害を確認する
+- Reviewerの修正後は、セキュリティ影響の有無と再確認要否を明記する
 
 ## resultへ格納するファイル
 

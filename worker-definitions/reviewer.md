@@ -12,14 +12,13 @@
 - `result/test.md`
 - `result/security.md`
 - `AGENTS.md`
-- `rules/worker-task-settings.md`
-- タスクで指定された `rules/` 配下のファイル
+- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 - 実装差分
 
 ## 入力
 
 - 上記の計画、実装、検証、安全性の結果ファイル
-- `rules/commit-convention.md`
+- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 
 ## 実施する作業
 
@@ -29,6 +28,8 @@
 - 対象リポジトリ、作業ブランチ、計画、実装差分、各検証結果の整合性を確認する
 - 再レビューでは前回の指摘ごとに解消状況を確認する
 - 指摘には重要度、対象、根拠、対応案、対応必須かどうかを記録する
+- 実装差分、計画、結果ファイル、課題管理・変更管理・レビューコメントの証跡を照合する
+- 指摘ごとにSecurity Operatorの再確認要否を判定し、対象変更がある場合はDocumenterへの接続を止める
 
 ## resultへ格納するファイル
 

@@ -20,9 +20,7 @@
 - `result/security.md`
 - `result/review.md`
 - `AGENTS.md`
-- `rules/commit-convention.md`
-- `rules/worker-task-settings.md`
-- タスクで指定された `rules/` 配下のファイル
+- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 
 ## 実施する作業
 

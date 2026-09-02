@@ -30,3 +30,6 @@
 - Documenter はタスク固有の結果を `result/task-log.md` に上書きし、汎用的な改善点だけを `docs/development-improvement.md` に1項目1行で追記・更新する
 - Documenter の完了報告と `result/task-log.md`、`docs/development-improvement.md` の更新を確認した後、親タスクは Owner に最終結果を報告する
 - worker が停止条件に該当した場合は、完了扱いにせず、理由と Owner に求める判断を親タスクへ報告する
+- 入力ゲート、証跡、再確認、データ、外部連携、仕様書の扱いは `rules/worker-evidence.md` に従う
+- レビュー依頼とレビューコメントへの返信は `rules/review-request-format.md` に従う
+- 開発改善記録の形式、ステータス、更新方法は `rules/development-improvement-record.md` に従う

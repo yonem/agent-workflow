@@ -40,7 +40,7 @@
 - `README.md`: ワークフロー全体と運用方法
 - `docs/current-task.md`: Plannerへ渡す現在のタスク
 - `docs/development-improvement.md`: Documenterが汎用的な開発サイクル改善を一覧で積み上げる永続記録
-- `result/task-log.md`: Documenterがタスク固有の判断・結果・残課題を記録するファイル。タスクごとに上書きする
+- 対象プロジェクトの `result/task-log.md`: Documenterがタスク固有の判断・結果・残課題を記録するファイル。タスクごとに上書きする
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
 - `result/`: workerが後続工程へ渡すタスク単位の結果ファイル。worker別のサブフォルダは作成せず、各タスクで上書きする
 - `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
@@ -65,6 +65,10 @@ Documenter
 - `result/plan.md`、`changes.md`、`test.md`、`security.md`、`review.md` はworkerごとに固定し、各タスクで上書きする
 - `docs/development-improvement.md` は改善項目を1項目1行の表で追記・更新し、タスク固有の詳細は記録しない
 - `result/task-log.md` はDocumenterのタスク固有ログとして、タスクが変わるたびに上書きする
+- `rules/worker-evidence.md` はworker接続前の入力ゲート、証跡、再確認、外部連携、データ、仕様書の共通ルールとする
+- `rules/review-request-format.md` はレビュー依頼の固定形式と返信先を定義する
+- `rules/development-improvement-record.md` は改善記録の対象、ステータス、形式、更新ルールを定義する
+- `rules/README.md` は `rules/` 配下の適用範囲、状態、優先順位を定義するルールの入口とする
 - worker タスクのモデルは `gpt-5.6-luna` に統一し、推論レベルは `rules/worker-task-settings.md` に従う
 - Plannerは計画承認前に実装を開始しない
 - 計画外の変更が必要になった場合は作業を停止して報告する
