@@ -28,7 +28,7 @@ Documenter：判断・結果・教訓を記録
 人間がマージ・リリースを判断
 ```
 
-各 worker の役割、作業領域、受け取るファイル、結果ファイル、後工程への受け渡しは `worker-definitions/` の Markdown ファイルで定義します。タスク単位の結果は root 直下の `result/` に固定ファイル名で上書き保存し、Documenter の開発全体ログだけは `docs/development-improvement.md` に積み上げます。
+各 worker の役割、作業領域、受け取るファイル、結果ファイル、後工程への受け渡しは `worker-definitions/` の Markdown ファイルで定義します。タスク単位の結果は root 直下の `result/` に固定ファイル名で上書き保存します。Documenterはタスク固有の記録を `result/task-log.md` に上書き保存し、他プロジェクトでも再利用できる改善点だけを `docs/development-improvement.md` に1項目1行で追記・更新します。
 
 各 worker は完了時に親タスクへ、判定・結果ファイル・未確認事項・次の worker を報告します。親タスクは報告と結果ファイルを確認してから次工程へ接続します。Reviewer が修正依頼と判定した場合は Implementer に戻し、Tester、Security Operator、Reviewer の確認を再実行します。詳細は `rules/worker-task-settings.md` を参照してください。
 
@@ -67,7 +67,8 @@ Documenter：判断・結果・教訓を記録
     ├── changes.md
     ├── test.md
     ├── security.md
-    └── review.md
+    ├── review.md
+    └── task-log.md
 ```
 
 ## 役割
@@ -110,7 +111,7 @@ Documenter：判断・結果・教訓を記録
 
 ## ファイルの受け渡し
 
-正式な引き継ぎ情報は会話履歴ではなく、`result/` に格納された結果ファイルです。後工程は前工程の結果ファイルを読み取り、自身の固定結果ファイルを `result/` に上書き保存します。Documenter の成果物だけは `docs/development-improvement.md` に追記し、開発全体の振り返りとライフサイクル改善に使用します。計画、外部操作、マージ、リリースなどの承認は Owner が行います。
+正式な引き継ぎ情報は会話履歴ではなく、`result/` に格納された結果ファイルです。後工程は前工程の結果ファイルを読み取り、自身の固定結果ファイルを `result/` に上書き保存します。Documenterはタスク固有の詳細を `result/task-log.md` に上書き保存し、汎用的な開発サイクル改善だけを `docs/development-improvement.md` に追記・更新します。計画、外部操作、マージ、リリースなどの承認は Owner が行います。
 
 ## 安全上の注意
 

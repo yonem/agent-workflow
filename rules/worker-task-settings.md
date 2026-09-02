@@ -27,5 +27,6 @@
 - Tester と Security Operator は並行して実行できるが、両方の完了報告を受けてから Reviewer に接続する
 - Reviewer が「修正依頼」と判定した場合は、指摘内容を Implementer に戻し、修正後に Tester、Security Operator、Reviewer の確認サイクルを再実行する
 - Reviewer が受入判定した場合は、Documenter に接続する
-- Documenter の完了報告を受けた後、親タスクは Owner に最終結果を報告する
+- Documenter はタスク固有の結果を `result/task-log.md` に上書きし、汎用的な改善点だけを `docs/development-improvement.md` に1項目1行で追記・更新する
+- Documenter の完了報告と `result/task-log.md`、`docs/development-improvement.md` の更新を確認した後、親タスクは Owner に最終結果を報告する
 - worker が停止条件に該当した場合は、完了扱いにせず、理由と Owner に求める判断を親タスクへ報告する
