@@ -13,10 +13,10 @@
 ## 入力
 
 - Implementer の変更内容
-- `result/plan.md`
-- `result/changes.md`
-- `result/test.md`
-- `docs/current-task.md`
+- `threads/<thread-name>/result/plan.md`
+- `threads/<thread-name>/result/changes.md`
+- `threads/<thread-name>/result/test.md`
+- `threads/<thread-name>/docs/current-task.md`
 - `AGENTS.md`
 - `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 
@@ -32,15 +32,16 @@
 
 ## resultへ格納するファイル
 
-- `result/security.md`
+- `threads/<thread-name>/result/security.md`
 
 ## 後工程への受け渡し
 
-- `result/security.md` を Reviewer と Owner へ渡す
+- `threads/<thread-name>/result/security.md` を Reviewer と Owner へ渡す
 
 ## 完了条件
 
 - 確認範囲、確認結果、残存リスクが記録されている
+- 処理中および例外発生時のログトレーサビリティを確認し、秘密情報・個人情報・外部入力が過剰に出力されていないことを確認している
 - 懸念がある場合は判定を保留して Owner に報告する
 - 判定は「問題なし」「懸念あり」「保留」のいずれかとする
-- 最終応答と `result/security.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態を記載する
+- 最終応答と `threads/<thread-name>/result/security.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態、Owner判断を記載する。Owner判断は `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルで記載する

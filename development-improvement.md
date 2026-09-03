@@ -1,6 +1,6 @@
 # 開発サイクル改善記録
 
-汎用的な開発サイクルの改善点を記録する。記載方法は `rules/development-improvement-record.md` に従い、個別タスクの詳細は対象プロジェクトの `result/task-log.md` に記録する。
+汎用的な開発サイクルの改善点を記録する。記載方法は `rules/development-improvement-record.md` に従い、個別タスクの詳細は対象スレッドの `threads/<thread-name>/result/task-log.md` に記録する。
 
 ## 記載ルール
 

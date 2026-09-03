@@ -12,9 +12,9 @@
 ## 入力
 
 - Implementer の変更内容
-- `result/changes.md`
-- `result/plan.md`
-- `docs/current-task.md`
+- `threads/<thread-name>/result/changes.md`
+- `threads/<thread-name>/result/plan.md`
+- `threads/<thread-name>/docs/current-task.md`
 - `AGENTS.md`
 - 承認済み計画
 - `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
@@ -31,15 +31,16 @@
 
 ## resultへ格納するファイル
 
-- `result/test.md`
+- `threads/<thread-name>/result/test.md`
 
 ## 後工程への受け渡し
 
-- `result/test.md` を Security Operator、Reviewer へ渡す
+- `threads/<thread-name>/result/test.md` を Security Operator、Reviewer へ渡す
 
 ## 完了条件
 
 - 検証結果が実測ベースで記録されている
 - 未検証項目と既知の制約が明記されている
+- 正常系・異常系を含め、処理中の状態と例外発生時のログトレーサビリティが確保されていることを確認している
 - 判定は「成功」「失敗」「一部未検証」「保留」のいずれかとする
-- 最終応答と `result/test.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態を記載する
+- 最終応答と `threads/<thread-name>/result/test.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態、Owner判断を記載する。Owner判断は `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルで記載する

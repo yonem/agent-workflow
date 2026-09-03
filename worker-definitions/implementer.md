@@ -10,9 +10,9 @@ Owner が承認した計画の範囲だけを実装する。
 
 ## 入力
 
-- `result/plan.md`
+- `threads/<thread-name>/result/plan.md`
 - Owner の承認内容
-- `docs/current-task.md`
+- `threads/<thread-name>/docs/current-task.md`
 - `AGENTS.md`
 - `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
 
@@ -28,18 +28,19 @@ Owner が承認した計画の範囲だけを実装する。
 
 ## resultへ格納するファイル
 
-- `result/changes.md`
+- `threads/<thread-name>/result/changes.md`
 
 ## 後工程への受け渡し
 
 - 実装済みの作業領域
-- `result/changes.md` を Tester、Security Operator、Reviewer へ渡す
+- `threads/<thread-name>/result/changes.md` を Tester、Security Operator、Reviewer へ渡す
 
 ## 完了条件
 
 - 承認範囲の実装が完了している
 - 変更内容と未解決事項が記録されている
-- `result/plan.md` の計画状態を実装結果と一致させる。計画自体を変更した場合は理由とOwner判断を記録する
-- 最終応答と `result/changes.md` に、`判定`、`実施内容`、`結果ファイル`、`未確認事項`、`次に実行すべき worker` を明記して親タスクへ報告する
+- 処理中の開始、主要な状態遷移、完了・失敗を追跡でき、特に例外発生時のログトレーサビリティが確保されていることを確認している
+- `threads/<thread-name>/result/plan.md` の計画状態を実装結果と一致させる。計画自体を変更した場合は理由とOwner判断を記録する
+- 最終応答と `threads/<thread-name>/result/changes.md` に、`判定`、`実施内容`、`結果ファイル`、`未確認事項`、`次に実行すべき worker`、`Owner判断` を明記して親タスクへ報告する。Owner判断は `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルで記載する
 - 判定は「実装完了」「修正不能」「保留」のいずれかとする
 - Reviewerの修正依頼に対応する場合は、指摘IDごとに修正内容と未対応理由を記録する

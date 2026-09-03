@@ -33,7 +33,7 @@ status: inactive
 ## 優先順位
 
 1. `AGENTS.md`
-2. Ownerが承認した `docs/current-task.md`
+2. Ownerが承認した対象スレッドの `threads/<thread-name>/docs/current-task.md`
 3. `rules/` 配下の共通ルール
 4. `worker-definitions/` のworker固有手順
 

@@ -9,8 +9,9 @@
 - 既存の手動変更を勝手に上書きしない
 - コミットは1目的にまとめ、コミットメッセージ規約に従う
 - workerの役割、作業領域、入出力は `worker-definitions/` の定義に従う
-- worker間の正式な引き継ぎは会話ではなく `result/` の結果ファイルで行う
+- worker間の正式な引き継ぎは会話ではなく、対象スレッドの `threads/<thread-name>/result/` の結果ファイルで行う
 - 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
+- 各workerは完了時に `Owner判断` と `Owner判断 (追記)` をMarkdownテーブルで報告し、再検証時は同様の内容を重複させず差分を追記する。最終報告では `Owner判断 (追記)` を `なし` とする
 
 ## 禁止事項
 
@@ -38,17 +39,17 @@
 ## 作業領域
 
 - `README.md`: ワークフロー全体と運用方法
-- `docs/current-task.md`: Plannerへ渡す現在のタスク
-- `docs/development-improvement.md`: Documenterが汎用的な開発サイクル改善を一覧で積み上げる永続記録
-- 対象プロジェクトの `result/task-log.md`: Documenterがタスク固有の判断・結果・残課題を記録するファイル。タスクごとに上書きする
+- `threads/<thread-name>/docs/current-task.md`: 各スレッドでPlannerへ渡す現在のタスク
+- `threads/<thread-name>/result/task-log.md`: Documenterがスレッド固有の判断・結果・残課題を記録するファイル。タスクごとに上書きする
+- `development-improvement.md`: Documenterが全スレッド共通の開発サイクル改善を一覧で積み上げる永続記録
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
-- `result/`: workerが後続工程へ渡すタスク単位の結果ファイル。worker別のサブフォルダは作成せず、各タスクで上書きする
+- `threads/<thread-name>/result/`: workerが同じスレッドの後続工程へ渡すタスク単位の結果ファイル。worker別のサブフォルダは作成せず、各タスクで上書きする
 - `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
 
 ## workerの流れ
 
 ```text
-docs/current-task.md
+threads/<thread-name>/docs/current-task.md
   ↓
 Planner
   ↓ Owner承認
@@ -62,9 +63,18 @@ Documenter
   ↓ Ownerがマージ・リリースを判断
 ```
 
-- `result/plan.md`、`changes.md`、`test.md`、`security.md`、`review.md` はworkerごとに固定し、各タスクで上書きする
-- `docs/development-improvement.md` は改善項目を1項目1行の表で追記・更新し、タスク固有の詳細は記録しない
-- `result/task-log.md` はDocumenterのタスク固有ログとして、タスクが変わるたびに上書きする
+- `threads/<thread-name>/result/plan.md`、`changes.md`、`test.md`、`security.md`、`review.md` はworkerごとに固定し、各タスクで上書きする
+- ルートの `development-improvement.md` は改善項目を追記・更新し、タスク固有の詳細は記録しない
+- `threads/<thread-name>/result/task-log.md` はDocumenterのタスク固有ログとして、タスクが変わるたびに上書きする
+- 1つのスレッドでは1タスクだけを扱い、同一スレッドで複数タスクを並行して実行しない
+- Ownerは作業対象のスレッド名とタスクを `threads/<thread-name>/docs/current-task.md` に記載し、workerはその記載から対象スレッドを認識する
+- Ownerは `current-task.md` に `スレッド名`、`CodexプロジェクトID`、`Codex実行ディレクトリ`、`対象リポジトリ`、`ベースブランチ`、`作業ブランチ` を必ず記載する
+- workerは作業開始前に自身のCodexプロジェクトID、Codex実行ディレクトリ、対象リポジトリへのアクセス可否を確認する。Codex実行ディレクトリは対象リポジトリと一致しなくてもよく、projectIdまたは対象リポジトリが一致しない場合は作業を開始せず親タスクへ報告する
+- 1スレッドと1つのCodexプロジェクトを1対1で対応させ、1つのプロジェクトを複数スレッドで共有しない
+- 新規スレッドでは専用プロジェクトを作成し、projectIdをcurrent-task.mdへ記載して全workerの所属を照合してからPlannerを起動する
+- 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクでは結果ファイルを新しい内容で上書きする。Documenterの正式な結果ファイルは `threads/<thread-name>/result/task-log.md` とする
+- Implementer以降は処理中、とくに例外発生時のログトレーサビリティ確認結果を完了条件として記録する
+- スレッドの分離と追加は `rules/thread-operation.md` に従う
 - `rules/worker-evidence.md` はworker接続前の入力ゲート、証跡、再確認、外部連携、データ、仕様書の共通ルールとする
 - `rules/review-request-format.md` はレビュー依頼の固定形式と返信先を定義する
 - `rules/development-improvement-record.md` は改善記録の対象、ステータス、形式、更新ルールを定義する

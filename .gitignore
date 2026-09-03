@@ -1,0 +1,3 @@
+# スレッドごとのタスク入力・結果はプロジェクト固有のためGit管理対象外
+threads/*/docs/
+threads/*/result/
