@@ -7,12 +7,12 @@
 ## 作業領域
 
 - `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/docs/task-progress.md`（次タスク以降の共通台帳の正本）
 - `threads/<thread-name>/result/plan.md`
 - `threads/<thread-name>/result/changes.md`
 - `threads/<thread-name>/result/test.md`
 - `threads/<thread-name>/result/security.md`
-- `AGENTS.md`
-- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
+- 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
 - 実装差分
 
 ## 入力
@@ -23,17 +23,33 @@
 ## 実施する作業
 
 - 要件と完了条件への適合を確認する
+- 新規資料のtask-id、タスク名、目的、project/thread、対象、日時、状態、原典パスの整合と、history-key/run-idの混入がないことを確認する
 - 指摘事項を重要度付きで記録する
 - 合格、条件付き承認、修正依頼、保留を判定する
 - 対象リポジトリ、作業ブランチ、計画、実装差分、各検証結果の整合性を確認する
 - 再レビューでは前回の指摘ごとに解消状況を確認する
 - 指摘には重要度、対象、根拠、対応案、対応必須かどうかを記録する
 - 実装差分、計画、結果ファイル、課題管理・変更管理・レビューコメントの証跡を照合する
+- `docs/task-progress.md`、worker固有result、health-check、history/index、manifestの責務と参照関係を照合する
+- `task-legacy-history-backup`の管理識別子、旧配置対応、旧内容の不変性、通常候補・復旧対象外の明示を確認する
 - 指摘ごとにSecurity Operatorの再確認要否を判定し、対象変更がある場合はDocumenterへの接続を止める
+- `review.md`をReviewer受入判定の正本とし、`plan.md`、`changes.md`、`task-progress.md`、`history/index.md`、manifestは入力・参照として照合する。正本不明、参照切れ、責務重複、更新境界不明がある場合は受入せず、根拠と停止理由を記録する。
+- `review.md`の過去attempt、修正依頼、受入判定は履歴として保持し、履歴本文を削除・上書きしない。新しいレビュー報告はattempt番号・日時付きで末尾へ追記する。最大attempt番号の報告（同じattempt番号が複数ある場合は最新日時）を現行判定として扱い、過去attemptは現行判定に使用しない。現行報告には判定（受入／条件付き受入／修正依頼／保留）、次worker、Documenter接続可否を明記する。attempt番号・日時・判定・次worker・接続可否が欠落、現行報告を一意に特定できない、または`plan.md`・`task-progress.md`・`history/index.md`・`changes.md`と不一致の場合は、現行判定を推測せず修正依頼または保留としてDocumenter接続・Owner完了確認・履歴操作を止める。
+- Reviewer受入と実運用後の効果確認を別判定として確認する。効果確認の状態、証跡、担当、次回確認日、継続条件、再評価条件が不足していれば、受入済みでも改善完了とは判定しない。承認範囲外の変更を検知した場合は、現行taskへ追加せず新TASKのOwner判断待ちとする。
+- ルール変更では、変更前後の直接対象・参照対象・記録対象・移行先導入対象、正本・参照先・更新責任・更新境界、旧表現、影響分類、矛盾・判定不能・変更漏れの停止条件、共通仕様と固有設定の分離を独立確認する。影響一覧と実変更が一致しない、旧表現の扱いが不明、参照切れ・相反する停止条件・変更漏れが残る場合は受入せず停止する
+- ルール変更またはIMP同期では、タスク開始、対応開始、Reviewer受入後、Documenter記録前後の4境界について全対象IMPの必須判定表を独立確認する。対象、現行、期待遷移、5条件、実施結果、変更前後、実施者、証跡、次回確認条件のいずれかが未更新・欠落している場合、または適用可能な遷移が未実施の場合は、修正依頼または保留とし受入しない。
+- IMP状態の自動更新を独立確認する場合は、対象IMP・正本・証跡・更新責任者の特定、サマリーと詳細の一致、Owner判断残件なし、並行更新・競合なし、状態遷移の一意性という5条件を照合する。承認済み計画に基づく対応開始→`対応中`、Reviewer受入済みかつ効果確認未完了→`継続評価`、効果確認・記録更新・Owner完了確認済み→`対応完了`の3遷移だけを受入対象とし、変更前後、理由、証跡、更新日時、対象task-id、更新責任者、次回確認条件の記録を確認する。サマリー・詳細不一致、競合、正本・証跡・責任者不明、`適用外`・承認範囲外の是正、Owner完了確認の欠落はOwner判断必須境界として、自動更新されていないことを独立確認する。
+- 移行先固有のproject/thread、過去task、Worker Registry、F-ID、IMP-ID、draftsが共通サイクルの必須条件になっていないこと、Documenter省略時の記録責任者・記録先が明示されていることを確認する。
+- 技術非依存性を役割、能力、入出力、状態、判定基準、証跡、停止条件で確認し、媒体変更後も正本、責任、状態、証跡、完了条件の意味が維持されることを確認する。技術依存がある場合は例外記録の理由、適用範囲・期間、代替可否、Owner判断、移行時影響、利用不能時の停止条件、分離先を照合し、不足時は受入しない。
+- タスク統合候補では、候補抽出元が`history/index.md`だけであること、ローカルパス完全一致、ベースブランチ一致、機能・レイヤー、概要比較の順序、5分類の根拠、共通・固有範囲の分離、Owner承認前の不変条件を独立確認する。欠落、矛盾、分類不能、history原本操作、統合確定がある場合は受入せず停止する
+- Documenter再記録後の受入時に、`operation-check.md`の固定必須見出し6つの順序、7列の対応前後比較表、根拠区分、未確認区分、`current-task.md`・`task-progress.md`・担当resultとの状態整合を独立確認する。欠落・順序不一致・表形式不一致・状態不一致時はDocumenterまたは担当workerの責務にかかわらず、受入、完了、次worker接続、履歴操作を確定せず、根拠と停止理由を`review.md`へ記録する。Reviewerの修正依頼、保留、未確認が残る間はOwner完了確認待ちへ進めない
+- 読み取り専用ドライランでは、`タスク開始`、`Owner承認`、`worker接続`、`タスク切替`、`履歴退避`、`タスク終了`の6代表ケースを独立確認する。各ケースの正本、参照先、更新責任、更新境界、Owner判断、停止条件、期待値・実際値・根拠・影響を照合し、参照切れ、重複記載、旧識別子混入、Owner判断再掲、状態台帳不一致の分類と、停止理由・再開条件の記録を確認する。実資料・履歴・外部サービスが変更されていないことも受入条件とする。
 
 ## resultへ格納するファイル
 
 - `threads/<thread-name>/result/review.md`
+
+履歴退避、正本結果、task境界は `rules/thread-operation.md`、入力証跡とOwner判断は `rules/worker-evidence.md` を参照する。
 
 ## 後工程への受け渡し
 
@@ -44,4 +60,7 @@
 - 指摘、対応方針、残課題、判定が記録されている
 - 処理中の状態遷移と例外発生時のログトレーサビリティが要件・実装・検証結果と整合していることを確認している
 - 判定は「受入」「条件付き受入」「修正依頼」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/review.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態、Owner判断を記載する。Owner判断は `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルで記載する
+- `review.md`の最大attempt番号（同番号なら最新日時）の現行報告が特定でき、attempt、日時、判定、次worker、Documenter接続可否が`plan.md`・`task-progress.md`・`history/index.md`・`changes.md`と一致している
+- 読み取り専用ドライラン6ケースの結果、停止ケースの記録形式、対象外境界、実資料・履歴・外部サービスを変更していないことを独立確認している
+- IMP状態自動更新の5条件、3遷移、Owner判断必須境界、必須記録項目が共通rules、worker定義、報告テンプレート、整合性確認、状態サマリー、TASK-008結果記録で一致していることを独立確認している
+- 最終応答と `threads/<thread-name>/result/review.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う

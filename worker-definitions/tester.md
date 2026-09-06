@@ -15,9 +15,8 @@
 - `threads/<thread-name>/result/changes.md`
 - `threads/<thread-name>/result/plan.md`
 - `threads/<thread-name>/docs/current-task.md`
-- `AGENTS.md`
 - 承認済み計画
-- `rules/` 配下にある適用対象のルール（`rules/README.md` の定義に従う）
+- 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
 
 ## 実施する作業
 
@@ -33,6 +32,8 @@
 
 - `threads/<thread-name>/result/test.md`
 
+履歴退避、正本結果、task境界は `rules/thread-operation.md`、入力証跡とOwner判断は `rules/worker-evidence.md` を参照する。
+
 ## 後工程への受け渡し
 
 - `threads/<thread-name>/result/test.md` を Security Operator、Reviewer へ渡す
@@ -43,4 +44,4 @@
 - 未検証項目と既知の制約が明記されている
 - 正常系・異常系を含め、処理中の状態と例外発生時のログトレーサビリティが確保されていることを確認している
 - 判定は「成功」「失敗」「一部未検証」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/test.md` に、判定、実施内容、結果ファイル、未確認事項、次に実行すべき worker、親タスクへの報告状態、Owner判断を記載する。Owner判断は `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルで記載する
+- 最終応答と `threads/<thread-name>/result/test.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う

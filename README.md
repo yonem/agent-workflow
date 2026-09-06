@@ -2,7 +2,7 @@
 
 新規プロジェクトでAIエージェントを役割ごとに運用し、ファイルを介して作業結果を引き継ぐためのワークフロー定義です。
 
-小規模な作業では1つのセッションで役割を切り替え、大規模または独立性が必要な作業では複数タスクやワークツリーに分けます。Orchestrator は任意とし、タスク分割・worker の起動・成果物の状態管理を自動化する場合に利用します。
+小規模な作業では1つのセッションで役割を切り替え、大規模または独立性が必要な作業では複数のスレッドに分けます。各スレッドは1つのCodexプロジェクトと1つのタスクに対応します。Orchestrator は任意とし、workerの起動・成果物の状態管理を自動化する場合に利用します。
 
 ## 目的
 
@@ -12,18 +12,26 @@
 
 本リポジトリは、特定プロジェクトを直接運用するための作業場所ではなく、各プロジェクトへ展開するスターターパックです。共通ルールとworker定義を対象リポジトリへ適用し、対象プロジェクトの構成・技術・実行環境に合わせたタスクと検証計画をPlannerに作成させます。
 
+改善サイクルは、改善事項の発見、汎用性評価、Owner判断、計画、実装、Reviewer受入、実運用後の効果確認、再評価、記録更新、完了または継続の順で運用します。Reviewer受入だけでは改善完了とせず、効果確認の状態・証跡・次回確認日・再評価条件を別に記録します。共通仕様は `rules/development-improvement-record.md` を正本とします。
+
+共通仕様は特定の言語、shell、実行可能プログラム、外部ライブラリ、製品、ベンダー、OS、実行環境を前提にしません。役割、能力、入出力、状態、判定基準、証跡、停止条件で目的を確認し、記録媒体を変更しても正本、責任、状態、証跡、完了条件の意味を維持します。避けられない技術依存は理由、適用範囲・期間、代替可否、移行時影響、Owner判断、停止条件、分離先を例外記録へ残します。
+
 初回導入時は、次の順序で準備します。
 
 1. 本リポジトリの `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md` を対象リポジトリへ展開する
-2. 対象リポジトリの `threads/<thread-name>/docs/current-task.md` を作成し、スレッド名、CodexプロジェクトID、Codex実行ディレクトリ、対象リポジトリ、ベースブランチ、作業ブランチを記載する
-3. Plannerへ対象リポジトリの内訳確認と `plan.md` の作成を依頼する
-4. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する
+2. `rules/history-initialization.md` に従い、Git追跡対象外のローカル `history/` と10項目の `history/index.md` を初期化する。通常の既存履歴があるのに台帳がない場合は、上書きせず停止する。`history/task-legacy-history-backup/`は今回の特殊な保全領域として初期化判定から除外する
+3. `rules/current-task-template.md` を使って対象リポジトリの `threads/<thread-name>/docs/current-task.md` を作成し、Task ContextとTask Definitionを記載する。作業ブランチは、既存ブランチを指定しない限り `記述ルールに従い新規作成` とする
+4. 初回タスクの既知情報を `history/index.md` へ登録し、`current-task.md`との一致を確認する
+5. Plannerへ対象リポジトリの内訳確認と `plan.md` の作成を依頼する
+6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
 
-`threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は、展開先で生成されるタスク固有の作業領域です。本リポジトリではGit管理対象外とし、共通の仕組みには含めません。共通ルールを更新した場合は、派生先で差分を確認してから必要な内容だけを取り込みます。
+`threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は、展開先で生成されるタスク固有の作業領域です。次タスク以降、進行中タスクの共通台帳は`docs/task-progress.md`、worker固有の完了報告は`result/`に分けます。本リポジトリではGit管理対象外とし、共通の仕組みには含めません。共通ルールを更新した場合は、派生先で差分を確認してから必要な内容だけを取り込みます。
 
 Codexの再起動後にworkerの表示やプロジェクト所属が不一致になった場合は、作業を開始せず、Ownerがworkerを正しいプロジェクトへ再作成・再接続します。復旧手順は `rules/thread-operation.md` の「同期失敗時の復旧」を参照してください。
 
-各スレッドは専用のCodexプロジェクトと1対1で対応させます。新しいスレッドでは専用プロジェクトを作成し、projectIdを`current-task.md`へ記載して全workerの所属を確認してからPlannerを起動します。
+Ownerが「ヘルスチェックを実行して」と明示した場合、または作業中にworkerへ接続できなかった場合は、`rules/worker-health-check.md` に従って同一projectId内のworker一覧、アクセス可否、状態、重複、不一致、不足を確認します。接続失敗時も自動作成へ進まず、Ownerの確認前にworkerの状態を変更しません。不足workerの追加はOwnerが明示的に指示した場合だけ行います。
+
+各スレッドは専用のCodexプロジェクトと1対1で対応させ、通常時は1つのactiveなproject/thread/taskだけを扱います。復旧時の例外を含む分離・履歴・整合性の詳細は `rules/thread-operation.md` と `rules/workflow-consistency-check.md` に従います。
 
 ## 基本ワークフロー
 
@@ -34,9 +42,9 @@ Planner：現状調査・実装計画
   ↓ 人間が承認
 Implementer：実装・テスト追加
   ↓
-Tester：テスト・静的解析・ビルド
-  ↓
-Security Operator：秘密情報・安全性を確認
+Tester：テスト・静的解析・ビルド ─┐
+                                     ├─ 両方完了
+Security Operator：秘密情報・安全性の確認 ─┘
   ↓
 Reviewer：要件・設計・安全性を独立確認
   ↓
@@ -45,13 +53,11 @@ Documenter：判断・結果・教訓を記録
 人間がマージ・リリースを判断
 ```
 
-各 worker の役割、作業領域、入力、結果ファイル、後工程への受け渡しは `worker-definitions/` の Markdown ファイルで定義します。1つのスレッドでは1タスクだけを扱い、タスク固有の入力と結果はスレッド単位で管理します。結果は `threads/<thread-name>/result/` に固定ファイル名で上書き保存します。Documenterは他workerと同じ `threads/<thread-name>/result/task-log.md` にタスク固有の記録を上書き保存し、全スレッドで再利用できる改善点だけをルートの `development-improvement.md` に追記・更新します。記載ルールは `rules/development-improvement-record.md` を参照してください。
+各 worker の固有責務、入力、結果ファイル、後工程は `worker-definitions/`、標準接続サイクルとモデル設定は `rules/worker-task-settings.md`、入力ゲートと証跡は `rules/worker-evidence.md`、完了報告の形式は `rules/worker-report-template.md` を正本とします。現行result/history境界、復旧、再検証、task-logの更新時点は `rules/thread-operation.md` に従います。
 
-各 worker は完了時に親タスクへ、判定・結果ファイル・未確認事項・次の worker を報告します。親タスクは報告と結果ファイルを確認してから次工程へ接続します。Reviewer が修正依頼と判定した場合は Implementer に戻し、Tester、Security Operator、Reviewer の確認を再実行します。複数の作業ループは `threads/` 配下のスレッドディレクトリで分離して運用します。詳細は `rules/worker-task-settings.md` と `rules/thread-operation.md` を参照してください。
+共通rules、worker定義、テンプレート、README、workflow資料、移行手順を変更する場合は、変更前に直接対象・参照対象・記録対象・移行先導入対象を分類し、正本・参照先・更新責任・更新境界・旧表現・停止条件を確認します。変更後は同じ影響一覧を再確認し、影響なし・対象外の根拠、未確認・矛盾・変更漏れの停止理由を`changes.md`へ記録します。手順の正本は `rules/workflow-consistency-check.md` と `rules/workflow-integrity-check.md` です。
 
-すべての worker は、完了報告と結果ファイルに `Owner判断` と `Owner判断 (追記)` のMarkdownテーブルを記載します。再検証時は同様の内容を重複させず、差分を追記します。最終報告では `Owner判断 (追記)` を `なし` で終えます。詳細は `rules/worker-evidence.md` を参照してください。
-
-同一タスクの再検証では結果ファイルへ追記し、新しいタスクへ切り替える場合は結果ファイルを上書きします。Documenterの正式な結果ファイルは各スレッドの `result/task-log.md` です。Implementer以降は、処理中および例外発生時のログトレーサビリティ確認結果も記録します。
+動作確認は `rules/operation-check-report.md`、worker状態の確認は `rules/worker-health-check.md`、汎用改善の記録は `rules/development-improvement-record.md` に従います。プロジェクト固有のworker省略は共通文書へ追加しません。
 
 ## 使い方
 
@@ -59,9 +65,26 @@ Documenter：判断・結果・教訓を記録
 2. Plannerに現状調査と計画作成を依頼する
 3. 人間が計画・リスク・完了条件を承認する
 4. Implementerに承認済みの範囲だけを実装させる
-5. Testerに実測ベースの検証を依頼する
-6. Reviewerに独立レビューを依頼する
-7. 人間が採用、修正、中止、マージを判断する
+5. TesterとSecurity Operatorに、それぞれ実測ベースの検証と安全性確認を依頼する
+6. 両方の完了報告を確認してからReviewerに独立レビューを依頼する
+7. Reviewer受入後に実運用の効果を確認し、Documenterまたは導入時に指定した記録責任者が結果・残課題・次回条件を記録する
+8. 効果不足や承認範囲外の是正がある場合は、同一TASKの修正または新しいTASK-xxxの計画をOwnerが判断する
+9. 人間が採用、修正、中止、マージ、リリースを判断する
+
+## 移行先での初期有効化確認
+
+他プロジェクトへ展開した後、次を確認するまで共通サイクルを有効化済みとしません。
+
+- `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md`、導入確認手順が配置されている
+- `rules/history-initialization.md`に従って、ローカルの`history/`と10項目の`history/index.md`を初期化できる
+- `current-task.md`、`task-progress.md`、worker結果ファイル、汎用改善記録、タスク固有ログの記録先が確認できる
+- Planner、Implementer、Reviewer、Documenterの責務と、Documenterを省略する場合の記録責任者・記録先が確認できる
+- Reviewer受入と実運用後の効果確認、継続評価、再評価、新TASK起票、停止条件の境界が確認できる
+- 特定の過去task、project/thread、Worker Registry、F-ID、IMP-ID、draftsなしで初回サイクルを開始できる
+- 共通資料の正本・参照先・更新責任・更新境界、旧表現の扱い、影響確認と変更後再確認の手順を確認できる
+- 移行先固有のproject/thread、Worker Registry、task-id、IMP-ID、現在のブランチ、実行ディレクトリを共通仕様の必須条件にせず、必要な固有設定を導入時に分離して設定できる
+
+不足・責任不明・記録先不明・確認不能がある場合は未有効化として停止し、必要な導入作業を新しいTASK-xxxとして計画します。
 
 ## ディレクトリ
 
@@ -71,6 +94,14 @@ Documenter：判断・結果・教訓を記録
 ├── LICENSE
 ├── README.md
 ├── development-improvement.md
+├── history/
+│   ├── index.md
+│   ├── <task-id>/
+│       ├── manifest.md
+│       ├── docs/
+│       └── result/
+│   └── task-legacy-history-backup/
+│       └── legacy/<old-name>/
 ├── rules/
 │   ├── README.md
 │   └── *.md
@@ -82,9 +113,11 @@ Documenter：判断・結果・教訓を記録
 │   ├── reviewer.md
 │   └── documenter.md
 ├── threads/
-│   ├── normal/
+│   ├── <thread-name-a>/
 │   │   ├── docs/
-│   │   │   └── current-task.md
+│   │   │   ├── current-task.md
+│   │   │   ├── task-progress.md
+│   │   │   └── operation-check.md
 │   │   └── result/
 │   │       ├── plan.md
 │   │       ├── changes.md
@@ -92,17 +125,15 @@ Documenter：判断・結果・教訓を記録
 │   │       ├── security.md
 │   │       ├── review.md
 │   │       └── task-log.md
-│   ├── emergency/
+│   ├── <thread-name-b>/
 │   │   ├── docs/
-│   │   │   └── current-task.md
 │   │   └── result/
-│   │       └── *.md
-│   └── <new-thread-name>/
+│   └── <thread-name-c>/
 │       ├── docs/
 │       └── result/
 ```
 
-`threads/normal/` と `threads/emergency/` はスレッド単位の作業領域です。新しいスレッドは `threads/<new-thread-name>/` として追加します。`rules/` 配下のMarkdownファイルは共通ルールとして扱い、適用範囲や優先順位は `rules/README.md`、スレッドの分離方法は `rules/thread-operation.md` を参照してください。
+`threads/<thread-name>/` は、Codexプロジェクトと1対1で対応するタスク単位の作業領域です。スレッド名は用途に応じて自由に決定し、新しいスレッドは同じ構成で追加します。`rules/` 配下のMarkdownファイルは共通ルールとして扱い、適用範囲や優先順位は `rules/README.md`、スレッドの分離方法は `rules/thread-operation.md` を参照してください。
 
 ## 役割
 
@@ -110,7 +141,7 @@ Documenter：判断・結果・教訓を記録
 
 ## Workerタスク設定
 
-各 worker の Codex タスクは `gpt-5.6-luna` を使用します。推論レベルは Planner、Implementer、Security Operator、Reviewer が `high`、Tester、Documenter が `medium` です。詳細は `rules/worker-task-settings.md` を参照してください。
+モデル、推論レベル、標準接続サイクルは `rules/worker-task-settings.md` を参照してください。
 
 | 役割 | 主な責任 | コード変更 |
 | --- | --- | --- |
@@ -122,6 +153,12 @@ Documenter：判断・結果・教訓を記録
 | Reviewer | 要件・設計・安全性の独立確認 | なし |
 | Documenter | 判断・結果・教訓の永続化 | 文書のみ |
 
+## タスク統合候補の判定
+
+タスクの継続・統合候補は、`history/index.md`の新ルール統合判定台帳を候補抽出元として、task-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要の8項目だけを比較する。task-idは候補行の識別子であり、タスク名やtask-idの一致だけで統合しない。比較順序は対象リポジトリ一致、ローカルパス完全一致、ベースブランチ一致、機能・レイヤー、タスク概要とする。`状態`と`最終更新`、Owner判断、効果確認状態は統合判定の条件に使用せず、必要な場合は別途証跡として確認する。判定結果は`継続`、`統合候補`、`関連のみ`、`別タスク`、`判定不能`へ分類する。
+
+`統合候補`はOwnerの明示承認前に確定せず、history原本の変更、自動削除・移動・改名・上書きを行わない。候補情報の欠落、矛盾、比較不能、Owner判断不明がある場合は、影響・停止理由・再開条件を結果へ記録して停止する。
+
 ## 承認ポイント
 
 - タスク定義、調査結果、実装計画：Owner が承認する
@@ -132,19 +169,11 @@ Documenter：判断・結果・教訓を記録
 
 ## 停止条件
 
-- 計画外の変更が必要になった
-- 同じ検証に2回連続で失敗した
-- 要件の解釈が複数に分かれた
-- 外部サービスの認証や権限が必要になった
-- 本番環境や個人情報に触れる必要がある
-- 承認されていない削除、移動、上書き、公開が必要になった
-- 変更範囲が当初想定を大きく超えた
-
-停止時は、理由、試した対応、推定原因、影響範囲、未確認事項、Owner に求める判断を記録します。
+共通の停止条件、安全ゲート、承認ゲートは `AGENTS.md` と適用対象の `rules/` を正本とします。停止時は理由、影響、未確認事項、Ownerに求める判断を結果ファイルへ記録します。
 
 ## ファイルの受け渡し
 
-正式な引き継ぎ情報は会話履歴ではなく、対象スレッドの `threads/<thread-name>/result/` に格納された結果ファイルです。後工程は同じスレッドの結果ファイルを読み取り、自身の固定結果ファイルを上書き保存します。Documenterはタスク固有の詳細を `threads/<thread-name>/result/task-log.md` に上書き保存し、汎用的な開発サイクル改善だけをルートの `development-improvement.md` に追記・更新します。計画、外部操作、マージ、リリースなどの承認は Owner が行います。
+正式な引き継ぎ情報は会話履歴ではなく、対象スレッドの現行結果ファイルまたは指定された履歴スナップショットです。正本指定、manifest、履歴退避、復旧は `rules/thread-operation.md`、証跡とOwner判断は `rules/worker-evidence.md`、承認は `rules/plan-approval-required-info.md` を参照します。
 
 ## 安全上の注意
 

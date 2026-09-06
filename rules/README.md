@@ -6,6 +6,36 @@
 - workerは作業開始前に `rules/README.md` を確認し、適用対象のルールを読み取る
 - 適用範囲が明記されていないルールは、全worker・全プロジェクトへ適用する
 - 新しい共通ルールを追加するとき、worker定義の入力欄を更新する必要はない
+- 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報は `rules/plan-approval-required-info.md` を参照する
+- Plannerへ指示する前の要件定義提案フォーマットと接続ゲートは `rules/requirement-definition-format.md` を参照する
+- 実装媒体をルール・プロンプト・Markdownに限定する場合は `rules/implementation-medium.md` を参照する
+- 新規運用開始時のローカル`history/`と`history/index.md`の初期化は `rules/history-initialization.md` を参照する
+- 次タスク以降の進行中タスク台帳は `threads/<thread-name>/docs/task-progress.md` を正本とし、worker固有結果は `threads/<thread-name>/result/`へ記録する。配置・履歴境界は `rules/thread-operation.md`を参照する
+- Workerの状態確認結果はOwner明示トリガー時、または作業中のworker接続失敗を契機に切り替えた時だけ `threads/<thread-name>/result/health-check.md`へ記録する。用途と境界は `rules/worker-health-check.md`を参照する
+- 前回health-checkと現在worker一覧の差分確認は `rules/worker-connection-diff.md`を参照し、比較可能な2回目以降だけ専用resultへ記録する
+- 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
+- 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
+- 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
+
+## ルール追加時の永続性・移行性ゲート
+
+- ルールや機能を追加するときは、現行タスクだけで有効になる一時対応ではなく、タスク完了後も残り続けるシステム機能として設計する。
+- 他プロジェクトへagent-workflowを移行した時点から有効になるよう、共通ルール、worker定義、テンプレート、導入手順、記録先、適用条件を必要な範囲で整備する。
+- 現行プロジェクト固有の接続設定、タスク固有の判断、特定の一時資料の存在を、移行先で機能が有効になるための前提にしない。
+- 移行後の有効化条件、担当worker、入力、出力、完了条件、停止条件を確認できない場合は、ルール追加を完了扱いにせずOwnerへ報告する。
+- このゲートは、個別タスクの完了判定とは別に、システム機能として継続利用できることを確認するために適用する。
+
+## ルール変更の影響確認ゲート
+
+共通資料を変更する場合は、変更前に直接対象、参照対象、記録対象、移行先導入対象を分類し、正本・参照先・更新責任・更新境界・旧表現・停止条件を確認する。変更後は同じ一覧を再確認し、旧表現、参照切れ、重複記載、相反する停止条件、共通仕様と固有設定の混在を判定する。
+
+影響が特定できない、正本・責任・境界が不明、資料間に矛盾がある、または判定不能な場合は、推測で補正せず `changes.md` に期待値、実際値、根拠、影響、停止理由、再開条件を記録して停止する。履歴原本、legacy、backupは読み取り保全し、現行資料の変更対象へ自動的に含めない。
+
+## タスク統合候補の粒度判定ゲート
+
+タスク統合候補は、`history/index.md`の「新ルール統合判定台帳（候補判定の正本）」だけを通常の候補抽出元とし、task-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要の8項目だけを、対象リポジトリ一致、ローカルパス完全一致、ベースブランチ一致、機能・レイヤー分類、タスク概要比較の順に判定する。task-idは候補行の識別子であり、タスク名やtask-idの一致だけで統合しない。`状態`と`最終更新`、Owner判断、効果確認状態は統合判定の条件に使用せず、必要な場合は別途証跡として確認する。Owner承認に統合先、共通範囲、固有範囲、完了条件、履歴の扱い、競合時の優先方針がない場合は実統合へ進まない。
+
+判定結果は`継続`、`統合候補`、`関連のみ`、`別タスク`、`判定不能`に分類する。`統合候補`はOwner承認前に確定せず、task-id、対象範囲、完了条件、履歴の扱いを変更しない。必須情報の欠落、矛盾、分類不能、Owner判断不明、history本体の横断検索や原本操作が必要な場合は停止し、影響と再開条件を記録する。
 
 ## 適用対象の判断
 
@@ -13,6 +43,7 @@
 
 ```text
 scope: all-workers
+scope: all-threads
 scope: planner
 scope: implementer
 scope: tester

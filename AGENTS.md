@@ -7,15 +7,21 @@
 - 計画外の変更を行わない
 - 変更内容と検証結果を記録する
 - 既存の手動変更を勝手に上書きしない
+- ルールや機能の追加は、現行タスクだけの一時対応ではなく、タスク完了後も残り続け、他プロジェクトへの移行時点から有効になるシステム機能として設計する。詳細は `rules/README.md` と適用対象の共通ルールに従う
+- 改善事項は、発見・汎用性評価・Owner判断・計画・実装・Reviewer受入・実運用後の効果確認・再評価・記録更新・完了または継続の共通サイクルで扱う。Reviewer受入と効果確認を混同せず、詳細は `rules/development-improvement-record.md` に従う
+- 他プロジェクトへ移行した際は、共通rules、worker定義、テンプレート、記録先、責任者、停止条件を確認するまで有効化完了としない。不足時は未有効化として停止する
+- 技術非依存性は役割、能力、入出力、状態、判定基準、証跡、停止条件で確認し、媒体変更後も正本・責任・状態・証跡・完了条件の意味を維持する。避けられない技術依存は例外記録なしに共通仕様へ組み込まない
 - コミットは1目的にまとめ、コミットメッセージ規約に従う
 - workerの役割、作業領域、入出力は `worker-definitions/` の定義に従う
 - worker間の正式な引き継ぎは会話ではなく、対象スレッドの `threads/<thread-name>/result/` の結果ファイルで行う
 - 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
-- 各workerは完了時に `Owner判断` と `Owner判断 (追記)` をMarkdownテーブルで報告し、再検証時は同様の内容を重複させず差分を追記する。最終報告では `Owner判断 (追記)` を `なし` とする
+- 各workerの完了報告の項目順・Owner判断の配置は `rules/worker-report-template.md` に従う
+- Owner判断の意味、OJ採番、本文表示、IDなし・不明・重複・対象外回答の扱いは `rules/worker-evidence.md` に従う
 
 ## 禁止事項
 
 - 秘密情報、個人情報、顧客固有情報の追加
+- 特定のプログラミング言語、shellプログラム、実行可能プログラム、外部ライブラリによる機能実装。詳細は `rules/implementation-medium.md` に従う
 - Ownerの明示承認がないファイルの削除
 - 破壊的なGit操作
 - 本番環境への接続
@@ -40,11 +46,18 @@
 
 - `README.md`: ワークフロー全体と運用方法
 - `threads/<thread-name>/docs/current-task.md`: 各スレッドでPlannerへ渡す現在のタスク
-- `threads/<thread-name>/result/task-log.md`: Documenterがスレッド固有の判断・結果・残課題を記録するファイル。タスクごとに上書きする
+- `threads/<thread-name>/result/task-log.md`: Documenterが現行タスクの判断・結果・残課題を記録する正式結果ファイル。履歴退避と更新境界は `rules/thread-operation.md` に従う
 - `development-improvement.md`: Documenterが全スレッド共通の開発サイクル改善を一覧で積み上げる永続記録
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
-- `threads/<thread-name>/result/`: workerが同じスレッドの後続工程へ渡すタスク単位の結果ファイル。worker別のサブフォルダは作成せず、各タスクで上書きする
+- `threads/<thread-name>/result/`: workerが同じスレッドの後続工程へ渡す現行タスクの結果ファイル。worker別のサブフォルダは作成せず、退避指示時は`history/yyyyMMddhhmm/`へ先に保存する
+- `history/yyyyMMddhhmm/`: Ownerの退避指示時点で保存するタスク・worker結果の読み取り専用スナップショット
 - `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
+- `rules/current-task-template.md`: 各スレッドの`current-task.md`に記載する識別情報とタスク定義のテンプレート
+- `rules/worker-report-template.md`: 各workerの完了報告と結果ファイルの共通テンプレート
+- `rules/workflow-consistency-check.md`: current-task、結果ファイル、projectId、実行環境の整合性チェック手順
+- `rules/worker-health-check.md`: Owner起点のworkerアクセス・状態確認、不足worker追加前後の手順
+- `rules/plan-approval-required-info.md`: 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報
+- `rules/requirement-definition-format.md`: Planner接続前の要件定義提案フォーマットと接続ゲート
 
 ## workerの流れ
 
@@ -63,28 +76,18 @@ Documenter
   ↓ Ownerがマージ・リリースを判断
 ```
 
-- `threads/<thread-name>/result/plan.md`、`changes.md`、`test.md`、`security.md`、`review.md` はworkerごとに固定し、各タスクで上書きする
-- ルートの `development-improvement.md` は改善項目を追記・更新し、タスク固有の詳細は記録しない
-- `threads/<thread-name>/result/task-log.md` はDocumenterのタスク固有ログとして、タスクが変わるたびに上書きする
-- 1つのスレッドでは1タスクだけを扱い、同一スレッドで複数タスクを並行して実行しない
-- Ownerは作業対象のスレッド名とタスクを `threads/<thread-name>/docs/current-task.md` に記載し、workerはその記載から対象スレッドを認識する
-- Ownerは `current-task.md` に `スレッド名`、`CodexプロジェクトID`、`Codex実行ディレクトリ`、`対象リポジトリ`、`ベースブランチ`、`作業ブランチ` を必ず記載する
-- workerは作業開始前に自身のCodexプロジェクトID、Codex実行ディレクトリ、対象リポジトリへのアクセス可否を確認する。Codex実行ディレクトリは対象リポジトリと一致しなくてもよく、projectIdまたは対象リポジトリが一致しない場合は作業を開始せず親タスクへ報告する
-- 1スレッドと1つのCodexプロジェクトを1対1で対応させ、1つのプロジェクトを複数スレッドで共有しない
-- 新規スレッドでは専用プロジェクトを作成し、projectIdをcurrent-task.mdへ記載して全workerの所属を照合してからPlannerを起動する
-- 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクでは結果ファイルを新しい内容で上書きする。Documenterの正式な結果ファイルは `threads/<thread-name>/result/task-log.md` とする
-- Implementer以降は処理中、とくに例外発生時のログトレーサビリティ確認結果を完了条件として記録する
-- スレッドの分離と追加は `rules/thread-operation.md` に従う
-- `rules/worker-evidence.md` はworker接続前の入力ゲート、証跡、再確認、外部連携、データ、仕様書の共通ルールとする
-- `rules/review-request-format.md` はレビュー依頼の固定形式と返信先を定義する
-- `rules/development-improvement-record.md` は改善記録の対象、ステータス、形式、更新ルールを定義する
-- `rules/README.md` は `rules/` 配下の適用範囲、状態、優先順位を定義するルールの入口とする
-- worker タスクのモデルは `gpt-5.6-luna` に統一し、推論レベルは `rules/worker-task-settings.md` に従う
-- Plannerは計画承認前に実装を開始しない
-- 計画外の変更が必要になった場合は作業を停止して報告する
-- Security Operatorは秘密情報、個人情報、危険な外部操作、公開上の懸念を確認する
-- Reviewerが修正依頼と判定した場合は、Implementer、Tester、Security Operator、Reviewerの確認サイクルを再実行する
-- Reviewerの受入後にDocumenterへ接続し、Documenter完了後に親タスクがOwnerへ最終報告する
+- worker固有の現行結果ファイル、Documenterの`task-log.md`、動作確認記録のパスは `worker-definitions/` と `rules/thread-operation.md` に従う。履歴退避後の更新境界も同ルールに従う
+- ルートの `development-improvement.md` は汎用的な改善項目だけを追記・更新し、タスク固有の詳細を混在させない
+- 1つのスレッドでは1タスクだけを扱い、対象スレッドとタスクは `current-task.md` で識別する
+- `current-task.md` の6項目、Task Definition、Task Lifecycleは `rules/current-task-template.md` に従う
+- project/thread/taskの1対1対応、1 active制約、履歴退避・復旧、新規タスク境界は `rules/thread-operation.md` に従う
+- worker接続前と作業開始前の整合性確認は `rules/workflow-consistency-check.md` に従う
+- 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクへの切替時も履歴と旧resultを保全する。詳細は `rules/thread-operation.md` に従う
+- Implementerは実装と最低限の変更記録を行い、詳細な検証・整合性確認・受入判定はReviewerへ移譲する。固有責務は `worker-definitions/` に従う
+- 共通の入力ゲート、証跡、報告、履歴、接続サイクル、計画回答、動作確認、worker状態は対応する `rules/` の正本を参照する
+- Plannerは計画承認前に実装を開始せず、計画外変更・停止条件・安全性懸念は親タスクへ報告する
+- Owner判断に未回答・保留・不明・対応不明が残る場合は、次工程、完了、履歴操作を停止し、残件ごとの回答プロンプトを提示する。詳細は `rules/worker-evidence.md` に従う
+- Reviewerが修正依頼と判定した場合は `rules/worker-task-settings.md` の再確認サイクルに従い、受入後にDocumenterへ接続する
 
 ## 停止条件
 
