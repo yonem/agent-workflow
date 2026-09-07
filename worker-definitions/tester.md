@@ -14,7 +14,7 @@
 - Implementer の変更内容
 - `threads/<thread-name>/result/changes.md`
 - `threads/<thread-name>/result/plan.md`
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - 承認済み計画
 - 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
 
@@ -44,4 +44,4 @@
 - 未検証項目と既知の制約が明記されている
 - 正常系・異常系を含め、処理中の状態と例外発生時のログトレーサビリティが確保されていることを確認している
 - 判定は「成功」「失敗」「一部未検証」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/test.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/test.md` は、`rules/worker-report-template.md`を参考に、検証対象、実測結果、未検証事項、証跡、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う

@@ -7,7 +7,7 @@
 ## 作業領域
 
 - これまでの `threads/<thread-name>/result/` ファイル
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - `threads/<thread-name>/docs/task-progress.md`（次タスク以降の共通台帳の正本）
 - ルートの `development-improvement.md`
 - `threads/<thread-name>/result/task-log.md`
@@ -32,7 +32,7 @@
 - `docs/task-progress.md`へ共通の進行・影響・Owner判断を集約し、`result/task-log.md`にはDocumenter固有の判断・結果・残課題だけを記録する。共通内容を二重記載しない
 - タスク固有の動作確認手順を `threads/<thread-name>/docs/operation-check.md` に作成または更新する
 - `operation-check.md`には、対応前後比較、発火タイミング、検証フロー（要約）、検証データ作成方法を分けて記載する。これらは特定プロジェクトの状態名や機能名に依存させず、利用者操作、外部イベント、API受信、時刻、状態変化など対象に適した発火契機で表現する
-- 作業開始時と完了時に、`rules/operation-check-report.md`の固定必須見出し6つの順序、7列の対応前後比較表（修正対象、発火タイミング、発火条件・前提、対応前：こうなっていた、対応後：こうなる、対応前の根拠、対応後の確認結果）、根拠区分、未確認区分、状態台帳との整合を照合し、結果へ記録する。欠落・順序不一致・表形式不一致時は推測で補正せず、親タスクへ報告して受入・完了・次worker接続・履歴操作を停止する
+- 作業開始時と完了時に、docs側の`threads/<thread-name>/docs/operation-check.md`について、`rules/operation-check-report.md`の固定必須見出し6つの順序、7列の対応前後比較表（修正対象、発火タイミング、発火条件・前提、対応前：こうなっていた、対応後：こうなる、対応前の根拠、対応後の確認結果）、根拠区分、未確認区分、状態台帳との整合を照合し、結果へ記録する。これは通常のworker result本文の形式を固定しない。欠落・順序不一致・表形式不一致時は推測で補正せず、親タスクへ報告して受入・完了・次worker接続・履歴操作を停止する
 - 読み取り専用ドライランの受入後は、`タスク開始`、`Owner承認`、`worker接続`、`タスク切替`、`履歴退避`、`タスク終了`の6ケースについて、正本、参照先、更新責任、更新境界、Owner判断、停止条件、判定、根拠、未確認事項を`task-log.md`へ記録する。参照切れ、重複記載、旧識別子混入、Owner判断再掲、状態台帳不一致がある場合は、停止理由、影響、再開条件を記録し、実資料・履歴・外部サービスを変更しない。
 - 対応前の振る舞いは、実測、既存証跡、実装内容からの論理推定、未確認を区別し、「こうなっていた」から「こうなる」への変化と根拠を記録する
 - 検証データが必要な場合は、`operation-check.md`だけで準備できる手順を記載し、DB投入は1検証シナリオにつき原則1つの自己完結したSQL/DDLブロックとする。seedファイルや外部ファイルの読み込みを前提にしない
@@ -83,11 +83,11 @@
 - 処理中および例外発生時のログトレーサビリティ確認結果が、事実・根拠・未確認事項とともに記録されている
 - `threads/<thread-name>/result/task-log.md` に今回のタスク固有の記録が追跡可能な状態で保存されている
 - `operation-check.md`の固定必須見出し、対応前後比較、根拠区分、未確認区分を開始時・完了時に照合した結果が記録されている
-- `operation-check.md`の固定必須見出し6つの順序、7列の対応前後比較表、状態台帳との整合を開始時・完了時に照合した結果が記録されている
+- docs側`operation-check.md`の固定必須見出し6つの順序、7列の対応前後比較表、状態台帳との整合を開始時・完了時に照合した結果が記録されている。worker result本文の形式は固定しない
 - 読み取り専用ドライラン6ケースの結果、停止ケース、未確認事項、実資料・履歴・外部サービスを変更していないことが`task-log.md`へ記録されている
 - Owner がマージ・リリース判断を行える
 - Documenter記録後の状態を、候補なしならOwner完了確認待ち、候補ありならOwner判断待ちとして記録し、Ownerへclose可否、履歴退避可否、次タスク切替可否、未採番候補の有無を報告している
 - Owner確認前にタスク完了、履歴退避、次タスク切替、新規IMP採番を確定していない
 - IMPサマリー・詳細・証跡・次回確認条件の同期、4分類、全IMP再確認、終了ゲートの順序、停止理由・影響・再開条件を記録している
 - 判定は「記録完了」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/task-log.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、効果確認、残課題、完了ゲートを記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う

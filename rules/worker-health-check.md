@@ -9,17 +9,47 @@ Ownerが同一Codexプロジェクト内のworkerの所属・アクセス可否�
 
 ## `health-check.md`の責務境界
 
-- `health-check.md`は、Ownerがヘルスチェックを明示的に依頼した場合、または作業中のworker接続失敗を契機にヘルスチェックへ切り替えた場合に作成・更新する補助的な運用記録である。
+- `threads/<thread-name>/docs/health-check.md`は、Ownerがヘルスチェックを明示的に依頼した場合、または作業中のworker接続失敗を契機にヘルスチェックへ切り替えた場合に作成・更新する人間向けの正本である。
 - workerの完了報告、`threads/<thread-name>/docs/task-progress.md`、`history/*/manifest.md`の代替や、通常作業で毎回作成する必須報告ではない。
 - `docs/task-progress.md`には実施日時、判定、未確認事項、原典パスだけを参照として記録し、Worker Registryや状態一覧を全文複製しない。
 - Ownerの明示トリガーまたはworker接続失敗による切替がない場合は、`health-check.md`が存在しないことを未実施・正常・異常のいずれとも推測しない。
-- 前タスクの`result/health-check.md`は、対応するhistoryのスナップショットとともに保全し、新タスクの状態証跡へ自動流用しない。
+- 前タスクの`result/health-check.md`は、対応するhistoryのスナップショットとともに旧資料として保全し、新タスクの状態証跡へ自動流用しない。
+
+## `health-check.md`の固定レイアウト
+
+現行の人間向け`health-check.md`は、見出しと次のWorker照合表だけで構成する。実施日時、対象project、詳細ログ、回答プロンプト、補足説明はこのファイルへ記載せず、必要な証跡として`task-progress.md`またはworkerの`result/`へ記録する。
+
+```markdown
+# Worker照合
+
+| 役割 | 実測thread | 一覧掲載 | 個別読取 | 所属 | 状態 | モデル・推論 | 判定 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Planner |  |  |  |  |  |  |  |
+| Implementer |  |  |  |  |  |  |  |
+| Reviewer |  |  |  |  |  |  |  |
+| Documenter |  |  |  |  |  |  |  |
+| Tester |  |  |  |  |  |  |  |
+| Security Operator |  |  |  |  |  |  |  |
+```
+
+各列は次の意味で記録する。
+
+- `役割`：標準6役割を1行ずつ記録する。プロジェクトで接続しない役割は行を省略せず`対象外`とする。
+- `実測thread`：期待threadと一致する場合は`同一`、存在しない・接続対象外の場合は`なし`、別threadを確認した場合は実測識別子または`別thread`とする。
+- `一覧掲載`：対象projectの一覧に掲載されているかを`掲載`、`不掲載`、`対象外`で記録する。
+- `個別読取`：個別threadを読めたかを`成功`、`失敗`、`対象外`で記録する。
+- `所属`：期待projectへの所属を`一致`、`不一致`、`未確認`、`対象外`で記録する。
+- `状態`：確認できたworker状態をそのまま記録する。取得不能や対象外は`未確認`または`対象外`とし、推測しない。
+- `モデル・推論`：確認できた指定モデルと推論レベルを記録する。取得不能や対象外は`未確認`または`対象外`とする。
+- `判定`：アクセス可否、所属一致、不一致、重複、対象外、未確認などの結論を短く記録する。
+
+表の列順、役割行、値の意味を変更しない。値を確定できない場合は正常・不足と推測せず、`未確認`として記録する。
 
 ## 起動条件と入力ゲート
 
 - ヘルスチェックは、Ownerが `ヘルスチェックを実行して` と明示するか、workerの所属・アクセス・状態確認を明示的に依頼した場合に開始する。加えて、作業中にworkerへ接続できなかった場合は、自動作成へ進まず、読み取り専用のヘルスチェックへ自動的に切り替える。通常のworker作業や会話から、接続失敗以外を理由に自動開始しない。
 - worker接続失敗を契機に開始した場合は、失敗したworker、接続を試みた時点、失敗の事実、実行中タスク、未確認範囲を記録し、接続失敗をworker不足・アーカイブ済み・不一致と推測しない。
-- 開始前に、最新の `threads/<thread-name>/docs/current-task.md`、`rules/worker-task-settings.md`、`worker-definitions/*.md`、`rules/workflow-consistency-check.md`、既存のWorker Registryを確認する。
+- 開始前に、最新の `threads/<thread-name>/result/current-task.md`、`rules/worker-task-settings.md`、`worker-definitions/*.md`、`rules/workflow-consistency-check.md`、既存のWorker Registryを確認する。
 - `current-task.md`から対象スレッド名、CodexプロジェクトID、対象リポジトリ、Codex実行ディレクトリ、ブランチ、Worker Registryを取得する。対象projectIdが空、対象リポジトリと一致しない、または参照不能な場合は開始せず停止する。
 - `list_projects`等で対象projectIdが対象リポジトリのGitプロジェクトであることを確認する。別projectId、別リポジトリ、別hostの一覧を対象結果へ混在させない。
 - ヘルスチェックの実行は読み取り専用で開始する。Ownerの確認前に、worker作成、アーカイブ、削除、復元、移動、置換、その他の状態変更を行わない。
@@ -94,18 +124,18 @@ thread単位の状態と、役割単位の判定を分けて記録する。1つ�
 
 ## 結果記録
 
-ヘルスチェックの実行単位ごとの結果は、対象スレッドの `threads/<thread-name>/result/health-check.md` に記録する。これはPlanner、Implementer、Tester、Security Operator、Reviewer、Documenterの固定完了報告ファイルとは別の運用記録である。
+ヘルスチェックの実行単位ごとの結果は、対象スレッドの `threads/<thread-name>/docs/health-check.md` に記録する。これは人間向け状態確認の正本であり、Planner、Implementer、Tester、Security Operator、Reviewer、Documenterのworker結果とは別の資料である。旧`result/health-check.md`は変更せず、参照する場合は旧資料であることを明記する。
 
 前回health-checkと現在のworker一覧を比較する場合は、`rules/worker-connection-diff.md` を参照する。比較可能な2回目以降だけ `threads/<thread-name>/result/worker-connection-diff.md` を別管理で作成し、health-check本文を複製しない。比較不能・取得失敗・状態変化時は差分を確定しない。
 
 履歴退避、manifest、正本結果、旧result保全は `rules/thread-operation.md` に従う。health-check固有の判定基準と結果項目は本ルールで定義し、履歴保存手順を再定義しない。
 
-結果には、次の項目を含める。
+補足証跡には、次の項目を`task-progress.md`またはworkerの`result/`へ記録する。これらを`health-check.md`へ重複記載しない。
 
 - 実行日時、起動トリガー（Owner明示またはworker接続失敗）、対象スレッド、対象projectId、対象リポジトリ、Codex実行ディレクトリ
-- 期待worker一覧の正本、指定モデル・推論レベルの正本参照先と照合結果（未確認を含む）、current-taskから取得したthreadId・hostId
+- 期待worker一覧の正本、指定モデル・推論レベルの正本参照先、current-taskから取得したthreadId・hostId
 - 現行一覧とアーカイブ一覧の取得範囲、ページ数、個別thread読取の成否、取得失敗・未確認範囲
-- Ownerへ提示した一覧と、役割ごとの状態・判定・理由・重複・不一致
+- Ownerへ提示した表と、役割ごとの理由・重複・不一致
 - Owner確認の日時と内容、手動アーカイブの対象・実施者・確認結果、追加指示の有無
 - 追加した役割、追加結果、追加後の全件再確認結果、未解決事項、停止理由
 

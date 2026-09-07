@@ -5,7 +5,7 @@ status: active
 
 # current-task.md テンプレート
 
-各スレッドの `threads/<thread-name>/docs/current-task.md` は、次の形式を基本とする。
+各スレッドの `threads/<thread-name>/result/current-task.md` は、次の形式を基本とする。これはPlanner接続用の特別な入力資料であり、通常のworker result本文自由化の対象外とする。
 
 このファイルは、タスクの識別情報・Task Definition・Task Lifecycleの入力スキーマを正本として定義する。進行中タスクの共通台帳は次タスク以降`threads/<thread-name>/docs/task-progress.md`とし、実行環境との照合は `rules/workflow-consistency-check.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、履歴と復旧の手順は `rules/thread-operation.md`に従う。
 

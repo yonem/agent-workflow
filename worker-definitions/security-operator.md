@@ -16,7 +16,7 @@
 - `threads/<thread-name>/result/plan.md`
 - `threads/<thread-name>/result/changes.md`
 - `threads/<thread-name>/result/test.md`
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
 
 ## 実施する作業
@@ -45,4 +45,4 @@
 - 処理中および例外発生時のログトレーサビリティを確認し、秘密情報・個人情報・外部入力が過剰に出力されていないことを確認している
 - 懸念がある場合は判定を保留して Owner に報告する
 - 判定は「問題なし」「懸念あり」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/security.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/security.md` は、`rules/worker-report-template.md`を参考に、安全性確認、証跡、懸念、停止条件、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う

@@ -10,7 +10,8 @@ status: active
 本ルールは、Ownerが明示的にヘルスチェックを依頼したとき、前回の完了済みヘルスチェックと今回のworker一覧を読み取り比較し、Ownerが手動判断できる差分記録を作るためのルール・プロンプト・Markdown様式である。特定言語、shell、実行可能プログラム、外部ライブラリは使用しない。
 
 - `rules/worker-health-check.md`: worker一覧の取得順、状態判定、Owner確認、health-checkの原典
-- `threads/<thread-name>/result/health-check.md`: 各回のworker一覧と取得結果。本ルールは全文を複製しない
+- `threads/<thread-name>/docs/health-check.md`: 各回のworker一覧と取得結果の人間向け正本。本ルールは全文を複製しない
+- 旧`threads/<thread-name>/result/health-check.md`: 既存タスクの保全資料。明示指定がない限り現行比較元にしない
 - `threads/<thread-name>/result/worker-connection-diff.md`: 比較可能な2回目以降だけに作成する専用差分記録
 - `threads/<thread-name>/docs/task-progress.md`: 共通進捗・受入観点・Owner判断の正本
 - `threads/<thread-name>/result/changes.md`: worker固有の実施結果、停止理由、未確認事項、次worker
@@ -27,7 +28,7 @@ status: active
 
 ## 比較元の選択
 
-原則として、現在の対象project・対象スレッドに対応する直近の完了済み`result/health-check.md`を比較元にする。現行resultにない場合は、`history/*/result/health-check.md`と対応するmanifestを候補として確認する。
+原則として、現在の対象project・対象スレッドに対応する直近の完了済み`docs/health-check.md`を比較元にする。現行docsにない場合は、Ownerが指定した履歴のhealth-check資料と対応するmanifestを候補として確認する。旧`result/health-check.md`は保全資料として明示指定された場合だけ参照する。
 
 比較元は次をすべて満たす場合だけ採用する。
 
@@ -85,7 +86,7 @@ status: active
 
 ## 専用差分記録の作成条件と形式
 
-比較可能な2回目以降だけ、`threads/<thread-name>/result/worker-connection-diff.md`を作成する。`result/health-check.md`とは別管理とし、health-check本文を複製せず、比較元・比較先の原典パスと参照箇所を記録する。
+比較可能な2回目以降だけ、`threads/<thread-name>/result/worker-connection-diff.md`を作成する。本文の章立てや表形式は固定せず、比較元・比較先の原典パスと参照箇所、差分分類、判定、停止要否を記録する。`docs/health-check.md`とは別管理とし、health-check本文を複製しない。
 
 ```markdown
 # worker接続差分確認

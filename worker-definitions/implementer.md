@@ -12,7 +12,7 @@ Owner が承認した計画の範囲だけを実装する。実装と最低限�
 
 - `threads/<thread-name>/result/plan.md`
 - Owner の承認内容
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - `threads/<thread-name>/docs/task-progress.md`（次タスク以降の共通台帳の正本）
 - 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
 
@@ -53,6 +53,6 @@ Owner が承認した計画の範囲だけを実装する。実装と最低限�
 - 実装の開始・完了・失敗、計画外変更の有無、未確認事項を最低限記録し、詳細な処理状態・例外時のログトレーサビリティ検証はReviewerへ移譲している
 - `threads/<thread-name>/result/plan.md` を入力として実装範囲を確認し、計画自体を変更した場合は理由とOwner判断を記録する。計画と実装の詳細な整合性確認はReviewerが担う
 - Reviewerが詳細検証・整合性確認・受入判定を実施できるよう、変更対象、実施内容、未確認事項、制約を `changes.md` に記録している
-- 最終応答と `threads/<thread-name>/result/changes.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/changes.md` は、`rules/worker-report-template.md`を参考に、変更対象、実施内容、制約、未確認事項、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
 - 判定は「実装完了」「修正不能」「保留」のいずれかとする
 - Reviewerの修正依頼に対応する場合は、指摘IDごとに修正内容と未対応理由を記録する

@@ -6,12 +6,12 @@
 
 ## 作業領域
 
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - リポジトリ、`AGENTS.md`、既存ドキュメント、関連コード
 
 ## 入力
 
-- `threads/<thread-name>/docs/current-task.md`
+- `threads/<thread-name>/result/current-task.md`
 - `threads/<thread-name>/docs/task-progress.md`（存在する場合。次タスク以降の進行中台帳）
 - 共通入力ゲート・環境整合性・計画回答は `rules/worker-evidence.md`、`rules/workflow-consistency-check.md`、`rules/plan-approval-required-info.md` に従う
 
@@ -59,7 +59,7 @@
 - Owner返却前、またはOwner判断残件がある状態で後工程へ接続していない
 - Ownerの明示回答を、Plannerや別workerの伝聞で代用していない
 - `threads/<thread-name>/result/plan.md` に対象リポジトリ、ブランチ、タスク識別情報、計画状態を記録している
-- 最終応答と `threads/<thread-name>/result/plan.md` は `rules/worker-report-template.md` の形式で親タスクへ報告する。Owner判断本文・表は `rules/worker-evidence.md` と `rules/plan-approval-required-info.md` に従う
+- 最終応答と `threads/<thread-name>/result/plan.md` は、`rules/worker-report-template.md`を参考に、計画状態、承認状態、根拠、未確認事項、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味と計画必須情報は `rules/worker-evidence.md` と `rules/plan-approval-required-info.md` に従う
   - 判定（計画作成完了 / 保留）
   - 実施内容
   - 結果ファイル

@@ -1,12 +1,12 @@
 # Worker入力・証跡・再確認ルール
 
-入力ゲート・証跡・Owner判断の意味と状態を本ルールで定義する。報告書の項目順・表配置は `rules/worker-report-template.md`、current-taskの入力スキーマは `rules/current-task-template.md`、実環境との照合手順は `rules/workflow-consistency-check.md`、計画関連Owner回答の必須4項目は `rules/plan-approval-required-info.md`、履歴・復旧・task境界は `rules/thread-operation.md`を参照する。
+入力ゲート・証跡・Owner判断の意味と状態を本ルールで定義する。通常のresult本文の項目順・表配置・末尾位置は固定しない。current-taskの入力スキーマは `rules/current-task-template.md`、実環境との照合手順は `rules/workflow-consistency-check.md`、計画関連Owner回答の必須4項目は `rules/plan-approval-required-info.md`、履歴・復旧・task境界は `rules/thread-operation.md`を参照する。
 
 ## 次工程へ接続する前の入力ゲート
 
 各 worker は作業開始前に次を確認する。不足、矛盾、古い情報がある場合は作業を開始せず「未着手」として親タスクへ報告する。
 
-- 対象スレッドの `threads/<thread-name>/docs/current-task.md` が最新である
+- 対象スレッドの `threads/<thread-name>/result/current-task.md` が最新である
 - `current-task.md` に記載されたスレッド名が、workerに割り当てられたスレッドと一致している
 - 対象リポジトリへアクセスでき、対象ブランチとタスク対象が一致している
 - 自身のCodexプロジェクトIDが `current-task.md` の期待プロジェクトIDと一致している
@@ -44,7 +44,7 @@
 
 ### operation-check.mdの共通構成検出責務
 
-全workerと親タスクは、担当外の資料であっても`threads/<thread-name>/docs/operation-check.md`の必須構成を照合する。`rules/operation-check-report.md`の6見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、`current-task.md`・`task-progress.md`・担当resultとの状態整合のいずれかが欠落・不一致の場合は、欠落箇所と根拠パスを親タスクへ報告し、推測で補正しない。欠落が解消され、Reviewerの修正依頼・保留・未確認が解消されるまで、受入、完了、次worker接続、履歴操作を確定しない。`task-progress.md`または`history/index.md`をOwner完了確認待ちへ進める場合も、これらの確認を先に完了する。
+全workerと親タスクは、担当外の資料であっても`threads/<thread-name>/docs/operation-check.md`の必須構成を照合する。これはdocs側の動作確認資料の形式であり、通常の`result/*.md`本文の形式を拘束しない。`rules/operation-check-report.md`の6見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、`current-task.md`・`task-progress.md`・担当resultとの状態整合のいずれかが欠落・不一致の場合は、欠落箇所と根拠パスを親タスクへ報告し、推測で補正しない。欠落が解消され、Reviewerの修正依頼・保留・未確認が解消されるまで、受入、完了、次worker接続、履歴操作を確定しない。`task-progress.md`または`history/index.md`をOwner完了確認待ちへ進める場合も、これらの確認を先に完了する。
 
 ### 読み取り専用ドライランの証跡
 
@@ -54,7 +54,7 @@
 
 ### review.mdの現行判定一意化責務
 
-全workerと親タスクは、`threads/<thread-name>/result/review.md`の過去attemptを履歴として保全しつつ、新しいレビュー報告がattempt番号・日時付きで末尾へ追記されていることを確認する。現行判定は最大attempt番号の報告とし、同じattempt番号が複数ある場合は最新日時の報告とする。過去attemptは履歴として保持するが、現行判定には使用しない。
+全workerと親タスクは、`threads/<thread-name>/result/review.md`の過去attemptを履歴として保全しつつ、新しいレビュー報告がattempt番号・日時付きで記録されていることを確認する。記録位置や本文形式は固定しない。現行判定は最大attempt番号の報告とし、同じattempt番号が複数ある場合は最新日時の報告とする。過去attemptは履歴として保持するが、現行判定には使用しない。
 
 現行報告には、attempt番号、再確認日時、判定（受入／条件付き受入／修正依頼／保留）、次worker、Documenter接続可否（接続可／接続不可）を必須とする。attempt番号・日時・判定・次worker・接続可否の欠落、最大attempt／最新日時の特定不能、または`plan.md`、`task-progress.md`、`history/index.md`、`changes.md`との矛盾は、現行判定不明または矛盾として親タスクへ報告する。履歴報告を削除・書換えず、最新報告の追記と台帳再同期が完了するまで、受入、Documenter接続、完了、履歴操作、タスク切替を停止する。
 
@@ -103,7 +103,7 @@ Reviewerは、該当しない項目を `対象外` と明記したうえで、�
 
 ## Owner判断
 
-すべてのworkerは、最終応答と担当の結果ファイルの最後尾に `Owner判断` と `Owner判断 (追記)` の2セクションを記載する。判断項目がある場合はMarkdownテーブルを使用し、`判断ID`、`Owner回答`、`ステータス`を必須列として分離する。`推奨対応`はOwnerがYesまたはNoで回答できる質問文にする。Documenterの担当結果ファイルは `threads/<thread-name>/result/task-log.md` とする。
+すべてのworkerは、最終応答と担当の結果ファイルにOwner判断の状態を意味が分かる形で記録する。`Owner判断`という見出し、表の列、追記形式、最後尾への配置は必須としない。判断項目がある場合は、`判断ID`、`Owner回答`、`ステータス`、根拠を対応付ける。`推奨対応`はOwnerがYesまたはNoで回答できる質問文にする。Documenterの担当結果ファイルは `threads/<thread-name>/result/task-log.md` とする。
 
 Owner判断を含む回答本文には、判断表と同じ各ID・短い要約を、コピーしてそのまま返答できる一つのブロックコードで提示する。Owner回答ブロックにはOJ行だけを記載し、回答は`=yes`を規定値とする。変更・否認・保留が必要な場合だけ`=no`、`=hold`、または承認済みの代替値を使用する。判断項目を説明文中に分散させず、本文のID・要約と表のIDが一致しない場合は自動適用しない。
 
@@ -161,15 +161,11 @@ Owner判断の`ステータス`は、次の4種類から選択する。
 
 - `Owner判断` には、その時点で有効な判断事項を集約し、`ステータス`を記載する
 - `Owner判断 (追記)` には、今回の報告・再検証で新たに発生または変化した未対応の判断事項だけを記載し、ステータスは原則 `要判断` とする
-- 判断項目が存在しない場合も、報告書の最後尾に次の形式で `Owner判断 (追記)` を記載する
-  ```markdown
-  ### Owner判断 (追記)
-  なし
-  ```
+- 判断項目が存在しない場合は、報告内の任意の位置に`Owner判断残件：なし`と`回答プロンプト：なし`を記録する。`Owner判断 (追記)`という見出しや最後尾への配置は必須としない
 - 同様の内容を追記する場合は、古い追記を残して行数を増やさず、最新の内容へ移動・更新する
 - 再検証で追記した判断事項が次の報告でも有効な場合は、内容を `Owner判断` へ統合し、`Owner判断 (追記)` には新しい差分だけを記載する
-- 最終報告では、これまでの判断事項を `Owner判断` へ統合し、`Owner判断 (追記)` は `なし` で終える
-- `Owner判断` と `Owner判断 (追記)` より後ろに、判定、実施内容、結果ファイル、未確認事項などの報告項目を追加しない
+- 最終報告では、これまでの判断事項の最新ステータスを維持し、未回答の判断が残っていないことを明記する。過去の判断をどの見出しへ統合するか、または追記をどこへ置くかは固定しない
+- Owner判断の見出し、表の列、追記位置、末尾配置は固定しない。ただし、未回答・保留・不明な判断を残したまま次工程へ接続しない
 - 判断事項が残ったままの場合は `なし` で終わらせず、親タスクへOwner判断を求めてDocumenterまたは次工程へ接続しない
 
 ## 修正サイクル

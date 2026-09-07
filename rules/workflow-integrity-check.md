@@ -2,7 +2,7 @@
 
 ## 目的と責務
 
-整合性チェッカーは、実行プログラムを使わず、現行タスクの文書を人が同じ順序で照合するためのルールと記録様式である。実装媒体の禁止事項は `rules/implementation-medium.md` を正本とする。入力ファイルを変更せず、状態サマリーや進行中タスク台帳を必須入力にしない。固有の不一致・根拠・未確認事項は `threads/<thread-name>/result/changes.md` に記録し、共通進捗・資産区分・Owner判断の正本は `threads/<thread-name>/docs/task-progress.md` に任せる。
+整合性チェッカーは、実行プログラムを使わず、現行タスクの文書を人が照合するためのルールである。通常のworker result本文の順序・見出し・表形式は固定せず、task識別、証跡、判定、未確認事項、次工程の意味を確認する。実装媒体の禁止事項は `rules/implementation-medium.md` を正本とする。入力ファイルを変更せず、状態サマリーや進行中タスク台帳を必須入力にしない。固有の不一致・根拠・未確認事項は `threads/<thread-name>/result/changes.md` に記録し、共通進捗・資産区分・Owner判断の正本は `threads/<thread-name>/docs/task-progress.md` に任せる。
 
 参照関係は次のとおりとする。
 
@@ -23,7 +23,7 @@ current-task.md
 
 | 入力 | 確認する内容 |
 | --- | --- |
-| `threads/<thread-name>/docs/current-task.md` | 6項目、task-id、タスク名、目的、Task Definition、Worker Registry、Draft Policy |
+| `threads/<thread-name>/result/current-task.md` | 6項目、task-id、タスク名、目的、Task Definition、Worker Registry、Draft Policy |
 | `threads/<thread-name>/result/plan.md` | 承認済み対象、対象外、受入条件、Owner判断 |
 | `threads/<thread-name>/result/changes.md` | 現行workerの実施内容、未確認事項、次worker |
 | `threads/<thread-name>/result/review.md` | 末尾へ追記されたattempt番号・日時付きレビュー報告。最大attempt番号（同番号なら最新日時）を現行判定として照合 |
@@ -65,7 +65,7 @@ current-task.md
 
 `review.md`は過去attemptのレビュー報告と修正依頼を履歴として保持し、新しいレビュー報告を末尾へ追記する。各報告にはattempt番号、日時、判定、次worker、Documenter接続可否を記録する。現行判定は最大attempt番号の報告とし、同じattempt番号が複数ある場合は最新日時の報告を現行判定とする。過去attemptは履歴として保持するが、現行判定の根拠には使用しない。
 
-現行報告は次の項目を含む。
+現行報告は、次の項目を識別できる形で含む。見出し、順序、表形式は固定しない。
 
 ```markdown
 ## 実行メタデータ
@@ -106,7 +106,7 @@ current-task.md
 - Ownerの新規task開始指示を現行task終了の発火契機とし、全IMP再確認後に状態更新、manifest、`history/index.md`、次task接続の順序を守ること
 - Documenter記録後の状態が、候補なしなら`Documenter記録完了・Owner完了確認待ち`、候補ありなら`Documenter記録完了・Owner判断待ち`であること
 - Ownerのclose確認または判断の記録元、close可否、履歴退避可否、次タスク切替可否、新規IMP採番可否が分離して記録されていること
-- `operation-check.md`に固定必須見出し（前提、対応前後比較、検証フロー（要約）、動作確認手順、検証データ作成方法、外部連携の整備・設定（未実施））がこの順序であり、対応前後比較が7列（修正対象、発火タイミング、発火条件・前提、対応前：こうなっていた、対応後：こうなる、対応前の根拠、対応後の確認結果）の表形式で、未確認区分と状態台帳との整合が記録されていること
+- docs側の`operation-check.md`に固定必須見出し（前提、対応前後比較、検証フロー（要約）、動作確認手順、検証データ作成方法、外部連携の整備・設定（未実施））がこの順序であり、対応前後比較が7列（修正対象、発火タイミング、発火条件・前提、対応前：こうなっていた、対応後：こうなる、対応前の根拠、対応後の確認結果）の表形式で、未確認区分と状態台帳との整合が記録されていること。これは`result/*.md`本文の形式を固定する規定ではない
 
 ## 照合手順
 

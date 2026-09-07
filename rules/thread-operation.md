@@ -33,10 +33,13 @@ Codexプロジェクト、スレッド、タスクは1対1で対応させる。
 ```text
 threads/<thread-name>/
 ├── docs/
-│   ├── current-task.md
+│   ├── issue-memo.md
+│   ├── owner-jadge.md
 │   ├── task-progress.md
+│   ├── health-check.md
 │   └── operation-check.md
 └── result/
+    ├── current-task.md
     ├── plan.md
     ├── changes.md
     ├── test.md
@@ -47,12 +50,17 @@ threads/<thread-name>/
 
 ## ファイルの責務
 
-- `threads/<thread-name>/docs/current-task.md` は、そのCodexプロジェクト・スレッドで扱う1つのタスクをPlannerへ渡す入力とする
+- `threads/<thread-name>/result/current-task.md` は、そのCodexプロジェクト・スレッドで扱う1つのタスクをPlannerへ渡す正式入力とする
+- `threads/<thread-name>/docs/issue-memo.md` は、要件定義中の決定事項、変更経緯、未決定事項の正本とし、要件確定時に凍結する
+- 要件定義、タスク作成、対応案の提示を求める意図を検知した時点で、最初の案を提示する前に対応する`docs/issue-memo.md`を作成または再開する。現行タスクの要件変更は現行memo、新規タスクは現行タスクへ混在させない新規スレッドのmemoを使用する
+- `threads/<thread-name>/docs/owner-jadge.md` は、Owner判断のサマリー、詳細、回答プロンプトだけを管理する正本とする
 - `threads/<thread-name>/docs/task-progress.md` は、次タスク以降の進行中タスクの共通台帳の正本とする。改修範囲、現行/変更後、共通検証、影響、Owner判断、参照関係を記録する
+- `docs/issue-memo.md` と `docs/task-progress.md` は人間向けに整理した要約・判断・進捗資料とし、関連会話または状態変化の都度、既存項目を更新・統合する。会話本文や詳細証跡を機械的に追記しない
+- AI・workerが必要とする詳細な引継ぎ、実施結果、照合値、受入根拠、原典一覧は `result/` の担当資料へ記録し、`docs/` へ全文複製しない
 - `threads/<thread-name>/docs/operation-check.md` は、Documenterが動作確認の手順・結果を記録する補助資料とする
 - `threads/<thread-name>/result/task-log.md` は、Documenterがworker固有の現行タスク記録を残す正式結果である。共通台帳は`docs/task-progress.md`を参照する。退避指示時は履歴スナップショットを先に保存する
 - `threads/<thread-name>/result/` は、そのスレッドのworker間で受け渡すタスク固有の結果を格納する
-- `threads/<thread-name>/result/health-check.md` は、Ownerの明示トリガーがある場合だけ作成するworker状態確認の補助記録であり、完了報告・台帳・manifestの代替にしない
+- `threads/<thread-name>/docs/health-check.md` は、Ownerの明示トリガーがある場合だけ作成する人間向けworker状態確認の正本であり、完了報告・台帳・manifestの代替にしない。旧`result/health-check.md`は保全資料として変更しない
 - `result/` 内はworker別に分割せず、現行作業では固定ファイル名を使用する。退避指示時は固定ファイルの断面を履歴へ保存し、過去断面を上書きしない
 - ルートの `development-improvement.md` は全スレッドで共有し、汎用的な改善項目だけを永続化する
 - ルートの `rules/` と `worker-definitions/` は全スレッドで共有する
@@ -63,7 +71,7 @@ threads/<thread-name>/
 
 | 資料 | 正本情報 | 更新責任 | 更新境界 |
 | --- | --- | --- | --- |
-| `threads/<thread-name>/docs/current-task.md` | タスク識別、対象・対象外、Task Lifecycle、Worker Registry | Owner／Planner | 現行タスクの入力。過去taskの内容を混在させない |
+| `threads/<thread-name>/result/current-task.md` | タスク識別、対象・対象外、Task Lifecycle、Worker Registry | Owner／Planner | 現行タスクの正式入力。過去taskの内容を混在させない |
 | `threads/<thread-name>/docs/task-progress.md` | 共通進捗、切替境界、受入条件、Owner判断残件 | Implementerが実装状態を反映、Reviewerが受入状態を更新 | 固定パス。旧taskの台帳は履歴へ退避してから切り替える |
 | `threads/<thread-name>/result/plan.md` | 現行taskの承認済み計画 | Planner／Owner承認 | 承認後の計画外変更は禁止。変更時は再承認 |
 | `threads/<thread-name>/result/changes.md` | Implementerの実施結果 | Implementer | 受入判定を代替しない |
@@ -76,7 +84,7 @@ threads/<thread-name>/
 
 ## 履歴領域の初期化
 
-新規運用開始時は、履歴退避を開始する前に `rules/history-initialization.md` に従って、Git追跡対象外のローカル `history/` と10項目の `history/index.md` を初期化する。初回タスクの既知情報を台帳へ登録し、`current-task.md`と一致することを確認する。
+新規運用開始時は、履歴退避を開始する前に `rules/history-initialization.md` に従って、Git追跡対象外のローカル `history/` と、サマリー・詳細・統合判定用8項目を持つ `history/index.md` を初期化する。初回タスクの既知情報を台帳へ登録し、`result/current-task.md`と一致することを確認する。
 
 `history/`に通常の履歴スナップショットや不明な資料があるのに`history/index.md`がない場合、既存台帳を推測で再構成せず、既存資料の移動・削除・改名・上書きを行わず停止する。今回の特殊な保全領域である`history/task-legacy-history-backup/`は、この初期化判定の対象外とし、内容を変更しない。初期化完了を確認できない間は、退避、復旧、統合候補判定、タスク切替を完了扱いにしない。
 
@@ -123,7 +131,7 @@ IMP状態の自動更新は、対象IMP・正本・証跡・更新責任者が�
 
 ## workerの参照先
 
-- workerは、現在処理しているスレッドの `threads/<thread-name>/docs/current-task.md`、`threads/<thread-name>/docs/task-progress.md`、`threads/<thread-name>/result/` を参照する。`docs/task-progress.md`がない前タスクは、移行境界として自動作成・移動・上書きせず、Owner承認を確認する
+- workerは、現在処理しているスレッドの `threads/<thread-name>/result/current-task.md`、`threads/<thread-name>/docs/task-progress.md`、`threads/<thread-name>/result/` を参照する。`docs/task-progress.md`がない前タスクは、移行境界として自動作成・移動・上書きせず、Owner承認を確認する
 - Ownerは作業対象のスレッド名とタスクを、そのスレッドの `current-task.md` に記載する
 - Ownerは `current-task.md` に次の6項目を必ず記載する：`スレッド名`、`CodexプロジェクトID`、`Codex実行ディレクトリ`、`対象リポジトリ`、`ベースブランチ`、`作業ブランチ`
 - `作業ブランチ`のデフォルト値は `記述ルールに従い新規作成` とする。既存ブランチを使用する場合だけ、Ownerが使用するブランチ名を明記する

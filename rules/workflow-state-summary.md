@@ -2,7 +2,7 @@
 
 ## 目的と責務
 
-状態サマリーは、実行プログラムを使わず、現行タスクの状態を同じ項目順で要約するためのルールと出力テンプレートである。実装媒体の禁止事項は `rules/implementation-medium.md` を正本とする。状態を変更せず、整合性確認の結果を必須入力にしない。固有の未確認事項・要約根拠・次workerは `threads/<thread-name>/result/changes.md` に記録し、進行中タスクの共通台帳は `threads/<thread-name>/docs/task-progress.md` を正本とする。
+状態サマリーは、実行プログラムを使わず、現行タスクの状態を要約するためのルールと出力テンプレートである。状態サマリー自身の確認項目は維持するが、通常のworker result本文の項目順・見出し・表形式を固定するものではない。実装媒体の禁止事項は `rules/implementation-medium.md` を正本とする。状態を変更せず、整合性確認の結果を必須入力にしない。固有の未確認事項・要約根拠・次workerは `threads/<thread-name>/result/changes.md` に記録し、進行中タスクの共通台帳は `threads/<thread-name>/docs/task-progress.md` を正本とする。
 
 参照関係は次のとおりとする。
 
@@ -106,7 +106,7 @@ Documenter記録後は候補の有無、Ownerのclose確認または判断の記
 - `未着手`なのに評価・計画・実装・受入・効果確認の証跡がある、または`対応中`へ変更したのにOwner承認・計画・実装・受入の根拠がない
 - Documenter記録完了後のOwner完了確認またはOwner判断がない
 - Owner確認前に完了、履歴退避、次タスク切替、新規IMP採番を確定している
-- `operation-check.md`の固定必須見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、状態台帳との整合の欠落・不一致を検出したまま、受入・完了・次worker接続・履歴操作を確定している
+- docs側`operation-check.md`の固定必須見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、状態台帳との整合の欠落・不一致を検出したまま、受入・完了・次worker接続・履歴操作を確定している。これは通常のworker result本文の形式とは別である
 - Reviewerの修正依頼、保留、未確認が残る間に`task-progress.md`または`history/index.md`をOwner完了確認待ちへ進めている
 - IMPサマリーと詳細の不一致、証跡なしの`対応完了`、効果確認中のIMPの完了扱い、別IMPの競合・検証不能の未分類、同一IMPの自動統合を検出したまま進めている
 - Ownerの新規task開始指示がない、全IMP再確認がない、または状態更新→manifest→`history/index.md`→次task接続の順序を飛ばしている

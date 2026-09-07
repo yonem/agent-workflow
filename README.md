@@ -19,9 +19,9 @@
 初回導入時は、次の順序で準備します。
 
 1. 本リポジトリの `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md` を対象リポジトリへ展開する
-2. `rules/history-initialization.md` に従い、Git追跡対象外のローカル `history/` と10項目の `history/index.md` を初期化する。通常の既存履歴があるのに台帳がない場合は、上書きせず停止する。`history/task-legacy-history-backup/`は今回の特殊な保全領域として初期化判定から除外する
-3. `rules/current-task-template.md` を使って対象リポジトリの `threads/<thread-name>/docs/current-task.md` を作成し、Task ContextとTask Definitionを記載する。作業ブランチは、既存ブランチを指定しない限り `記述ルールに従い新規作成` とする
-4. 初回タスクの既知情報を `history/index.md` へ登録し、`current-task.md`との一致を確認する
+2. `rules/history-initialization.md` に従い、Git追跡対象外のローカル `history/` と、サマリー・詳細・統合判定用8項目を持つ `history/index.md` を初期化する。通常の既存履歴があるのに台帳がない場合は、上書きせず停止する。`history/task-legacy-history-backup/`は今回の特殊な保全領域として初期化判定から除外する
+3. `rules/current-task-template.md` を使って対象リポジトリの `threads/<thread-name>/result/current-task.md` を作成し、Task ContextとTask Definitionを記載する。作業ブランチは、既存ブランチを指定しない限り `記述ルールに従い新規作成` とする
+4. 初回タスクの既知情報を `history/index.md` へ登録し、`result/current-task.md`との一致を確認する
 5. Plannerへ対象リポジトリの内訳確認と `plan.md` の作成を依頼する
 6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
 
@@ -36,7 +36,7 @@ Ownerが「ヘルスチェックを実行して」と明示した場合、また
 ## 基本ワークフロー
 
 ```text
-threads/<thread-name>/docs/current-task.md
+threads/<thread-name>/result/current-task.md
   ↓
 Planner：現状調査・実装計画
   ↓ 人間が承認
@@ -53,15 +53,21 @@ Documenter：判断・結果・教訓を記録
 人間がマージ・リリースを判断
 ```
 
-各 worker の固有責務、入力、結果ファイル、後工程は `worker-definitions/`、標準接続サイクルとモデル設定は `rules/worker-task-settings.md`、入力ゲートと証跡は `rules/worker-evidence.md`、完了報告の形式は `rules/worker-report-template.md` を正本とします。現行result/history境界、復旧、再検証、task-logの更新時点は `rules/thread-operation.md` に従います。
+各 worker の固有責務、入力、結果ファイル、後工程は `worker-definitions/`、標準接続サイクルとモデル設定は `rules/worker-task-settings.md`、入力ゲートと証跡は `rules/worker-evidence.md`、完了報告の最低記録項目は `rules/worker-report-template.md` を正本とします。通常のresult本文の見出し順・表形式は固定しません。現行result/history境界、復旧、再検証、task-logの更新時点は `rules/thread-operation.md` に従います。
 
 共通rules、worker定義、テンプレート、README、workflow資料、移行手順を変更する場合は、変更前に直接対象・参照対象・記録対象・移行先導入対象を分類し、正本・参照先・更新責任・更新境界・旧表現・停止条件を確認します。変更後は同じ影響一覧を再確認し、影響なし・対象外の根拠、未確認・矛盾・変更漏れの停止理由を`changes.md`へ記録します。手順の正本は `rules/workflow-consistency-check.md` と `rules/workflow-integrity-check.md` です。
 
 動作確認は `rules/operation-check-report.md`、worker状態の確認は `rules/worker-health-check.md`、汎用改善の記録は `rules/development-improvement-record.md` に従います。プロジェクト固有のworker省略は共通文書へ追加しません。
 
+人間向け資料と管理ファイルの共通形式、正本、責任、初期作成、復元、移行手順は `rules/human-facing-documentation.md` に従います。`owner-jadge.md`、`task-progress.md`、`issue-memo.md`の形式や、サマリーと詳細の昇順・トレース規則も同ルールを参照します。
+
+`docs/issue-memo.md`と`docs/task-progress.md`は人間向けに整理した要約・判断・進捗を記録し、AI・worker向けの詳細な引継ぎ・証跡は`result/`へ記録します。関連会話や状態変化の都度更新しますが、既存項目を統合・更新し、会話本文を機械的に追記しません。
+
+要件定義、タスク作成、対応案の提示を開始した時点で、最初の案を提示する前に`docs/issue-memo.md`を作成または再開します。作成・再開できない場合は、Planner接続と後工程を停止します。
+
 ## 使い方
 
-1. 対象スレッドの `threads/<thread-name>/docs/current-task.md` を要件に合わせて記入する
+1. 対象スレッドの `threads/<thread-name>/result/current-task.md` を要件に合わせて記入する
 2. Plannerに現状調査と計画作成を依頼する
 3. 人間が計画・リスク・完了条件を承認する
 4. Implementerに承認済みの範囲だけを実装させる
@@ -76,7 +82,7 @@ Documenter：判断・結果・教訓を記録
 他プロジェクトへ展開した後、次を確認するまで共通サイクルを有効化済みとしません。
 
 - `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md`、導入確認手順が配置されている
-- `rules/history-initialization.md`に従って、ローカルの`history/`と10項目の`history/index.md`を初期化できる
+- `rules/history-initialization.md`に従って、ローカルの`history/`とサマリー・詳細・統合判定用8項目の`history/index.md`を初期化できる
 - `current-task.md`、`task-progress.md`、worker結果ファイル、汎用改善記録、タスク固有ログの記録先が確認できる
 - Planner、Implementer、Reviewer、Documenterの責務と、Documenterを省略する場合の記録責任者・記録先が確認できる
 - Reviewer受入と実運用後の効果確認、継続評価、再評価、新TASK起票、停止条件の境界が確認できる
@@ -115,10 +121,13 @@ Documenter：判断・結果・教訓を記録
 ├── threads/
 │   ├── <thread-name-a>/
 │   │   ├── docs/
-│   │   │   ├── current-task.md
+│   │   │   ├── issue-memo.md
+│   │   │   ├── owner-jadge.md
 │   │   │   ├── task-progress.md
+│   │   │   ├── health-check.md
 │   │   │   └── operation-check.md
 │   │   └── result/
+│   │       ├── current-task.md
 │   │       ├── plan.md
 │   │       ├── changes.md
 │   │       ├── test.md

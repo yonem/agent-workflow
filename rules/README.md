@@ -10,8 +10,11 @@
 - Plannerへ指示する前の要件定義提案フォーマットと接続ゲートは `rules/requirement-definition-format.md` を参照する
 - 実装媒体をルール・プロンプト・Markdownに限定する場合は `rules/implementation-medium.md` を参照する
 - 新規運用開始時のローカル`history/`と`history/index.md`の初期化は `rules/history-initialization.md` を参照する
+- 人間向け資料、`owner-jadge.md`、`task-progress.md`、`issue-memo.md`の共通形式・責務・作成・復元・移行手順は `rules/human-facing-documentation.md` を参照する
 - 次タスク以降の進行中タスク台帳は `threads/<thread-name>/docs/task-progress.md` を正本とし、worker固有結果は `threads/<thread-name>/result/`へ記録する。配置・履歴境界は `rules/thread-operation.md`を参照する
-- Workerの状態確認結果はOwner明示トリガー時、または作業中のworker接続失敗を契機に切り替えた時だけ `threads/<thread-name>/result/health-check.md`へ記録する。用途と境界は `rules/worker-health-check.md`を参照する
+- `docs/issue-memo.md`と`docs/task-progress.md`は人間向けに整理した要約・判断・進捗とし、関連会話・状態変化の都度、既存項目を更新・統合する。AI・worker向けの詳細な引継ぎ・証跡は`result/`へ記録し、会話本文や`result/`本文をdocsへ機械的に複製しない。共通の形式・責任・作成・復元・移行境界は `rules/human-facing-documentation.md`を参照する
+- 要件定義、タスク作成、対応案の提示を開始した時点で、最初の案の前に`docs/issue-memo.md`を作成または再開する。未作成・境界不明・作成失敗時はPlanner接続と後工程を停止する
+- Workerの状態確認結果はOwner明示トリガー時、または作業中のworker接続失敗を契機に切り替えた時だけ `threads/<thread-name>/docs/health-check.md`へ記録する。用途と境界は `rules/worker-health-check.md`を参照する
 - 前回health-checkと現在worker一覧の差分確認は `rules/worker-connection-diff.md`を参照し、比較可能な2回目以降だけ専用resultへ記録する
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
@@ -64,7 +67,7 @@ status: inactive
 ## 優先順位
 
 1. `AGENTS.md`
-2. Ownerが承認した対象スレッドの `threads/<thread-name>/docs/current-task.md`
+2. Ownerが承認した対象スレッドの `threads/<thread-name>/result/current-task.md`
 3. `rules/` 配下の共通ルール
 4. `worker-definitions/` のworker固有手順
 

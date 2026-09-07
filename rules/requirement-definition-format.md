@@ -5,6 +5,8 @@ status: active
 
 # 要件定義提案フォーマット
 
+要件定義中の決定事項と変更経緯は、`rules/human-facing-documentation.md`に従い、関連項目をまとめながら、関係する会話の都度`threads/<thread-name>/docs/issue-memo.md`を更新する。会話本文を機械的に転載せず、変更経緯は日付、変更内容、理由、影響を簡潔に記録する。要件定義終了時にissue-memoを凍結し、その確定内容を`threads/<thread-name>/result/current-task.md`へ転記してからPlannerへ接続する。
+
 ## 発火タイミングと適用条件
 
 次の発言を受け取った時点で本ルールを発火する。対象名や文末が異なっていても、要件定義、タスク作成、対応案の提示を求める意図があれば同じ扱いとする。
@@ -17,11 +19,14 @@ status: active
 発火後は、次の順序を必ず守る。
 
 1. 発言の対象と依頼意図を特定する
-2. 本フォーマットで要件定義案を作成してOwnerへ提示する
-3. Owner判断が必要な場合は、明示回答を受領するまで停止する
-4. 承認後にだけPlannerへ要件定義案を渡す
+2. `rules/human-facing-documentation.md`に従い、対応する`docs/issue-memo.md`を作成または再開する
+3. issue-memoへ初期情報と今回の要件を整理してから、本フォーマットで要件定義案をOwnerへ提示する
+4. Owner判断が必要な場合は、明示回答を受領するまで停止する
+5. 承認後にだけPlannerへ要件定義案を渡す
 
-要件定義案の提示前に、Plannerへの指示、task-idの確定、`current-task.md`の更新、タスク作成、実装、後工程接続を開始してはならない。
+要件定義案の提示前に、issue-memoの作成・再開確認を除き、Plannerへの指示、task-idの確定、`current-task.md`の更新、タスク作成、実装、後工程接続を開始してはならない。issue-memoを作成・再開できない場合は、要件定義案を確定扱いにせず停止する。
+
+要件定義の最初の回答で、issue-memoの作成・再開済みであることを明示する。作成前に提示した要件定義案は正式な提案として扱わず、作成後に現行の要件を整理し直す。
 
 単なる現状説明、既存資料の閲覧、完了済み結果の確認、要件定義フォーマット自体の質問で、作業開始や計画作成を求めていない発言には発火しない。ただし、依頼意図が曖昧で作業開始の可能性がある場合は、安全側に倒して本フォーマットを提示する。
 
@@ -99,3 +104,4 @@ Codex実行ディレクトリ: <Codex実行ディレクトリ>
 - 要件定義の提示段階では、既存のcurrent-task、result、historyを更新しない。
 - Owner承認後にタスクを作成した場合は、通常の`current-task.md`、`task-progress.md`、Plannerの`result/plan.md`へ正本を分けて記録する。
 - 要件定義案の汎用的な改善知見は、承認された計画と実施結果の記録後にDocumenterが`development-improvement.md`へ記録する。
+- `issue-memo.md`の決定事項、未決定事項、変更理由をPlannerの計画だけで代替しない。凍結後の要件変更はissue-memoの再開、Owner再承認、`result/current-task.md`と`plan.md`の再照合を必須とする。

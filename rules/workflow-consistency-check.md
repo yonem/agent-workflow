@@ -41,7 +41,7 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 ## 確認対象
 
 ```text
-threads/<thread-name>/docs/current-task.md
+threads/<thread-name>/result/current-task.md
 threads/<thread-name>/docs/task-progress.md
 threads/<thread-name>/result/*.md
 worker自身のCodexプロジェクト所属・実行環境
