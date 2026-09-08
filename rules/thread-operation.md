@@ -52,7 +52,7 @@ threads/<thread-name>/
 
 - `threads/<thread-name>/result/current-task.md` は、そのCodexプロジェクト・スレッドで扱う1つのタスクをPlannerへ渡す正式入力とする
 - `threads/<thread-name>/docs/issue-memo.md` は、要件定義中の決定事項、変更経緯、未決定事項の正本とし、要件確定時に凍結する
-- 要件定義、タスク作成、対応案の提示を求める意図を検知した時点で、最初の案を提示する前に対応する`docs/issue-memo.md`を作成または再開する。現行タスクの要件変更は現行memo、新規タスクは現行タスクへ混在させない新規スレッドのmemoを使用する
+- 明示的な新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加の宣言だけを新規要件定義の発火条件とする。単なる相談・補足・確認・意見交換では`docs/issue-memo.md`、`current-task.md`、historyを変更しない。曖昧な場合は推測せず確認まで停止する。新規taskの発火後は、要件記録・task-id採番・新規memo作成より先にOwnerの現行taskの扱いを確定する
 - `threads/<thread-name>/docs/owner-jadge.md` は、Owner判断のサマリー、詳細、回答プロンプトだけを管理する正本とする
 - `threads/<thread-name>/docs/task-progress.md` は、次タスク以降の進行中タスクの共通台帳の正本とする。改修範囲、現行/変更後、共通検証、影響、Owner判断、参照関係を記録する
 - `docs/issue-memo.md` と `docs/task-progress.md` は人間向けに整理した要約・判断・進捗資料とし、関連会話または状態変化の都度、既存項目を更新・統合する。会話本文や詳細証跡を機械的に追記しない
@@ -81,6 +81,21 @@ threads/<thread-name>/
 | `rules/`、`worker-definitions/` | 共通ルール、workerの役割・入出力・完了条件 | Owner／承認済みImplementer | 個別taskの状態や結果を複製しない |
 
 同一情報を複数資料へ記載する場合は、上表の正本だけを更新し、他資料は参照または要約に限定する。正本候補が複数、参照先が存在しない、更新責任が重複、更新境界が不明な場合は推測で補正せず停止する。現行資料と履歴資料を同時にworkerの入力へ混在させず、どちらを正本とするかを結果へ明記する。
+
+用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。スレッド、報告書、ルール、クルーなどの解釈に文脈がない場合は用語集をデフォルトとして参照し、未登録・衝突・解釈不能は推測せず停止する。
+
+## 新規要件定義と現行タスクの切替ゲート
+
+明示的な新規task開始を検知した場合、次の順序を崩さない。
+
+1. 発言を「新規task開始」「現行taskの変更」「単なる相談・補足・確認」のいずれかへ分類する。判定不能なら現行taskを維持し、確認まで資料作成・採番・切替を停止する。
+2. 新規task開始の場合、要件本文、task-id、新規issue-memo、active taskを確定する前に、Ownerが「現行taskを中断・終了して切替」または「現行taskを残し、新規作業を別project・別thread等で行う」のどちらかを選択する。
+3. 切替を選択した場合は、現行状態と再開条件を記録し、現行`docs/`と`result/`を`<作業ディレクトリroot>/history/<task-id>/`へ退避する。退避元・退避先・task-id・状態・日時・理由・対象資料をmanifestへ記録する。
+4. 退避後、manifest、`history/index.md`の該当行、退避先のdocs/resultのtask-id・状態・原典を相互照合する。欠落、読取不能、不一致、部分成功なら旧docs/resultの初期化や新規task開始へ進めない。
+5. 照合成功とOwner承認を確認した後、承認範囲内で旧docs/resultを新規task用に初期化し、新規`docs/issue-memo.md`、`result/current-task.md`、必要なtask資料を作成する。旧memo・旧resultを新規正本へ混在させない。
+6. task-idの一意性と同一projectのactive taskが1件であることを確認し、確認できない場合は停止する。現行taskを残す選択時は同一projectで新規active taskを作成せず、別project・別thread等の別作業領域が用意されるまで開始しない。
+
+部分成功、照合不能、Owner判断の未回答、履歴先不明、承認されていない削除・上書きがある場合は、期待値・実際値・証跡・影響・停止理由・再開条件を現行resultまたは`docs/task-progress.md`へ記録し、再確認完了まで停止する。履歴原本、manifest、スナップショットは変更しない。
 
 ## 履歴領域の初期化
 

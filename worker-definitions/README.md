@@ -1,6 +1,6 @@
 # Worker定義
 
-このディレクトリは、各workerの役割、入力、出力、判定、停止条件、後工程を共通仕様として案内する。個別の責務は各worker定義を正本とし、入力ゲート・証跡・Owner判断は`rules/worker-evidence.md`、履歴・復元・task境界は`rules/thread-operation.md`を参照する。
+このディレクトリは、各workerの役割、入力、出力、判定、停止条件、後工程を共通仕様として案内する。個別の責務は各worker定義を正本とし、用語の標準的な意味と取り違え防止は`rules/glossary.md`、入力ゲート・証跡・Owner判断は`rules/worker-evidence.md`、履歴・復元・task境界は`rules/thread-operation.md`を参照する。
 
 ## Worker一覧
 
@@ -36,3 +36,5 @@ Documenter
 ```
 
 各workerの完了報告は担当resultへ保存し、親タスクへ判定、結果パス、未確認事項、次workerを報告する。Owner判断残件、入力不一致、正本不明、参照切れ、履歴操作要求、移行先の責任者・記録先・停止条件の未確認がある場合は次工程へ接続しない。
+
+各workerは作業開始前に`rules/glossary.md`を参照し、未登録語、同音異義語、造語、略語、意味衝突、デフォルト解釈不能を推測で確定せず、結果へ記録してOwner確認まで停止する。

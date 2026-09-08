@@ -17,6 +17,7 @@
 - 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
 - 各workerの完了報告の項目順・Owner判断の配置は `rules/worker-report-template.md` に従う
 - Owner判断の意味、OJ採番、本文表示、IDなし・不明・重複・対象外回答の扱いは `rules/worker-evidence.md` に従う
+- 用語の正本、標準的な意味、取り違え防止、未登録語・意味衝突時の停止条件は `rules/glossary.md` を参照する。個別資料へ用語定義を重複掲載しない
 
 ## 禁止事項
 
@@ -85,6 +86,7 @@ Documenter
 - 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクへの切替時も履歴と旧resultを保全する。詳細は `rules/thread-operation.md` に従う
 - Implementerは実装と最低限の変更記録を行い、詳細な検証・整合性確認・受入判定はReviewerへ移譲する。固有責務は `worker-definitions/` に従う
 - 共通の入力ゲート、証跡、報告、履歴、接続サイクル、計画回答、動作確認、worker状態は対応する `rules/` の正本を参照する
+- 全タスクで`threads/<thread-name>/docs/operation-check.md`を作成または更新し、固定6見出し・7列の対応前後比較・根拠区分・未確認区分をPlanner計画、Reviewer受入、Documenter記録の各境界で確認する。欠落時は受入・完了・履歴操作・次タスク接続を停止する
 - Plannerは計画承認前に実装を開始せず、計画外変更・停止条件・安全性懸念は親タスクへ報告する
 - Owner判断に未回答・保留・不明・対応不明が残る場合は、次工程、完了、履歴操作を停止し、残件ごとの回答プロンプトを提示する。詳細は `rules/worker-evidence.md` に従う
 - Reviewerが修正依頼と判定した場合は `rules/worker-task-settings.md` の再確認サイクルに従い、受入後にDocumenterへ接続する

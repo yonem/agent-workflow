@@ -130,6 +130,8 @@ thread単位の状態と、役割単位の判定を分けて記録する。1つ�
 
 履歴退避、manifest、正本結果、旧result保全は `rules/thread-operation.md` に従う。health-check固有の判定基準と結果項目は本ルールで定義し、履歴保存手順を再定義しない。
 
+新規taskの開始・切替に伴うヘルスチェックでは、同一projectのactive taskが1件であること、現行taskの扱いにOwner回答があること、退避後のmanifest・`history/index.md`・退避docs/resultの照合が完了していることを確認する。いずれかが未確認、部分成功、不一致の場合は不足workerや正常状態を推測せず、task切替とactive状態変更を停止する。
+
 補足証跡には、次の項目を`task-progress.md`またはworkerの`result/`へ記録する。これらを`health-check.md`へ重複記載しない。
 
 - 実行日時、起動トリガー（Owner明示またはworker接続失敗）、対象スレッド、対象projectId、対象リポジトリ、Codex実行ディレクトリ

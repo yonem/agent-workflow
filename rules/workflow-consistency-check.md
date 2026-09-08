@@ -7,7 +7,7 @@ status: active
 
 worker接続前および作業開始前に、`current-task.md`、`docs/task-progress.md`、スレッドの結果ファイル、workerの実行環境が同じタスクを指していることを確認するための共通手順。
 
-本書は記載値と実環境の照合手順を正本とする。6項目とTask Definition/Task Lifecycleの記載形式は `rules/current-task-template.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、project/thread/taskのライフサイクルは `rules/thread-operation.md`に従う。共通台帳の正本は次タスク以降`docs/task-progress.md`とする。
+本書は記載値と実環境の照合手順を正本とする。用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。6項目とTask Definition/Task Lifecycleの記載形式は `rules/current-task-template.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、project/thread/taskのライフサイクルは `rules/thread-operation.md`に従う。共通台帳の正本は次タスク以降`docs/task-progress.md`とする。
 
 ## ルール変更時の影響確認
 
@@ -46,6 +46,8 @@ threads/<thread-name>/docs/task-progress.md
 threads/<thread-name>/result/*.md
 worker自身のCodexプロジェクト所属・実行環境
 ```
+
+用語を判定条件、状態、役割、資料名として扱う場合は、`rules/glossary.md`の登録語・標準的な意味・取り違え防止の意味を照合する。未登録語、同音異義語、造語、略語、意味衝突、デフォルト解釈不能が残る場合は、整合性確認を完了扱いにせずOwnerへ確認を求める。
 
 ## ファイル上の確認項目
 
@@ -108,6 +110,18 @@ OwnerはPlannerまたは各workerを接続する前に、次の項目を確認�
 - [ ] Codex実行ディレクトリを確認した
 - [ ] current-task.mdの必須6項目が揃っている
 - [ ] 履歴を扱う場合、Task Lifecycle、manifest、history/index.mdの対応を確認した
+
+## 新規要件定義・タスク切替の整合性確認
+
+新規task開始を確認する場合は、候補判定とは別に、次の順序と状態を照合する。
+
+- 発言が明示的な新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加であること。相談・補足・確認・意見交換、または意図不明の場合は新規taskへ進めない。
+- Ownerが現行taskの中断・終了または現行taskを残して別project・別thread等で実施する選択を明示していること。未回答・保留・不明ならtask-id、新規memo、履歴操作、active切替を停止する。
+- 切替時は、現行docs/resultの退避先、manifest、`history/index.md`行、退避内容のtask-id・状態・原典・未完了事項を照合し、すべて成功していること。片側確認や部分成功は完了扱いにしない。
+- 照合成功後だけ旧docs/resultの初期化と新規memo/current-task/task資料の作成を行い、新旧資料の混在がないことを確認する。
+- task-idの一意性と同一projectのactive taskが1件であることを確認する。現行taskを残す選択時に同一projectのactive重複がある場合は停止する。
+
+不一致・確認不能・部分成功・承認範囲外の削除や上書きがある場合は、期待値、実際値、証跡、影響、停止理由、再開条件を記録し、Reviewer接続や次task開始へ進めない。
 
 ## タスク統合候補の判定
 

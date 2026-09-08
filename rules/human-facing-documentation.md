@@ -24,7 +24,7 @@ status: active
 | 汎用改善 | `<作業ディレクトリroot>/development-improvement.md` | Owner、全プロジェクト | Documenter／Owner |
 | 履歴台帳 | `<作業ディレクトリroot>/history/index.md` | Owner、AI | Owner |
 
-Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判断だけ、`task-progress.md`は現行タスクの進捗・証跡への参照・停止条件だけを扱い、互いの責務を重複させない。
+Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判断だけ、`task-progress.md`は現行タスクの進捗・証跡への参照・停止条件だけを扱い、互いの責務を重複させない。用語の標準的な意味と取り違え防止は`rules/glossary.md`を参照し、長い根拠・履歴・責任者・例外一覧を用語集へ混在させない。
 
 ## docsとresultの使い分け
 
@@ -142,8 +142,8 @@ Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判�
 ### 要件定義中
 
 - `threads/<thread-name>/docs/issue-memo.md`を要件定義中の決定事項、変更理由、未決定事項、懸念、Owner確認事項の正本とする。
-- 要件定義、タスク作成、対応案の提示を求める意図を検知した時点で、最初の要件定義案を提示する前に`issue-memo.md`を作成または再開する。要件承認前でtask-idが未確定の場合は、`task-id：未採番（要件定義中）`として記録する。
-- 現行タスクの要件変更であれば、現行の`issue-memo.md`を再開して更新する。新規タスクであれば現行タスクの資料へ混在させず、現行タスクの完了・退避境界を確認したうえで新規スレッドの`issue-memo.md`を作成する。凍結済みのissue-memoを別タスクへ流用しない。
+- 明示的な新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加だけを新規taskの発火条件とする。単なる相談、補足、既存資料の確認、意見交換では`issue-memo.md`を作成・変更しない。曖昧な場合は推測で発火させず、確認まで停止する。
+- 新規taskの発火後は、現行taskを「中断・終了して切替」するか「現行taskを残して別project・別thread等で行う」かをOwnerが選択するまで、要件本文の記録、task-id採番、新規memo作成を開始しない。切替を選んだ場合は、現行資料の履歴退避、manifest・`history/index.md`・退避内容の照合、成功確認を先に行う。凍結済みのissue-memoを別タスクへ流用しない。
 - 新規作成時は、少なくとも次の初期情報を記録する。
 
 ```markdown

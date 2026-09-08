@@ -1,6 +1,6 @@
 # Worker入力・証跡・再確認ルール
 
-入力ゲート・証跡・Owner判断の意味と状態を本ルールで定義する。通常のresult本文の項目順・表配置・末尾位置は固定しない。current-taskの入力スキーマは `rules/current-task-template.md`、実環境との照合手順は `rules/workflow-consistency-check.md`、計画関連Owner回答の必須4項目は `rules/plan-approval-required-info.md`、履歴・復旧・task境界は `rules/thread-operation.md`を参照する。
+入力ゲート・証跡・Owner判断の意味と状態を本ルールで定義する。通常のresult本文の項目順・表配置・末尾位置は固定しない。用語の標準的な意味と取り違え防止は正本の`rules/glossary.md`を参照する。current-taskの入力スキーマは `rules/current-task-template.md`、実環境との照合手順は `rules/workflow-consistency-check.md`、計画関連Owner回答の必須4項目は `rules/plan-approval-required-info.md`、履歴・復旧・task境界は `rules/thread-operation.md`を参照する。
 
 ## 次工程へ接続する前の入力ゲート
 
@@ -19,6 +19,10 @@
 - 未確認事項、保留事項、前回指摘が確認できる
 
 初回Plannerには前工程がないため、前工程の結果ファイルは「該当なし」として扱う。Plannerは `current-task.md`、対象リポジトリ、最新の一次資料、適用ルールを確認して計画を作成する。Implementer以降のworkerは、前工程の結果ファイルが存在しない場合は作業を開始しない。
+
+### 用語確認ゲート
+
+各workerは作業開始前に、指示・正本・結果資料で使われる重要語を`rules/glossary.md`と照合する。登録語は標準的な意味をデフォルト解釈とし、明示された適用文脈があれば文脈を優先する。未登録語、同音異義語、造語、略語、表記衝突、意味衝突、デフォルト解釈不能を既存語へ推測置換せず、対象・根拠・影響・Owner確認事項を結果へ記録して停止する。
 
 ### 計画結果の返却・受領・承認ゲート
 
@@ -100,6 +104,18 @@ Reviewerは、該当しない項目を `対象外` と明記したうえで、�
 - 正本・参照先・更新責任・更新境界は `rules/thread-operation.md` の資料マップに従う。報告には必要な正本パスと参照パスを記録し、同一情報の重複記載は要約・参照に限定する。正本不明、参照切れ、責務重複、更新境界不明は推測で補正せず、未確認事項と停止理由へ記録する。
 - `history/index.md`を扱う退避・復旧・統合候補・完了・タスク切替では、index行、current-task、task-progress、現行result、manifestのtask-id、目的、対象、未完了事項、状態、Owner判断、履歴パス、正本・根拠、最終更新を操作前後に照合する。これは操作整合性の確認であり、統合候補の比較条件は8項目（task-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要）に限定する。欠落、読取不能、不一致、部分成功、退避未完了は停止し、期待値・実際値・証跡・影響・停止理由・再開条件を結果へ記録する。
 - task-idの採番は実際に作成・確定された論理タスク台帳から連番で行い、候補資料の識別子、ファイル名、日時だけを根拠にしない。既存TASK-001、TASK-002、TASK-003の欠落、誤採番、重複、未確定は推測で変更せずOwnerへ報告する。
+
+### 新規要件定義・タスク切替の必須証跡
+
+新規taskの開始または切替を扱う結果には、本文形式を固定せず、少なくとも次を相互参照可能な形で記録する。
+
+- 明示トリガーの分類と、相談・補足・確認・意見交換を発火対象外とした根拠
+- Ownerの現行taskの扱い（中断・終了して切替／現行taskを残して別project・別thread等で実施）と回答元
+- 現行状態・再開条件、退避元・退避先、manifest、`history/index.md`行、退避docs/resultの照合結果
+- 照合成功後の旧docs/result初期化、新規issue-memo・current-task・task資料の作成結果、新旧資料の混在がないこと
+- task-id一意性、同一projectのactive task重複なし、未確認事項
+
+発言の判定不能、Owner判断の未回答、履歴退避・manifest・index・内容照合の部分成功または不一致、初期化前の削除・上書き、同一projectのactive重複がある場合は、期待値・実際値・証跡・影響・停止理由・再開条件を記録して停止する。
 
 ## Owner判断
 

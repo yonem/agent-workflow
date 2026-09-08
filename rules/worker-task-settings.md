@@ -30,7 +30,7 @@ Planner → Owner承認 → Implementer → Tester / Security Operator（並行�
 - PlannerはOwner承認前に実装を開始しない。各workerは接続前に `rules/workflow-consistency-check.md` の入力ゲートを通る
 - TesterとSecurity Operatorの両方の完了後にReviewerへ接続する
 - Reviewerが修正依頼と判定した場合は、指摘をImplementerへ戻し、必要なTester、Security Operator、Reviewerの確認を再実行する
-- Reviewerの受入後にDocumenterへ接続し、Documenterは `task-log.md` と汎用改善記録を更新してOwnerへ報告する
+- Reviewerの受入後にDocumenterへ接続し、Documenterは `operation-check.md`、`task-log.md`、汎用改善記録を更新してOwnerへ報告する。`operation-check.md`が存在しない、または固定構造を満たさない場合は、Documenter記録完了・Owner完了確認・次タスク切替へ進めない
 - Reviewer受入と実運用後の効果確認は別判定とする。Documenterは受入後に、効果確認の状態、証跡、確認担当、次回確認日、継続条件、再評価条件を記録する。効果不足や承認範囲外の是正がある場合は、`rules/development-improvement-record.md` と `rules/thread-operation.md` に従って再評価または新しいTASK-xxxを開始する
 - Documenterを移行先で省略する場合は、導入時に記録責任者と記録先を明示する。責任または記録先が不明な状態では有効化完了としない
 - 停止条件、外部操作、承認、判断本文のOJ表示は各正本rulesに従う。プロジェクト固有のworker省略はこの共通サイクルへ追加しない

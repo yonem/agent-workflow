@@ -60,3 +60,5 @@ status: active
 - 新規タスクへ切り替える場合は、旧current-task、task-progress、現行result、退避manifest、history/index行の対応を確認し、旧資料の退避完了前にtask-progressや現行resultを新task-idへ変更しない
 - タスク切替時のOwner判断は、既承認・継承可能、範囲変更による再判断、未回答、新規に分類する。既承認・継承可能な判断は再掲せず、同一論点は既存OJ-IDを継続し、別論点だけ新規OJ-IDを採番する
 - 欠落、不一致、解釈不能な記載がある場合、Plannerは作業を開始せずOwnerへ報告する
+
+新規taskへ切り替えた`current-task.md`には、可能な範囲で旧taskの状態・再開条件、Ownerの扱い選択、退避manifestと`history/index.md`の参照先、退避内容の照合結果、新規task-idの一意性確認を記録する。切替前の旧資料が退避・照合済みでない場合は、新しいtaskの入力へ変更せず停止する。同一projectのactive重複、照合不能、部分成功は未確認として扱い、再開条件が満たされるまでPlannerへ接続しない。

@@ -60,6 +60,15 @@ status: active
 
 初回タスクのtask-idは、対象プロジェクトで確定した論理タスク台帳の採番規則に従う。`F-xxx`、`IMP-xxx`、ファイル名、日時をtask-idの採番根拠にしない。
 
+## 新規タスク切替時の履歴化ゲート
+
+新規taskを開始する場合は、初期化済みの履歴領域を次の確認にも使用する。明示トリガーであることとOwnerの現行taskの扱いを先に確認し、切替の選択がない状態では履歴操作・task-id採番・新規memo作成を行わない。
+
+- 現行`docs/`と`result/`を同じtask-idの履歴領域へ退避し、manifestにtask-id、タスク名、状態、元project/thread、退避元・退避先、日時、理由、対象資料、再開条件を記録する。
+- 退避後にmanifest、`history/index.md`の該当行、退避先のdocs/resultを相互照合する。index行はtask-id、目的、対象、状態、未完了事項、Owner判断、履歴パス、正本・根拠の観点で確認し、内容の所属も照合する。
+- 照合が成功するまで旧docs/resultの削除・初期化、新規issue-memo、current-task、active taskの作成を行わない。部分成功、欠落、読取不能、内容不一致は停止として記録する。
+- 新規task-idは論理タスク台帳、既存履歴、manifest、`history/index.md`との一意性を確認してから確定する。同一projectにactive taskが存在する場合は新規activeを作成せず、現行taskを残すなら別project・別thread等へ案内する。
+
 ## 完了条件
 
 次をすべて満たした場合だけ、初期化完了とする。
