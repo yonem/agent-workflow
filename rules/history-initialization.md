@@ -67,6 +67,7 @@ status: active
 - 現行`docs/`と`result/`を同じtask-idの履歴領域へ退避し、manifestにtask-id、タスク名、状態、元project/thread、退避元・退避先、日時、理由、対象資料、再開条件を記録する。
 - 退避後にmanifest、`history/index.md`の該当行、退避先のdocs/resultを相互照合する。index行はtask-id、目的、対象、状態、未完了事項、Owner判断、履歴パス、正本・根拠の観点で確認し、内容の所属も照合する。
 - 照合が成功するまで旧docs/resultの削除・初期化、新規issue-memo、current-task、active taskの作成を行わない。部分成功、欠落、読取不能、内容不一致は停止として記録する。
+- 照合成功とOwner承認後は、クローズ・終了・中断または新規task切替のいずれであっても、現行docs/resultを初期化する。新規task切替時だけ新規taskの初期資料を作成し、クローズ・終了・中断時はactive taskなしの初期状態とする。
 - 新規task-idは論理タスク台帳、既存履歴、manifest、`history/index.md`との一意性を確認してから確定する。同一projectにactive taskが存在する場合は新規activeを作成せず、現行taskを残すなら別project・別thread等へ案内する。
 
 ## 完了条件

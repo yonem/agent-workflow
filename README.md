@@ -16,6 +16,8 @@
 
 共通仕様は特定の言語、shell、実行可能プログラム、外部ライブラリ、製品、ベンダー、OS、実行環境を前提にしません。役割、能力、入出力、状態、判定基準、証跡、停止条件で目的を確認し、記録媒体を変更しても正本、責任、状態、証跡、完了条件の意味を維持します。避けられない技術依存は理由、適用範囲・期間、代替可否、移行時影響、Owner判断、停止条件、分離先を例外記録へ残します。
 
+作業リポジトリや利用シーン固有のルールは共通rulesへ混在させず、`rules/local-rules.md` に従ってGit管理外の `rules/local/<rule-name>.md` へ置きます。共通rulesの保護対象を弱めず、適用条件・責任者・競合・証跡を確認できる場合だけ適用します。詳細な命名、最小本文、読込境界、移行・欠落時の扱いは `rules/local-rules.md` を参照してください。
+
 初回導入時は、次の順序で準備します。
 
 1. 本リポジトリの `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md` を対象リポジトリへ展開する
@@ -59,13 +61,15 @@ Documenter：判断・結果・教訓を記録
 
 動作確認は `rules/operation-check-report.md`、worker状態の確認は `rules/worker-health-check.md`、汎用改善の記録は `rules/development-improvement-record.md` に従います。プロジェクト固有のworker省略は共通文書へ追加しません。
 
+ローカルルールを利用する場合は、タスク開始、worker接続前、作業開始前、ルール参照時、Reviewer受入前、Documenter記録前、移行・復元時に `rules/local-rules.md` の判定を行います。欠落・競合・判定不能時の継続または停止条件も同ルールに従います。
+
 人間向け資料と管理ファイルの共通形式、正本、責任、初期作成、復元、移行手順は `rules/human-facing-documentation.md` に従います。`owner-jadge.md`、`task-progress.md`、`issue-memo.md`の形式や、サマリーと詳細の昇順・トレース規則も同ルールを参照します。
 
 `docs/issue-memo.md`と`docs/task-progress.md`は人間向けに整理した要約・判断・進捗を記録し、AI・worker向けの詳細な引継ぎ・証跡は`result/`へ記録します。関連会話や状態変化の都度更新しますが、既存項目を統合・更新し、会話本文を機械的に追記しません。
 
 用語の正本は`rules/glossary.md`です。用語、標準的な意味、取り違えないでほしい意味の3列表を参照し、未登録語・意味衝突・デフォルト解釈不能は推測で補わずOwner確認まで停止します。移行先では、同ファイルの初期作成・復元・有効化手順を確認します。
 
-新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加が明示された場合だけ新規要件定義を発火します。単なる相談・補足・確認・意見交換では管理資料を変更せず、曖昧な場合は確認まで停止します。新規taskでは、要件記録・task-id採番・新規`issue-memo.md`作成より先にOwnerが現行taskを中断・終了するか、現行taskを残して別project・別thread等で実施するかを選択します。切替時はhistory退避、manifest・`history/index.md`・退避内容の照合成功後にだけ旧docs/resultを初期化し、新規task資料を作成します。同一projectのactive重複、判定不能、部分成功は停止します。
+新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加が明示された場合だけ新規要件定義を発火します。単なる相談・補足・確認・意見交換では管理資料を変更せず、曖昧な場合は確認まで停止します。新規taskでは、要件記録・task-id採番・新規`issue-memo.md`作成より先にOwnerが現行taskを中断・終了するか、現行taskを残して別project・別thread等で実施するかを選択します。クローズ・終了・中断または切替時はhistory退避、manifest・`history/index.md`・退避内容の照合後に必ず旧docs/resultを初期化し、新規taskへ切り替える場合だけ新規task資料を作成します。同一projectのactive重複、判定不能、部分成功、初期化不完了は停止します。
 
 ## 使い方
 
@@ -84,6 +88,7 @@ Documenter：判断・結果・教訓を記録
 他プロジェクトへ展開した後、次を確認するまで共通サイクルを有効化済みとしません。
 
 - `AGENTS.md`、`rules/`、`worker-definitions/`、`README.md`、導入確認手順が配置されている
+- `rules/local-rules.md` が配置され、`rules/local/` の正本、Git管理外の扱い、適用条件、責任者、証跡、欠落時の継続・停止条件を確認できる
 - `rules/history-initialization.md`に従って、ローカルの`history/`とサマリー・詳細・統合判定用8項目の`history/index.md`を初期化できる
 - `current-task.md`、`task-progress.md`、worker結果ファイル、汎用改善記録、タスク固有ログの記録先が確認できる
 - Planner、Implementer、Reviewer、Documenterの責務と、Documenterを省略する場合の記録責任者・記録先が確認できる
@@ -112,6 +117,8 @@ Documenter：判断・結果・教訓を記録
 │       └── legacy/<old-name>/
 ├── rules/
 │   ├── README.md
+│   ├── local-rules.md
+│   ├── local/                 # Git管理外。プロジェクト固有ルールの正本
 │   └── *.md
 ├── worker-definitions/
 │   ├── planner.md

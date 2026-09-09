@@ -90,9 +90,9 @@ threads/<thread-name>/
 
 1. 発言を「新規task開始」「現行taskの変更」「単なる相談・補足・確認」のいずれかへ分類する。判定不能なら現行taskを維持し、確認まで資料作成・採番・切替を停止する。
 2. 新規task開始の場合、要件本文、task-id、新規issue-memo、active taskを確定する前に、Ownerが「現行taskを中断・終了して切替」または「現行taskを残し、新規作業を別project・別thread等で行う」のどちらかを選択する。
-3. 切替を選択した場合は、現行状態と再開条件を記録し、現行`docs/`と`result/`を`<作業ディレクトリroot>/history/<task-id>/`へ退避する。退避元・退避先・task-id・状態・日時・理由・対象資料をmanifestへ記録する。
+3. 中断・終了・クローズまたは新規taskへの切替を選択した場合は、現行状態と再開条件を記録し、現行`docs/`と`result/`を`<作業ディレクトリroot>/history/<task-id>/`へ退避する。退避元・退避先・task-id・状態・日時・理由・対象資料をmanifestへ記録する。履歴退避は現行領域の初期化と一体であり、退避だけを完了扱いにしてはならない。
 4. 退避後、manifest、`history/index.md`の該当行、退避先のdocs/resultのtask-id・状態・原典を相互照合する。欠落、読取不能、不一致、部分成功なら旧docs/resultの初期化や新規task開始へ進めない。
-5. 照合成功とOwner承認を確認した後、承認範囲内で旧docs/resultを新規task用に初期化し、新規`docs/issue-memo.md`、`result/current-task.md`、必要なtask資料を作成する。旧memo・旧resultを新規正本へ混在させない。
+5. 照合成功とOwner承認を確認した後、旧docs/resultを必ず初期化する。新規taskへ切り替える場合は、初期化後に新規`docs/issue-memo.md`、`result/current-task.md`、必要なtask資料だけを作成する。新規taskへ切り替えないクローズ・終了・中断の場合は、現行領域をactive taskなしの初期状態に戻し、旧taskの資料、task-id、OJ、状態、未完了事項、worker結果を残さない。旧memo・旧resultを新規正本へ混在させない。
 6. task-idの一意性と同一projectのactive taskが1件であることを確認し、確認できない場合は停止する。現行taskを残す選択時は同一projectで新規active taskを作成せず、別project・別thread等の別作業領域が用意されるまで開始しない。
 
 部分成功、照合不能、Owner判断の未回答、履歴先不明、承認されていない削除・上書きがある場合は、期待値・実際値・証跡・影響・停止理由・再開条件を現行resultまたは`docs/task-progress.md`へ記録し、再確認完了まで停止する。履歴原本、manifest、スナップショットは変更しない。
@@ -155,6 +155,7 @@ IMP状態の自動更新は、対象IMP・正本・証跡・更新責任者が�
 - workerは作業開始時に `current-task.md` のスレッド名が自身に割り当てられたスレッドと一致することを確認し、一致しない場合は作業を開始せず親タスクへ報告する
 - `worker-definitions/` の定義に記載するパスは、特定のスレッド名に固定せず `threads/<thread-name>/` で表現する
 - workerは開始時に共有ルールと対象スレッドの入力を確認し、結果を同じスレッドの `threads/<thread-name>/result/` に保存する
+- workerは接続前・作業開始前・完了報告前に、共通rulesと適用対象の`rules/local/`を読み、適用範囲、保護対象、優先順位、競合、停止条件、証跡を担当resultへ記録する。記録不足、正本欠落、判定不能、競合未解消の場合は作業・接続・受入・完了・履歴操作を停止する
 - スレッド間で結果ファイルを直接共有せず、必要な内容は親タスクが確認して対象スレッドへ引き継ぐ
 
 ## 新規スレッド作成時の手順
@@ -212,7 +213,7 @@ history/
 - Ownerの退避指示を受けた時点で、対象スレッドの `docs` と `result` を`history/<task-id>/`へコピーし、`manifest.md`へtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、理由、状態、対象資料、原典パスを記録する。新規manifestにhistory-key/run-idを追加しない。通常の退避元は削除・移動・上書きしない。履歴本体と`history/index.md`は機密情報を含み得るためGit追跡対象外とする。
 - 履歴はコピー完了後の読み取り専用スナップショットとし、再検証・修正で既存履歴の内容を変更しない。同じtask-idの重複履歴は作成せず、既存task-idとの関係が不明な場合はOwnerへ候補を提示する。作成・消費した履歴は、ローカルの`history/index.md`の新ルール統合判定台帳へ10項目で記録し、統合候補の比較には状態・最終更新を除く8項目だけを使用する。候補分類の詳細、Owner判断、manifestの詳細は結果資料へ記録する。Plannerはこの台帳を統合判断の唯一の情報源とし、`task-legacy-history-backup`は通常の類似候補検索・タスク継続・復旧に使用しない。
 - Owner承認済みの移行では、運用開始前のtimestamp形式historyのディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動できる。manifest、docs、resultの内容は変更せず、旧配置とbackup配置の対応をbackup manifestと`history/index.md`へ記録する。これは旧タスク個別へ論理task-idを遡及付与する処理ではない。
-- `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は現行作業領域および旧記録の読み取り互換領域として残す。旧resultを新タスクの正本へ自動変換・一括移行しない。
+- `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` はactive taskの現行作業領域とする。クローズ・終了・中断または新規task切替で履歴退避した後は初期化し、旧記録の読み取り互換領域として残してはならない。旧記録は`history/<task-id>/`を正本とし、旧resultを新タスクの正本へ自動変換・一括移行しない。
 - 履歴の参照は`manifest.md`からtask-id、タスク名、project/thread、状態、対象資料、原典パスを確認して行う。task-id、元スレッド、projectの対応が確定できない場合は停止する。`task-legacy-history-backup`は通常の参照候補から分離し、旧内容から論理task-idを遡及付与しない。
 
 ## history/indexの前後照合ゲート
@@ -275,9 +276,9 @@ Ownerは次の手順でworkerを再接続する。
 
 - Ownerが同じスレッドの `current-task.md` に同一のタスク識別情報を記載し、前回の指摘・修正に対する確認を続ける場合は同一タスクの再検証とする
 - 同一タスクの再検証では、既存の結果ファイルと `result/task-log.md` を削除・上書きせず、差分、解消内容、追加事項を追記する
-- タスク識別情報、目的、対象範囲のいずれかが変わる場合は新規タスクとする
-- 新規タスクへ切り替える場合は、前タスクの結果ファイルと `result/task-log.md` を削除・上書きせず、Ownerの退避指示に従って先に `history/<task-id>/` へ保存する。その後に現行の `result/` と `task-log.md` を新タスクへ切り替える。履歴保存ができない場合は現行結果を更新せず停止する
-- Ownerが新規タスクへ切り替える場合は、前タスクの最終判定、未確認事項、Owner判断 (追記) の末尾が `なし` であることと、履歴スナップショットのmanifestを確認してから `current-task.md` を更新する
+- クローズ・終了・中断または新規タスクの初期化では、旧タスクの`docs/`と`result/`を退避・照合した後、現行領域から旧タスクの資料、task-id、OJ、状態、未完了事項、worker結果を除去する。新規タスクへ切り替える場合だけ、新タスク用の資料を新規作成する。旧資料を新タスクの入力としてそのまま再利用・追記してはならない
+- 初期化後の`docs/`と`result/`には、新規task切替時だけ新タスクの識別情報と必要な初期資料を配置する。クローズ・終了・中断時はactive taskの資料を配置しない。旧task-id、旧OJ、旧状態、旧進捗、旧worker結果が1つでも残る場合は初期化不完了として停止し、次workerへ接続しない
+- 初期化に伴う削除・移動・上書きは、履歴退避と照合が完了し、Ownerが承認した範囲に限る。旧資料の退避前に初期化してはならない
 - `Owner判断` と `Owner判断 (追記)` の `なし` は、そのworkerのその報告時点に判断事項がないことを示す。過去の判断履歴を削除したり、将来の判断発生を妨げたりするものではない
 
 ## タスク統合候補の判定境界

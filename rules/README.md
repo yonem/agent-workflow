@@ -3,7 +3,9 @@
 ## 適用範囲
 
 - `rules/` 配下のMarkdownファイルは、原則として共通ルールである
+- 作業リポジトリ・利用シーン固有のローカルルールは `rules/local-rules.md` に従い、正本をGit管理外の `rules/local/<rule-name>.md` に置く。`rules/local/` の本文は共通rulesへ複製せず、適用中の状態・条件・証跡は対象taskの正本へ記録する
 - workerは作業開始前に `rules/README.md` を確認し、適用対象のルールを読み取る
+- workerは接続前・作業開始前・完了報告前に、適用した共通rulesとローカルルール、適用判定、保護対象、競合、証跡をresultへ記録する。記録不足・判定不能・競合未解消時は作業、接続、受入、完了、履歴操作を停止する。手順の正本は `rules/workflow-consistency-check.md` とする
 - 適用範囲が明記されていないルールは、全worker・全プロジェクトへ適用する
 - 新しい共通ルールを追加するとき、worker定義の入力欄を更新する必要はない
 - 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報は `rules/plan-approval-required-info.md` を参照する
@@ -14,12 +16,13 @@
 - 用語・標準的な意味・取り違え防止の正本は `rules/glossary.md` とし、用語そのものを対応キーとして参照する
 - 次タスク以降の進行中タスク台帳は `threads/<thread-name>/docs/task-progress.md` を正本とし、worker固有結果は `threads/<thread-name>/result/`へ記録する。配置・履歴境界は `rules/thread-operation.md`を参照する
 - `docs/issue-memo.md`と`docs/task-progress.md`は人間向けに整理した要約・判断・進捗とし、関連会話・状態変化の都度、既存項目を更新・統合する。AI・worker向けの詳細な引継ぎ・証跡は`result/`へ記録し、会話本文や`result/`本文をdocsへ機械的に複製しない。共通の形式・責任・作成・復元・移行境界は `rules/human-facing-documentation.md`を参照する
-- 新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加の明示宣言だけで新規要件定義を発火する。相談・補足・確認・意見交換では管理資料を変更せず、曖昧な場合は確認まで停止する。新規taskではOwnerが現行taskの中断・終了または別project・別thread等での継続を選択するまで、要件記録・task-id採番・新規memo作成を開始しない。切替時はhistory退避、manifest・`history/index.md`・退避内容の照合後に旧docs/resultを初期化し、同一projectのactive重複・判定不能・部分成功は停止する
+- 新機能追加、新規task作成、要件定義開始、承認済み計画へのtask追加の明示宣言だけで新規要件定義を発火する。相談・補足・確認・意見交換では管理資料を変更せず、曖昧な場合は確認まで停止する。新規taskではOwnerが現行taskの中断・終了または別project・別thread等での継続を選択するまで、要件記録・task-id採番・新規memo作成を開始しない。クローズ・終了・中断または切替時はhistory退避、manifest・`history/index.md`・退避内容の照合後に旧docs/resultを必ず初期化し、新規taskへ切り替える場合だけ初期化後の資料を作成する。初期化後の全資料に旧task-id・旧OJ・旧状態・旧進捗・旧worker結果が残っていないことを確認する。同一projectのactive重複・判定不能・部分成功・旧資料の混在は停止する。手順の正本は `rules/thread-operation.md` と `rules/workflow-consistency-check.md` とする
 - Workerの状態確認結果はOwner明示トリガー時、または作業中のworker接続失敗を契機に切り替えた時だけ `threads/<thread-name>/docs/health-check.md`へ記録する。用途と境界は `rules/worker-health-check.md`を参照する
 - 前回health-checkと現在worker一覧の差分確認は `rules/worker-connection-diff.md`を参照し、比較可能な2回目以降だけ専用resultへ記録する
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
+- ローカルルールの配置、命名、最小本文、読込・適用タイミング、優先順位、保護対象、証跡、ライフサイクル、移行・欠落時の扱いは `rules/local-rules.md` を参照する
 
 ## 用語・共通認識の参照ゲート
 

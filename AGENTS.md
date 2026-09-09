@@ -59,6 +59,7 @@
 - `rules/worker-health-check.md`: Owner起点のworkerアクセス・状態確認、不足worker追加前後の手順
 - `rules/plan-approval-required-info.md`: 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報
 - `rules/requirement-definition-format.md`: Planner接続前の要件定義提案フォーマットと接続ゲート
+- `rules/local-rules.md`: ローカルルールの正本配置、命名、適用判定、保護対象、証跡、移行・欠落時の共通ルール
 
 ## workerの流れ
 
@@ -86,6 +87,7 @@ Documenter
 - 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクへの切替時も履歴と旧resultを保全する。詳細は `rules/thread-operation.md` に従う
 - Implementerは実装と最低限の変更記録を行い、詳細な検証・整合性確認・受入判定はReviewerへ移譲する。固有責務は `worker-definitions/` に従う
 - 共通の入力ゲート、証跡、報告、履歴、接続サイクル、計画回答、動作確認、worker状態は対応する `rules/` の正本を参照する
+- `rules/local/` のローカルルールを参照する場合は、共通rulesを先に読み、適用条件・責任者・競合・証跡を `rules/local-rules.md` に従って確認する。共通rulesの保護対象を弱めるローカルルール、判定不能なルール、欠落した正本は適用せず停止する
 - 全タスクで`threads/<thread-name>/docs/operation-check.md`を作成または更新し、固定6見出し・7列の対応前後比較・根拠区分・未確認区分をPlanner計画、Reviewer受入、Documenter記録の各境界で確認する。欠落時は受入・完了・履歴操作・次タスク接続を停止する
 - Plannerは計画承認前に実装を開始せず、計画外変更・停止条件・安全性懸念は親タスクへ報告する
 - Owner判断に未回答・保留・不明・対応不明が残る場合は、次工程、完了、履歴操作を停止し、残件ごとの回答プロンプトを提示する。詳細は `rules/worker-evidence.md` に従う

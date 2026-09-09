@@ -4,3 +4,6 @@ threads/*/result/
 
 # 履歴には機密情報が含まれ得るため、索引を含めてGit管理対象外
 /history/
+
+# プロジェクト固有のローカルルールは正本をGit管理外とする
+/rules/local/
