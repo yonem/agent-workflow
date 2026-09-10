@@ -1,7 +1,7 @@
 # 履歴領域の初期化ルール
 
 scope: all-workers
-scope: all-threads
+thread-scope: all-threads
 status: active
 
 ## 目的

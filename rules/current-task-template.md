@@ -56,7 +56,7 @@ status: active
 - 新規運用ではhistory-key/run-idを記載しない。旧履歴に残る値は読み取り専用のlegacy情報としてのみ扱い、新規資料へ複製しない
 - 新規履歴は`history/<task-id>/`へ保存し、同じtask-idの重複履歴は上書きせずOwnerへ報告する
 - 旧timestamp形式historyを整理する場合は、`task-legacy-history-backup`をバックアップ領域の管理識別子として記載し、旧タスク個別へ論理task-idを遡及付与しない。旧配置対応はmanifestと`history/index.md`へ記録する
-- task-idは候補資料の識別子、ファイル名、日時だけを根拠にせず、実際に作成・確定された論理タスク台帳から連番で採番する。既存TASK-001、TASK-002、TASK-003の欠落・誤採番・重複・未確定は推測で変更せずOwnerへ報告する
+- task-idは候補資料の識別子、ファイル名、日時だけを根拠にせず、実際に作成・確定された論理タスク台帳から連番で採番する。台帳上の欠落・誤採番・重複・未確定は推測で変更せずOwnerへ報告する
 - 新規タスクへ切り替える場合は、旧current-task、task-progress、現行result、退避manifest、history/index行の対応を確認し、旧資料の退避完了前にtask-progressや現行resultを新task-idへ変更しない
 - タスク切替時のOwner判断は、既承認・継承可能、範囲変更による再判断、未回答、新規に分類する。既承認・継承可能な判断は再掲せず、同一論点は既存OJ-IDを継続し、別論点だけ新規OJ-IDを採番する
 - 欠落、不一致、解釈不能な記載がある場合、Plannerは作業を開始せずOwnerへ報告する

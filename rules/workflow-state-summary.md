@@ -94,7 +94,7 @@ Documenter記録後は候補の有無、Ownerのclose確認または判断の記
 - 次workerがWorker Registryに存在しない
 - `history/index.md`の必須項目が欠落・読取不能・古い、またはcurrent-task、task-progress、現行result、manifestと不一致
 - タスク切替の旧資料退避、manifest、index行、task-progress切替が未完了
-- task-idの採番根拠が候補資料の識別子、ファイル名、日時だけ、または既存TASK-001／TASK-002／TASK-003の棚卸しが未確認
+- task-idの採番根拠が候補資料の識別子、ファイル名、日時だけ、または論理タスク台帳の棚卸しが未確認
 - 既承認Owner判断の継承、範囲変更による再判断、未回答、新規の分類がない
 - IMP公開ステータスに`Reviewer受入待ち`、`計画承認済み`、`実装中`、`効果確認中`などの内部工程名を記録している
 - IMP自動更新の対象IMP、正本、証跡、更新責任者、変更前後、理由、更新日時、対象task-id、次回確認条件、自動更新条件の確認結果が欠落している、または状態遷移の一意性を確認できない

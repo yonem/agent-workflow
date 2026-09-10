@@ -96,14 +96,14 @@ Reviewerは、該当しない項目を `対象外` と明記したうえで、�
 ## タスク履歴と結果ファイル
 
 - 各workerの新規結果報告には、task-id、タスク名、元スレッド名、worker名、開始・完了日時、正本結果パスを記録する。task-idは`current-task.md`と一致させ、run-id/history-keyは記録しない。旧報告はそのまま読み取り保全する。
-- Ownerの退避指示時点で、対象スレッドの`docs`と`result`を `history/<task-id>/`へコピーし、`manifest.md`にtask-id、タスク名、目的、元project/thread、退避日時、理由、状態、worker接続・対象資料を記録する。旧manifestにhistory-key/run-idがある場合は変更せず、新規manifestへ複製しない。通常の退避元の現行ファイルは削除・移動・上書きしない。
+- Ownerの退避指示時点で、対象スレッドの`docs`と`result`を `history/<task-id>/`へコピーし、`manifest.md`にtask-id、タスク名、目的、元project/thread、退避日時、理由、状態、worker接続・対象資料を記録する。旧manifestにhistory-key/run-idがある場合は変更せず、新規manifestへ複製しない。退避前、照合前、または履歴原本に対して、削除・移動・上書きをしてはならない。manifest・`history/index.md`・退避内容の照合成功とOwner承認後は、`rules/thread-operation.md`に従い現行`docs`/`result`を初期化する。
 - 履歴は読み取り専用の原本とし、再検証・修正サイクルでは同じtask-idの履歴を上書きせず、Ownerが新規task-idまたは継続を確定する。旧historyの既存内容、過去のOwner判断、旧resultを改変しない。
 - Owner承認済みの旧history整理では、ディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動し、旧manifest/docs/resultの内容を変更しない。backup manifestとローカルの`history/index.md`に旧配置対応を記録する。これは旧historyの内容から新規task-idを遡及付与する処理ではない。
 - 旧resultやIDのない過去Owner判断を参照する場合は、旧パスを根拠へ記載する。新しいタスクや復旧先の正本へ自動移行せず、必要ならOwner承認と新しいtask-idのmanifestを取得する。
 - 次工程へ渡す入力は、現行作業領域または指定された履歴スナップショットのどちらか一方を正本として明示する。現行resultと履歴resultが混在する場合は作業を開始せず、Ownerへ正本指定を求める。
 - 正本・参照先・更新責任・更新境界は `rules/thread-operation.md` の資料マップに従う。報告には必要な正本パスと参照パスを記録し、同一情報の重複記載は要約・参照に限定する。正本不明、参照切れ、責務重複、更新境界不明は推測で補正せず、未確認事項と停止理由へ記録する。
 - `history/index.md`を扱う退避・復旧・統合候補・完了・タスク切替では、index行、current-task、task-progress、現行result、manifestのtask-id、目的、対象、未完了事項、状態、Owner判断、履歴パス、正本・根拠、最終更新を操作前後に照合する。これは操作整合性の確認であり、統合候補の比較条件は8項目（task-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要）に限定する。欠落、読取不能、不一致、部分成功、退避未完了は停止し、期待値・実際値・証跡・影響・停止理由・再開条件を結果へ記録する。
-- task-idの採番は実際に作成・確定された論理タスク台帳から連番で行い、候補資料の識別子、ファイル名、日時だけを根拠にしない。既存TASK-001、TASK-002、TASK-003の欠落、誤採番、重複、未確定は推測で変更せずOwnerへ報告する。
+- task-idの採番は実際に作成・確定された論理タスク台帳から連番で行い、候補資料の識別子、ファイル名、日時だけを根拠にしない。台帳上の欠落、誤採番、重複、未確定は推測で変更せずOwnerへ報告する。
 
 ### 新規要件定義・タスク切替の必須証跡
 

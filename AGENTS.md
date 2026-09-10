@@ -46,7 +46,7 @@
 ## 作業領域
 
 - `README.md`: ワークフロー全体と運用方法
-- `threads/<thread-name>/docs/current-task.md`: 各スレッドでPlannerへ渡す現在のタスク
+- `threads/<thread-name>/result/current-task.md`: 各スレッドでPlannerへ渡す現在のタスク
 - `threads/<thread-name>/result/task-log.md`: Documenterが現行タスクの判断・結果・残課題を記録する正式結果ファイル。履歴退避と更新境界は `rules/thread-operation.md` に従う
 - `development-improvement.md`: Documenterが全スレッド共通の開発サイクル改善を一覧で積み上げる永続記録
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
@@ -64,7 +64,7 @@
 ## workerの流れ
 
 ```text
-threads/<thread-name>/docs/current-task.md
+threads/<thread-name>/result/current-task.md
   ↓
 Planner
   ↓ Owner承認

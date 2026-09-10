@@ -17,6 +17,7 @@
 - `threads/<thread-name>/result/current-task.md`
 - 承認済み計画
 - 共通入力ゲート・証跡・報告・履歴は `rules/worker-evidence.md`、`rules/worker-report-template.md`、`rules/thread-operation.md` に従う
+- ローカルルールの読込・適用判定・保護対象・競合停止・移行・欠落時の扱いは `rules/local-rules.md` を正本とする。共通rulesを先に確認し、適用結果を `test.md` に記録する
 
 ## 実施する作業
 

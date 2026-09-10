@@ -210,7 +210,7 @@ history/
 ```
 
 - 新規履歴ディレクトリは`history/<task-id>/`とし、同じtask-idのディレクトリが存在する場合は上書きせず停止してOwnerへ報告する。既存の`history/yyyyMMddhhmm/`を整理する場合は、Owner承認のもとで`history/task-legacy-history-backup/legacy/<yyyyMMddhhmm>/`へ旧配置の対応を保ったまままとめ、内容別に再分類しない。
-- Ownerの退避指示を受けた時点で、対象スレッドの `docs` と `result` を`history/<task-id>/`へコピーし、`manifest.md`へtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、理由、状態、対象資料、原典パスを記録する。新規manifestにhistory-key/run-idを追加しない。通常の退避元は削除・移動・上書きしない。履歴本体と`history/index.md`は機密情報を含み得るためGit追跡対象外とする。
+- Ownerの退避指示を受けた時点で、対象スレッドの `docs` と `result` を`history/<task-id>/`へコピーし、`manifest.md`へtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、理由、状態、対象資料、原典パスを記録する。新規manifestにhistory-key/run-idを追加しない。退避前、照合前、または履歴原本に対する削除・移動・上書きは禁止する。manifest・`history/index.md`・退避内容の照合成功とOwner承認後は、現行タスク領域の `docs` と `result` を初期化する。履歴本体と`history/index.md`は機密情報を含み得るためGit追跡対象外とする。
 - 履歴はコピー完了後の読み取り専用スナップショットとし、再検証・修正で既存履歴の内容を変更しない。同じtask-idの重複履歴は作成せず、既存task-idとの関係が不明な場合はOwnerへ候補を提示する。作成・消費した履歴は、ローカルの`history/index.md`の新ルール統合判定台帳へ10項目で記録し、統合候補の比較には状態・最終更新を除く8項目だけを使用する。候補分類の詳細、Owner判断、manifestの詳細は結果資料へ記録する。Plannerはこの台帳を統合判断の唯一の情報源とし、`task-legacy-history-backup`は通常の類似候補検索・タスク継続・復旧に使用しない。
 - Owner承認済みの移行では、運用開始前のtimestamp形式historyのディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動できる。manifest、docs、resultの内容は変更せず、旧配置とbackup配置の対応をbackup manifestと`history/index.md`へ記録する。これは旧タスク個別へ論理task-idを遡及付与する処理ではない。
 - `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` はactive taskの現行作業領域とする。クローズ・終了・中断または新規task切替で履歴退避した後は初期化し、旧記録の読み取り互換領域として残してはならない。旧記録は`history/<task-id>/`を正本とし、旧resultを新タスクの正本へ自動変換・一括移行しない。
@@ -223,7 +223,7 @@ history/
 - 操作前は、期待値、実際値、原典・証跡、影響を記録し、欠落・読取不能・不一致・古い最終更新・manifest欠落があれば停止する。
 - 操作後は、保存先、状態、履歴パス、manifest、index行、task-progress、現行resultを再照合する。片側だけ確認できた場合は部分成功として完了扱いにしない。
 - タスク切替では、旧資料の退避先、退避manifest、旧index行、task-progressの切替完了を確認するまで新task-idへの切替完了としない。旧資料を推測で補完せず、退避不完全なら停止する。
-- task-idの採番・再整理では、実際に作成・確定された論理タスク台帳と既存TASK-001／TASK-002／TASK-003を棚卸しし、候補資料の識別子、ファイル名、日時だけを根拠に採番しない。欠落・誤採番・未確定時は変更しない。
+- task-idの採番・再整理では、実際に作成・確定された論理タスク台帳を棚卸しし、候補資料の識別子、ファイル名、日時だけを根拠に採番しない。台帳上の欠落・誤採番・未確定時は変更しない。
 - Owner判断は既承認・継承可能、範囲変更による再判断、未回答、新規に分類する。既承認・継承可能は再掲せず、同一論点は既存OJ-IDを継続し、別論点だけ新規OJ-IDを採番する。
 - `task-legacy-history-backup`とlegacy配下は通常の候補・継続・復旧対象から除外し、indexやmanifestの不一致を理由に内容を変更しない。
 

@@ -1,6 +1,6 @@
 ---
 scope: all-workers
-scope: all-threads
+thread-scope: all-threads
 status: active
 ---
 
