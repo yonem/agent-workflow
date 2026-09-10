@@ -26,6 +26,8 @@
 
 ## 実施する作業
 
+- タスク切替・新規要件定義では、`rules/task-initialization-and-requirement-gate.md`に従い、docs/resultの初期化、issue-memoの統合更新、全資料の相互照合、実施証跡の記録を完了させる。ファイル存在だけを初期化完了とみなさず、未実施・不一致があれば次工程を停止する。
+
 - 作業内容、検証、失敗、未解決事項、次回条件、教訓を整理する
 - 事実と推測を分けて記録する
 - task-id、タスク名、目的、対象project/thread、対象ブランチ、日時、状態、原典パス、判断結果、再作業の有無を記録する。新規記録へhistory-key/run-idを追加しない
@@ -79,6 +81,10 @@
 - `threads/<thread-name>/result/task-log.md` の現行タスク記録と汎用改善記録をOwnerへ渡す。履歴退避後の更新は `rules/thread-operation.md` に従う
 
 ## 完了条件
+
+### project境界・継続利用・親報告
+
+DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定・工程境界報告の証跡を記録する。分離した改善テーマがある場合は、改善記録と`task-log.md`・`task-progress.md`の相互参照を確認するまで、完了・退避・次task切替を確定しない。各工程境界で担当resultを根拠に親タスクへ報告し、報告不能時はOwner完了確認を停止する。
 
 - 判断と成果物が追跡可能な状態で記録されている
 - 作業ログが開発全体の改善に利用できる形で積み上げられている

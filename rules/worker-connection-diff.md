@@ -22,6 +22,7 @@ status: active
 
 1. Ownerがヘルスチェックまたはworker接続差分確認を明示的に依頼する。
 2. `current-task.md`の対象project、スレッド、リポジトリ、実行ディレクトリ、Worker Registryを確認する。
+   Owner会話、クルー会話、ファイル側threadを別の照合対象として記録し、現在のCodex projectIdまたは対象ファイル側threadが未確認・不一致・複数候補なら比較を開始しない。
 3. 比較元と比較先の取得日時、取得者、取得範囲、ページング、個別確認の成否を別々に記録する。
 4. 1回目は比較元がないため、差分を確定しない。Ownerへ「比較元なし・次回以降に比較」と提示し、差分を正常差分として作成しない。
 5. 比較可能な2回目以降で、比較元・比較先が同じ対象projectとスレッドに対応し、必要な取得が完了し、取得中の状態変化がない場合だけ`threads/<thread-name>/result/worker-connection-diff.md`を作成する。

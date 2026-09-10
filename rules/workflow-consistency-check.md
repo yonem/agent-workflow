@@ -9,6 +9,21 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 
 本書は記載値と実環境の照合手順を正本とする。用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。6項目とTask Definition/Task Lifecycleの記載形式は `rules/current-task-template.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、project/thread/taskのライフサイクルは `rules/thread-operation.md`に従う。共通台帳の正本は次タスク以降`docs/task-progress.md`とする。
 
+## 資料の正本・責務・更新境界
+
+| 資料 | 正本として扱う情報 | 更新責任 | 更新境界・参照先 |
+| --- | --- | --- | --- |
+| `docs/issue-memo.md` | 要件、決定事項、現状・要求状態比較 | 要件定義担当／Owner | 要件定義中。詳細計画は`result/plan.md`へ参照する |
+| `result/current-task.md` | task識別、Task Lifecycle、Registryの期待値 | Ownerまたは指定作成責任者 | Planner接続入力。実測状態を上書きしない |
+| `docs/task-progress.md` | 現行taskの状態、工程、停止・再開条件 | 工程担当 | 要約のみ。詳細証跡は`result/`へ置く |
+| `result/plan.md` | 承認済み計画、対象・対象外 | Planner／Owner | 実装範囲の入力。実装結果で書き換えない |
+| `result/changes.md`等 | workerの詳細な実施・確認結果 | 担当worker | 現行taskの結果のみ。履歴原本を統合しない |
+| `docs/owner-jadge.md` | Owner判断、OJ-ID、回答 | Owner／関連worker | Owner判断のみ。進捗を複製しない |
+| `docs/health-check.md` | workerの照合結果 | OwnerまたはPlanner | 明示トリガー時のみ。Registryを代替しない |
+| `history/index.md`・manifest | 履歴台帳メタデータ | Owner | 履歴操作時のみ。history原本は読み取り専用 |
+
+Registryは期待値、一覧・個別読取・Owner確認はそれぞれ独立した確認値として扱い、相互に代替しない。
+
 ## ルール変更時の影響確認
 
 共通rules、worker定義、報告テンプレート、README、workflow整合性資料、移行先導入手順を変更する前後では、次の順序で影響を確認する。対象を特定できない場合は実装を開始せず、`changes.md`へ停止記録を残す。
@@ -48,6 +63,18 @@ worker自身のCodexプロジェクト所属・実行環境
 ```
 
 用語を判定条件、状態、役割、資料名として扱う場合は、`rules/glossary.md`の登録語・標準的な意味・取り違え防止の意味を照合する。未登録語、同音異義語、造語、略語、意味衝突、デフォルト解釈不能が残る場合は、整合性確認を完了扱いにせずOwnerへ確認を求める。
+
+## project境界・会話種別・Worker Registryの照合
+
+現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリをこの順で照合する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
+
+Worker Registryは`current-task.md`を期待値の正本、一覧・個別読取・health-check・接続差分を実測の根拠とする。既存候補を先に照合し、役割、threadId、hostId、所属projectId、モデル・推論レベル、実行ディレクトリ、状態を比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。
+
+projectIdまたは対象ファイル側threadが未確認・不一致・複数候補、会話種別を区別不能、Registryと実測が不一致・重複・未確認の場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止し、期待値、実際値、根拠、影響、再開条件を親タスクへ報告する。
+
+## 実装媒体・承認範囲の照合
+
+作業開始前に、リポジトリの実態、taskの変更対象、計画に記載された許可媒体・許可操作、禁止操作、Owner承認状態を照合する。コード、テスト、解析、ビルド、文書、ルールを変更対象ごとに判定し、文書中心・コード含有・混在のいずれでも承認範囲外の操作を許可しない。判定不能は停止とする。
 
 ## ファイル上の確認項目
 

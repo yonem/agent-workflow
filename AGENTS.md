@@ -22,11 +22,11 @@
 ## 禁止事項
 
 - 秘密情報、個人情報、顧客固有情報の追加
+- 認証情報を含む外部サービスへの書き込み
 - 特定のプログラミング言語、shellプログラム、実行可能プログラム、外部ライブラリによる機能実装。詳細は `rules/implementation-medium.md` に従う
 - Ownerの明示承認がないファイルの削除
 - 破壊的なGit操作
 - 本番環境への接続
-- 認証情報を含む外部サービスへの書き込み
 - ライセンスが確認できない資料やコードの転載
 
 ## 検証
@@ -59,6 +59,8 @@
 - `rules/worker-health-check.md`: Owner起点のworkerアクセス・状態確認、不足worker追加前後の手順
 - `rules/plan-approval-required-info.md`: 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報
 - `rules/requirement-definition-format.md`: Planner接続前の要件定義提案フォーマットと接続ゲート
+- `rules/task-initialization-and-requirement-gate.md`: docs/result初期化、issue-memo更新、正本照合、worker接続の実施ゲート
+- `rules/rule-refresh.md`: ルール更新後の自動再読込、影響確認、停止ゲート
 - `rules/local-rules.md`: ローカルルールの正本配置、命名、適用判定、保護対象、証跡、移行・欠落時の共通ルール
 
 ## workerの流れ
@@ -84,6 +86,8 @@ Documenter
 - `current-task.md` の6項目、Task Definition、Task Lifecycleは `rules/current-task-template.md` に従う
 - project/thread/taskの1対1対応、1 active制約、履歴退避・復旧、新規タスク境界は `rules/thread-operation.md` に従う
 - worker接続前と作業開始前の整合性確認は `rules/workflow-consistency-check.md` に従う
+- タスク初期化、要件定義中のissue-memo更新、Planner・後続worker接続前の実施証跡は `rules/task-initialization-and-requirement-gate.md` に従う。理解確認だけでは接続条件を満たさない
+- ルール追加・更新後は、`rules/rule-refresh.md`に従い、指示を待たず次の回答・操作前に更新後の正本を再読込する。再読込と影響確認が未完了なら処理を停止する
 - 同一タスクの再検証では結果ファイルへ差分を追記し、新規タスクへの切替時も履歴と旧resultを保全する。詳細は `rules/thread-operation.md` に従う
 - Implementerは実装と最低限の変更記録を行い、詳細な検証・整合性確認・受入判定はReviewerへ移譲する。固有責務は `worker-definitions/` に従う
 - 共通の入力ゲート、証跡、報告、履歴、接続サイクル、計画回答、動作確認、worker状態は対応する `rules/` の正本を参照する

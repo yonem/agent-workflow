@@ -39,6 +39,19 @@ status: active
 - 完了日時（未完了時は空欄）：
 - 退避元CodexプロジェクトID：
 - 退避元スレッド名：
+
+## Worker Registry
+
+Worker Registryはworker再利用時の期待値の正本であり、実測値ではない。初回導入時に値が未確認なら、推測で埋めず接続前にOwnerが確認する。
+
+| 役割 | threadId | hostId | 所属projectId | モデル・推論レベル | 実行ディレクトリ | 状態 | 確認日時 | 更新責任者 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planner |  |  |  |  |  |  |  | Owner |
+| Implementer |  |  |  |  |  |  |  | Owner |
+| Tester |  |  |  |  |  |  |  | Owner |
+| Security Operator |  |  |  |  |  |  |  | Owner |
+| Reviewer |  |  |  |  |  |  |  | Owner |
+| Documenter |  |  |  |  |  |  |  | Owner |
 ```
 
 ## 記載ルール
@@ -50,6 +63,7 @@ status: active
 - 新規作成した作業ブランチ名は、作成後に `current-task.md` と担当結果ファイルへ記録する
 - `Task Definition`はPlannerが計画を作成できる具体性で記載する
 - `Task Lifecycle`はタスクの開始、完了、退避、復旧を追跡するために記載する。履歴へ退避しない場合も、未実施理由を結果ファイルへ記録する
+- Worker RegistryはOwnerがworker追加・変更・再利用の方針を承認して更新する。各workerは開始前にRegistryを期待値として実測値と照合し、不一致、重複、未確認では接続・作業を停止する。
 - `current-task.md`は識別情報・対象・Task Lifecycleの正本とし、共通進捗は`task-progress.md`、承認済み計画は`result/plan.md`、Implementer結果は`result/changes.md`、Reviewer判定は`result/review.md`を正本とする。`history/index.md`は要約・候補の参照であり、これらのresultを代替しない
 - 各資料の更新責任と更新境界は`rules/thread-operation.md`の資料マップに従う。正本候補が複数、参照切れ、責務重複、更新境界不明の場合は推測で補正せず停止する
 - `タスクID`は新規タスクの論理識別子として必須とし、Task DefinitionとTask Lifecycleで同じ値を記録する。タスク名だけで別タスクを統合しない

@@ -15,6 +15,10 @@
 
 ## スレッドとプロジェクトの対応
 
+Owner会話、クルー会話、ファイル側threadを区別する。Owner会話は判断・承認、クルー会話はworkerの継続利用可能な実行単位、ファイル側threadはtask資料の保存領域である。active taskは同一projectで1件に保つが、クルー会話の継続利用自体をactive taskの重複として扱わない。
+
+要件定義開始、worker接続、履歴退避、復旧、task切替の前に、現在のprojectId、Owner指定のファイル側thread、`current-task.md`のTask Contextを照合する。不一致・未確認・複数候補では、資料参照・更新・履歴操作・接続を停止する。
+
 Codexプロジェクト、スレッド、タスクは1対1で対応させる。
 
 通常時の不変条件は「1つのCodexプロジェクト = 1つのactiveなスレッド = 1つのactiveなタスク」とする。Ownerが復旧を明示した場合だけ、現在のスレッドを先に履歴退避・アーカイブしてから同じproject内に新規復旧スレッドを作成できる。この場合も旧スレッドはactiveではなく、activeなproject/thread/taskは常に1組だけとする。詳細な復旧順序は本書の「履歴からの復旧」に従う。
