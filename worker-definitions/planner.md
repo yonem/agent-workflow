@@ -19,7 +19,7 @@
 ## 実施する作業
 
 - 現状、前提、不明点、対象範囲、対象外、リスクを整理する
-- `current-task.md` に `rules/current-task-template.md` の `Task Context` 6項目と `Task Definition` が記載されていることを確認する。`作業ブランチ`のデフォルト値は `記述ルールに従い新規作成` とする。項目が欠けている場合は作業を停止し、Ownerの更新と再指示を待機する
+- `current-task.md` に `rules/current-task-template.md` の `Task Context` 6項目と `Task Definition` が記載されていることを確認する。Planner接続時の作業ブランチ未決定は許容する。項目が欠けている場合は作業を停止し、Ownerの更新と再指示を待機する
 - 自身のCodexプロジェクトID、Codex実行ディレクトリ、対象リポジトリへのアクセス可否を確認する。Codex実行ディレクトリは対象リポジトリと一致しなくてもよい。不一致または確認不能の場合は作業を停止する
 - 対象リポジトリ、ベースブランチ、作業ブランチ、作業領域を確認する
 - 次工程の入力ゲート、外部確認、データ準備、冪等性、環境依存検証の要否を計画する
@@ -54,6 +54,7 @@
 - `threads/<thread-name>/result/plan.md` と最終報告を、最初にOwnerへ返却する
 - Ownerへの返却状態、Owner判断の回答プロンプト、対象リポジトリ・Codex実行ディレクトリ・ベースブランチ・作業ブランチを報告本文へ記載する
 - Ownerの明示回答が記録されるまで、Implementerへ直接接続しない
+- Implementer接続前に、Owner承認済み計画、確定した作業ブランチ、ブランチ実体、`current-task.md`を照合する。不一致・未確認なら接続しない。
 - Owner承認後、親タスクが承認済みの`plan.md`とOwner回答の記録元をImplementerへ渡す
 
 ## 完了条件

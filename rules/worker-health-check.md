@@ -5,9 +5,15 @@ status: active
 
 # workerヘルスチェック
 
+## worker作成状態
+
+Worker Registryでは、作成・接続状態を`準備中`、`ready`、`接続済み`、`失敗`、`中断`に区別する。状態不明、重複候補、確定前は再作成せず、期待値・実際値・根拠・影響・停止理由・再開条件を記録してOwner確認へ停止する。
+
 Ownerが同一Codexプロジェクト内のworkerの所属・アクセス可否・状態を確認するための手順を定義する。これはworkerチャットの運用状態を確認する手順であり、アプリケーションの稼働監視、外部サービス監視、ホスト監視には適用しない。
 
 ## `health-check.md`の責務境界
+
+ファイル側threadの初期登録だけではworker確認を開始しない。health-checkはOwnerの明示依頼またはworker接続失敗を契機に、taskとprojectの境界が確定した後に実施する。初期登録からworker、会話、project、taskを推測・作成しない。
 
 - `threads/<thread-name>/docs/health-check.md`は、Ownerがヘルスチェックを明示的に依頼した場合、または作業中のworker接続失敗を契機にヘルスチェックへ切り替えた場合に作成・更新する人間向けの正本である。
 - workerの完了報告、`threads/<thread-name>/docs/task-progress.md`、`history/*/manifest.md`の代替や、通常作業で毎回作成する必須報告ではない。

@@ -24,6 +24,8 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 
 Registryは期待値、一覧・個別読取・Owner確認はそれぞれ独立した確認値として扱い、相互に代替しない。
 
+ファイル側threadの初期登録は資料保存領域の準備だけであり、Codex会話、クルー会話、worker、project、task、識別子、history台帳を発生させない。接続前照合・Worker Registry・active taskの確認は、要件定義開始とtask識別情報が確定した後に行う。初期登録とtask開始を区別できない場合はdocs/result/historyの更新と接続を停止する。
+
 ## ルール変更時の影響確認
 
 共通rules、worker定義、報告テンプレート、README、workflow整合性資料、移行先導入手順を変更する前後では、次の順序で影響を確認する。対象を特定できない場合は実装を開始せず、`changes.md`へ停止記録を残す。

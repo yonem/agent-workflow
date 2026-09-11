@@ -8,6 +8,8 @@
 
 このリポジトリは、CodexなどのAIエージェントを開発プロセスへ組み込むための、汎用的なルール・成果物・プロンプトを提供します。
 
+skillを扱う共通基盤は`rules/skill-framework.md`を正本とし、個別skillの定義には`rules/skill-definition-template.md`を使用します。既存rules、grill、worker分業、正本管理、停止条件、履歴管理、Owner承認ゲートを置換せず、skill単位へ段階的に整理します。
+
 ## 導入
 
 本リポジトリは、特定プロジェクトを直接運用するための作業場所ではなく、各プロジェクトへ展開するスターターパックです。共通ルールとworker定義を対象リポジトリへ適用し、対象プロジェクトの構成・技術・実行環境に合わせたタスクと検証計画をPlannerに作成させます。
@@ -25,7 +27,7 @@
 3. `rules/current-task-template.md` を使って対象リポジトリの `threads/<thread-name>/result/current-task.md` を作成し、Task ContextとTask Definitionを記載する。作業ブランチは、既存ブランチを指定しない限り `記述ルールに従い新規作成` とする
 4. 初回タスクの既知情報を `history/index.md` へ登録し、`result/current-task.md`との一致を確認する
 5. Plannerへ対象リポジトリの内訳確認と `plan.md` の作成を依頼する
-6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
+6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。Planner接続時の作業ブランチ未決定は許容し、Implementer接続前にだけ確定・実体照合する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
 
 `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は、展開先で生成されるタスク固有の作業領域です。次タスク以降、進行中タスクの共通台帳は`docs/task-progress.md`、worker固有の完了報告は`result/`に分けます。本リポジトリではGit管理対象外とし、共通の仕組みには含めません。共通ルールを更新した場合は、派生先で差分を確認してから必要な内容だけを取り込みます。
 
@@ -35,7 +37,7 @@ Ownerが「ヘルスチェックを実行して」と明示した場合、また
 
 各スレッドは専用のCodexプロジェクトと1対1で対応させ、通常時は1つのactiveなproject/thread/taskだけを扱います。復旧時の例外を含む分離・履歴・整合性の詳細は `rules/thread-operation.md` と `rules/workflow-consistency-check.md` に従います。
 
-作業開始、worker接続、履歴退避、復旧、task切替の前に、現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリを照合します。Owner会話は判断・承認、クルー会話はworker実行、ファイル側threadは資料保存のための別単位です。不一致、未確認、複数候補では資料操作・接続・履歴操作を停止します。
+ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程です。Codex会話、クルー会話、worker、project、task、識別子、history台帳は作成・接続・採番せず、要件定義開始後に別ゲートで扱います。作業開始、worker接続、履歴退避、復旧、task切替の前に、現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリを照合します。Owner会話は判断・承認、Codex会話は作業会話、クルー会話はworker実行、ファイル側threadは資料保存のための別単位です。不一致、未確認、複数候補では資料操作・接続・履歴操作を停止します。
 
 実装媒体はリポジトリの実態と承認済みtask範囲で判定します。文書中心ではMarkdownを中心にし、コードを含む開発リポジトリでは承認済み範囲で既存コード・テスト・解析・ビルドを扱えます。混在リポジトリでは変更対象ごとに判断し、新規依存、外部操作、本番接続、破壊的操作、承認範囲外の変更は停止または個別承認対象です。
 

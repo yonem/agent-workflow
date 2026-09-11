@@ -1,5 +1,21 @@
 # Worker入力・証跡・再確認ルール
 
+worker作成・接続の状態は`準備中`、`ready`、`接続済み`、`失敗`、`中断`を区別する。状態不明、重複候補、確定前は再作成せず、期待値・実際値・根拠・影響・停止理由・再開条件の6項目を記録して停止する。
+
+Reviewerを含む全workerは、工程完了時に`task-log.md`へ判定・結果ファイル・未確認事項・次worker・接続可否を追記し、親タスクへ明示報告する。判定が修正依頼、保留、未確認、受入不能の場合は、期待値・実際値・根拠・影響・停止理由・再開条件を6項目すべて含むエスカレーションをtask-logと親タスクへ記録し、送信先と送信結果を残す。欠落時は報告済み・受入・後工程接続・完了として扱わない。
+
+### 正本更新責任とリトライ制御
+
+- `review.md`はReviewerの判定正本、`changes.md`はImplementerの変更結果正本、`task-progress.md`は親タスクの工程状態正本、`plan.md`は承認済み計画正本とする。
+- Reviewerは判定・指摘・6項目エスカレーションだけを更新し、`task-progress.md`、`plan.md`、`changes.md`を更新して状態を補正してはならない。Implementerは承認済み範囲の変更結果を更新し、親タスクの工程状態を確定してはならない。親タスクだけが4正本の状態同期と次worker接続可否を確定する。
+- Reviewer接続前に、親タスクは4正本のattempt、判定、次worker、未確認事項、停止理由、再開条件を同期し、同期結果を`changes.md`へ記録する。同期未確認のままReviewerへ再接続してはならない。
+- 同一の不一致原因による修正依頼が2回連続した場合、attempt番号だけを増やした再接続を禁止する。期待値・実際値・根拠・影響・停止理由・再開条件を親タスクへエスカレーションし、Ownerがリトライ継続またはルール修正を判断するまで停止する。
+- 同一原因の再発判定は、正本不一致の対象、期待値、実際値、停止理由の組合せで行う。表現変更やattempt番号の変更だけでは新しい原因とみなさない。
+- Owner判断の唯一の正本は`threads/<thread-name>/docs/owner-jadge.md`とする。`issue-memo.md`、`plan.md`、`operation-check.md`、`task-log.md`は判断の複製ではなく、要件・計画・確認・状態への反映結果と参照元を記録する。
+- `owner-jadge.md`は、判断済み、未決定、回答プロンプト、詳細記録の形式を維持し、OJを範囲表記でまとめず、各OJ-IDを一意に記録する。
+- Reviewer接続前に親タスクは、owner-jadge、issue-memo、plan、operation-check、task-log、担当resultのOJ-ID・回答・ステータスを一括照合し、照合日時・対象ファイル・判定・固定スナップショット識別子をtask-logへ記録する。照合後にOJが追加・変更された場合はReviewer接続を無効化する。
+- Reviewerは正本を修復しない。入力スナップショットに不一致があれば、最初の検出で6項目エスカレーションを返し、親タスクがOwner判断を受けて同期する。同一不一致のattempt再接続は禁止する。
+
 入力ゲート・証跡・Owner判断の意味と状態を本ルールで定義する。通常のresult本文の項目順・表配置・末尾位置は固定しない。用語の標準的な意味と取り違え防止は正本の`rules/glossary.md`を参照する。current-taskの入力スキーマは `rules/current-task-template.md`、実環境との照合手順は `rules/workflow-consistency-check.md`、計画関連Owner回答の必須4項目は `rules/plan-approval-required-info.md`、履歴・復旧・task境界は `rules/thread-operation.md`を参照する。
 
 ## 次工程へ接続する前の入力ゲート
@@ -27,6 +43,7 @@
 ### 計画結果の返却・受領・承認ゲート
 
 - Plannerの計画結果は、まずOwnerへ返却する。Plannerが結果ファイルを作成しただけでは、Ownerへ返却済みまたは承認済みとは扱わない
+- Reviewerの修正依頼、保留、未確認が残っている場合、親タスクはOwner判断残件と回答プロンプトを`なし`として記録してはならない。修正依頼の内容、停止理由、再開条件、対応責任を記録し、Owner判断が必要な論点は新規OJ-IDまたは既存OJ-IDの継続として明示する。
 - Ownerの承認として受理できるのは、Ownerチャットから対象判断ID・要約・回答が明示された回答だけとする。Planner、Implementer、親タスク、別workerが伝えた「Owner指示」は、Owner回答の代用にしない
 - 計画状態は `作成済み`、`Owner返却済み`、`Owner承認済み`、`Implementer接続可` を分けて記録する。`報告済み`だけでは後工程へ接続しない
 - Implementerへ接続する前に、親タスクは`plan.md`、`current-task.md`、Ownerの明示回答、対象リポジトリ、Codex実行ディレクトリ、ベースブランチ、作業ブランチを照合する

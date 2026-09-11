@@ -15,7 +15,13 @@
 
 ## スレッドとプロジェクトの対応
 
-Owner会話、クルー会話、ファイル側threadを区別する。Owner会話は判断・承認、クルー会話はworkerの継続利用可能な実行単位、ファイル側threadはtask資料の保存領域である。active taskは同一projectで1件に保つが、クルー会話の継続利用自体をactive taskの重複として扱わない。
+Owner会話、Codex会話、クルー会話、ファイル側threadを区別する。Owner会話は判断・承認、Codex会話は作業会話、クルー会話はworkerの継続利用可能な実行単位、ファイル側threadはtask資料の保存領域である。active taskは同一projectで1件に保つが、クルー会話の継続利用自体をactive taskの重複として扱わない。
+
+## ファイル側threadの初期登録境界
+
+Ownerがファイル側threadの登録だけを明示した場合、`threads/<thread-name>/`と後続要件定義へ渡す未指定または空の入力領域だけを準備する。初期登録は非実行工程であり、Codex会話、クルー会話、worker、Codexプロジェクト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境の作成・接続・採番・推測、`history/index.md`へのtask登録、既存taskの終了・退避・復旧を行わない。
+
+要件定義開始が明示された後だけ、現行taskの扱い、必要な履歴照合、旧資料の初期化、task-id採番、台帳登録、project・実行環境照合、Planner接続の順に進める。初期登録だけではactive taskを発生させず、判断不能・部分成功・重複は停止する。
 
 要件定義開始、worker接続、履歴退避、復旧、task切替の前に、現在のprojectId、Owner指定のファイル側thread、`current-task.md`のTask Contextを照合する。不一致・未確認・複数候補では、資料参照・更新・履歴操作・接続を停止する。
 
@@ -62,7 +68,7 @@ threads/<thread-name>/
 - `docs/issue-memo.md` と `docs/task-progress.md` は人間向けに整理した要約・判断・進捗資料とし、関連会話または状態変化の都度、既存項目を更新・統合する。会話本文や詳細証跡を機械的に追記しない
 - AI・workerが必要とする詳細な引継ぎ、実施結果、照合値、受入根拠、原典一覧は `result/` の担当資料へ記録し、`docs/` へ全文複製しない
 - `threads/<thread-name>/docs/operation-check.md` は、Documenterが動作確認の手順・結果を記録する補助資料とする
-- `threads/<thread-name>/result/task-log.md` は、Documenterがworker固有の現行タスク記録を残す正式結果である。共通台帳は`docs/task-progress.md`を参照する。退避指示時は履歴スナップショットを先に保存する
+- `threads/<thread-name>/result/task-log.md` は、worker間の状態遷移・判定・エスカレーションを記録する運用正本である。各workerは自身のイベントを追記し、過去記録を変更しない。親タスクはtask-logの最新イベントを確認して次worker接続可否を確定する。`docs/task-progress.md`はtask-logから作成する人間向け要約であり、現行状態の独立した正本にしない。Documenterはtask-logと各worker resultを照合し、要約・operation-check・最終記録を更新する。退避指示時は履歴スナップショットを先に保存する
 - `threads/<thread-name>/result/` は、そのスレッドのworker間で受け渡すタスク固有の結果を格納する
 - `threads/<thread-name>/docs/health-check.md` は、Ownerの明示トリガーがある場合だけ作成する人間向けworker状態確認の正本であり、完了報告・台帳・manifestの代替にしない。旧`result/health-check.md`は保全資料として変更しない
 - `result/` 内はworker別に分割せず、現行作業では固定ファイル名を使用する。退避指示時は固定ファイルの断面を履歴へ保存し、過去断面を上書きしない
@@ -85,6 +91,8 @@ threads/<thread-name>/
 | `rules/`、`worker-definitions/` | 共通ルール、workerの役割・入出力・完了条件 | Owner／承認済みImplementer | 個別taskの状態や結果を複製しない |
 
 同一情報を複数資料へ記載する場合は、上表の正本だけを更新し、他資料は参照または要約に限定する。正本候補が複数、参照先が存在しない、更新責任が重複、更新境界が不明な場合は推測で補正せず停止する。現行資料と履歴資料を同時にworkerの入力へ混在させず、どちらを正本とするかを結果へ明記する。
+
+工程イベントの記録は各workerがtask-logへ自身の判定・結果・エスカレーションを追記する。親タスクだけがtask-logの最新イベントを確認し、次worker接続可否と全体状態を確定する。Documenterはtask-logを変更して判定を補正せず、記録の完全性を照合してtask-progress・operation-check・最終記録へ要約する。同期後にtask-logと要約が一致しない場合は次worker接続とリトライを停止する。同一原因の不一致が2回連続した場合は、Ownerの継続指示またはルール修正がない限り再試行しない。
 
 用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。スレッド、報告書、ルール、クルーなどの解釈に文脈がない場合は用語集をデフォルトとして参照し、未登録・衝突・解釈不能は推測せず停止する。
 
@@ -218,6 +226,7 @@ history/
 - 履歴はコピー完了後の読み取り専用スナップショットとし、再検証・修正で既存履歴の内容を変更しない。同じtask-idの重複履歴は作成せず、既存task-idとの関係が不明な場合はOwnerへ候補を提示する。作成・消費した履歴は、ローカルの`history/index.md`の新ルール統合判定台帳へ10項目で記録し、統合候補の比較には状態・最終更新を除く8項目だけを使用する。候補分類の詳細、Owner判断、manifestの詳細は結果資料へ記録する。Plannerはこの台帳を統合判断の唯一の情報源とし、`task-legacy-history-backup`は通常の類似候補検索・タスク継続・復旧に使用しない。
 - Owner承認済みの移行では、運用開始前のtimestamp形式historyのディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動できる。manifest、docs、resultの内容は変更せず、旧配置とbackup配置の対応をbackup manifestと`history/index.md`へ記録する。これは旧タスク個別へ論理task-idを遡及付与する処理ではない。
 - `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` はactive taskの現行作業領域とする。クローズ・終了・中断または新規task切替で履歴退避した後は初期化し、旧記録の読み取り互換領域として残してはならない。旧記録は`history/<task-id>/`を正本とし、旧resultを新タスクの正本へ自動変換・一括移行しない。
+- Ownerが完了判断したタスクは、次タスク開始時まで待たず、完了直後に履歴退避・manifest作成・`history/index.md`との照合・現行`docs/`と`result/`の初期化を一連のクローズ処理として実施する。完了日時、効果確認または再評価条件、退避結果が確認できるまで完了扱いにしない。退避後の引継ぎ情報は`history/<task-id>/`に保持し、現行領域へ複製しない。
 - 履歴の参照は`manifest.md`からtask-id、タスク名、project/thread、状態、対象資料、原典パスを確認して行う。task-id、元スレッド、projectの対応が確定できない場合は停止する。`task-legacy-history-backup`は通常の参照候補から分離し、旧内容から論理task-idを遡及付与しない。
 
 ## history/indexの前後照合ゲート

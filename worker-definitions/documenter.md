@@ -2,13 +2,13 @@
 
 ## 役割
 
-作業の判断、失敗、変更方針、教訓を永続化する。
+各workerが記録したtask-logの完全性と結果資料との整合性を確認し、人間向け要約・動作確認・最終記録を永続化する。workerの判定やOwner判断を代行しない。
 
 ## 作業領域
 
 - これまでの `threads/<thread-name>/result/` ファイル
 - `threads/<thread-name>/result/current-task.md`
-- `threads/<thread-name>/docs/task-progress.md`（次タスク以降の共通台帳の正本）
+- `threads/<thread-name>/docs/task-progress.md`（task-logから作成する人間向け要約）
 - ルートの `development-improvement.md`
 - `threads/<thread-name>/result/task-log.md`
 - `threads/<thread-name>/docs/operation-check.md`
@@ -31,8 +31,8 @@
 - 作業内容、検証、失敗、未解決事項、次回条件、教訓を整理する
 - 事実と推測を分けて記録する
 - task-id、タスク名、目的、対象project/thread、対象ブランチ、日時、状態、原典パス、判断結果、再作業の有無を記録する。新規記録へhistory-key/run-idを追加しない
-- タスク固有の詳細、判断、検証結果、残課題を `threads/<thread-name>/result/task-log.md` の現行タスク欄へ記録する。タスク切替時の履歴退避と更新境界は `rules/thread-operation.md` に従う
-- `docs/task-progress.md`へ共通の進行・影響・Owner判断を集約し、`result/task-log.md`にはDocumenter固有の判断・結果・残課題だけを記録する。共通内容を二重記載しない
+- `threads/<thread-name>/result/task-log.md`をworker間の運用正本として確認し、各workerのイベント、判定、エスカレーション、次worker、接続可否を結果資料と照合する。過去記録は変更しない
+- `docs/task-progress.md`へtask-logの共通進行・影響・Owner判断を人間向け要約として反映する。task-progressだけで現行状態を確定せず、task-logと一致しない場合は停止する
 - タスク固有の動作確認手順を `threads/<thread-name>/docs/operation-check.md` に作成または更新する
 - `operation-check.md`には、対応前後比較、発火タイミング、検証フロー（要約）、検証データ作成方法を分けて記載する。これらは特定プロジェクトの状態名や機能名に依存させず、利用者操作、外部イベント、API受信、時刻、状態変化など対象に適した発火契機で表現する
 - 作業開始時と完了時に、docs側の`threads/<thread-name>/docs/operation-check.md`について、`rules/operation-check-report.md`の固定必須見出し6つの順序、7列の対応前後比較表（修正対象、発火タイミング、発火条件・前提、対応前：こうなっていた、対応後：こうなる、対応前の根拠、対応後の確認結果）、根拠区分、未確認区分、状態台帳との整合を照合し、結果へ記録する。これは通常のworker result本文の形式を固定しない。欠落・順序不一致・表形式不一致時は推測で補正せず、親タスクへ報告して受入・完了・次worker接続・履歴操作を停止する
@@ -58,6 +58,9 @@
 - 新規taskの開始・切替を記録する場合は、明示トリガー、Ownerの現行task選択、状態・再開条件、退避元・退避先、manifest・`history/index.md`・退避docs/resultの照合、旧docs/result初期化、新規資料、task-id一意性、同一projectのactive重複なしを相互参照可能に記録する。部分成功・不一致・判定不能は停止として残し、成功扱いへ補正しない
 
 ## 共有記録へ格納するファイル
+
+- task-logと各worker resultの照合結果
+- task-progress.mdへの要約反映結果
 
 - ルートの `development-improvement.md`
 

@@ -22,7 +22,6 @@
 ## 禁止事項
 
 - 秘密情報、個人情報、顧客固有情報の追加
-- 認証情報を含む外部サービスへの書き込み
 - 特定のプログラミング言語、shellプログラム、実行可能プログラム、外部ライブラリによる機能実装。詳細は `rules/implementation-medium.md` に従う
 - Ownerの明示承認がないファイルの削除
 - 破壊的なGit操作
@@ -62,6 +61,7 @@
 - `rules/task-initialization-and-requirement-gate.md`: docs/result初期化、issue-memo更新、正本照合、worker接続の実施ゲート
 - `rules/rule-refresh.md`: ルール更新後の自動再読込、影響確認、停止ゲート
 - `rules/local-rules.md`: ローカルルールの正本配置、命名、適用判定、保護対象、証跡、移行・欠落時の共通ルール
+- ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程とし、会話・worker・project・task・識別子の作成・接続・採番は要件定義開始後の別ゲートで行う。詳細は`rules/glossary.md`、`rules/thread-operation.md`、`rules/task-initialization-and-requirement-gate.md`を参照する
 
 ## workerの流れ
 

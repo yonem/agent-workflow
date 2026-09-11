@@ -5,6 +5,8 @@ status: active
 
 # current-task.md テンプレート
 
+ファイル側threadの初期登録だけでは`current-task.md`をtask入力として確定しない。要件定義開始が明示され、task-id、対象、対象外、完了条件、停止条件、実行環境が確定した後に作成・更新する。初期登録段階で必要な入力は未指定または空として扱い、会話・worker・project・識別子を推測しない。
+
 各スレッドの `threads/<thread-name>/result/current-task.md` は、次の形式を基本とする。これはPlanner接続用の特別な入力資料であり、通常のworker result本文自由化の対象外とする。
 
 このファイルは、タスクの識別情報・Task Definition・Task Lifecycleの入力スキーマを正本として定義する。進行中タスクの共通台帳は次タスク以降`threads/<thread-name>/docs/task-progress.md`とし、実行環境との照合は `rules/workflow-consistency-check.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、履歴と復旧の手順は `rules/thread-operation.md`に従う。
@@ -19,7 +21,7 @@ status: active
 - 対象リポジトリ：
 - Codex実行ディレクトリ：
 - ベースブランチ：
-- 作業ブランチ：記述ルールに従い新規作成
+- 作業ブランチ：Planner接続時は未決定可。Implementer接続前に確定・実体照合
 
 ## Task Definition
 
@@ -59,7 +61,8 @@ Worker Registryはworker再利用時の期待値の正本であり、実測値�
 - `Task Context`の6項目は必須とする
 - `CodexプロジェクトID`、スレッド名、対象リポジトリは、実際の所属・対象と一致させる
 - `Codex実行ディレクトリ`はworkerの実行場所であり、対象リポジトリと異なっていてよい
-- `作業ブランチ`は、既存ブランチを使用する場合を除き `記述ルールに従い新規作成` とする
+- Planner接続時の`作業ブランチ`は未決定または候補を許容する。Implementer接続前にOwner承認済み計画と実体を照合し、確定値を記録する。
+- Worker Registryの状態は`準備中`、`ready`、`接続済み`、`失敗`、`中断`を区別する。不明・重複候補・確定前は再作成せずOwner確認へ停止する。
 - 新規作成した作業ブランチ名は、作成後に `current-task.md` と担当結果ファイルへ記録する
 - `Task Definition`はPlannerが計画を作成できる具体性で記載する
 - `Task Lifecycle`はタスクの開始、完了、退避、復旧を追跡するために記載する。履歴へ退避しない場合も、未実施理由を結果ファイルへ記録する
