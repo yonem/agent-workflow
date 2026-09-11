@@ -15,7 +15,13 @@
 
 ## スレッドとプロジェクトの対応
 
-Owner会話、クルー会話、ファイル側threadを区別する。Owner会話は判断・承認、クルー会話はworkerの継続利用可能な実行単位、ファイル側threadはtask資料の保存領域である。active taskは同一projectで1件に保つが、クルー会話の継続利用自体をactive taskの重複として扱わない。
+Owner会話、Codex会話、クルー会話、ファイル側threadを区別する。Owner会話は判断・承認、Codex会話は作業会話、クルー会話はworkerの継続利用可能な実行単位、ファイル側threadはtask資料の保存領域である。active taskは同一projectで1件に保つが、クルー会話の継続利用自体をactive taskの重複として扱わない。
+
+## ファイル側threadの初期登録境界
+
+Ownerがファイル側threadの登録だけを明示した場合、`threads/<thread-name>/`と後続要件定義へ渡す未指定または空の入力領域だけを準備する。初期登録は非実行工程であり、Codex会話、クルー会話、worker、Codexプロジェクト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境の作成・接続・採番・推測、`history/index.md`へのtask登録、既存taskの終了・退避・復旧を行わない。
+
+要件定義開始が明示された後だけ、現行taskの扱い、必要な履歴照合、旧資料の初期化、task-id採番、`history/index.md`の対応中登録、project・実行環境照合、Planner接続の順に進める。初期登録だけではactive taskを発生させず、判断不能・部分成功・重複は停止する。
 
 要件定義開始、worker接続、履歴退避、復旧、task切替の前に、現在のprojectId、Owner指定のファイル側thread、`current-task.md`のTask Contextを照合する。不一致・未確認・複数候補では、資料参照・更新・履歴操作・接続を停止する。
 
@@ -62,7 +68,7 @@ threads/<thread-name>/
 - `docs/issue-memo.md` と `docs/task-progress.md` は人間向けに整理した要約・判断・進捗資料とし、関連会話または状態変化の都度、既存項目を更新・統合する。会話本文や詳細証跡を機械的に追記しない
 - AI・workerが必要とする詳細な引継ぎ、実施結果、照合値、受入根拠、原典一覧は `result/` の担当資料へ記録し、`docs/` へ全文複製しない
 - `threads/<thread-name>/docs/operation-check.md` は、Documenterが動作確認の手順・結果を記録する補助資料とする
-- `threads/<thread-name>/result/task-log.md` は、Documenterがworker固有の現行タスク記録を残す正式結果である。共通台帳は`docs/task-progress.md`を参照する。退避指示時は履歴スナップショットを先に保存する
+- `threads/<thread-name>/result/task-log.md` は、worker間の状態遷移・判定・エスカレーションを記録する運用正本である。各workerは自身のイベントを追記し、過去記録を変更しない。親タスクはtask-logの最新イベントを確認して次worker接続可否を確定する。`docs/task-progress.md`はtask-logから作成する人間向け要約であり、現行状態の独立した正本にしない。Documenterはtask-logと各worker resultを照合し、要約・operation-check・最終記録を更新する。退避指示時は履歴スナップショットを先に保存する
 - `threads/<thread-name>/result/` は、そのスレッドのworker間で受け渡すタスク固有の結果を格納する
 - `threads/<thread-name>/docs/health-check.md` は、Ownerの明示トリガーがある場合だけ作成する人間向けworker状態確認の正本であり、完了報告・台帳・manifestの代替にしない。旧`result/health-check.md`は保全資料として変更しない
 - `result/` 内はworker別に分割せず、現行作業では固定ファイル名を使用する。退避指示時は固定ファイルの断面を履歴へ保存し、過去断面を上書きしない
@@ -86,6 +92,8 @@ threads/<thread-name>/
 
 同一情報を複数資料へ記載する場合は、上表の正本だけを更新し、他資料は参照または要約に限定する。正本候補が複数、参照先が存在しない、更新責任が重複、更新境界が不明な場合は推測で補正せず停止する。現行資料と履歴資料を同時にworkerの入力へ混在させず、どちらを正本とするかを結果へ明記する。
 
+工程イベントの記録は各workerがtask-logへ自身の判定・結果・エスカレーションを追記する。親タスクだけがtask-logの最新イベントを確認し、次worker接続可否と全体状態を確定する。Documenterはtask-logを変更して判定を補正せず、記録の完全性を照合してtask-progress・operation-check・最終記録へ要約する。同期後にtask-logと要約が一致しない場合は次worker接続とリトライを停止する。同一原因の不一致が2回連続した場合は、Ownerの継続指示またはルール修正がない限り再試行しない。
+
 用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。スレッド、報告書、ルール、クルーなどの解釈に文脈がない場合は用語集をデフォルトとして参照し、未登録・衝突・解釈不能は推測せず停止する。
 
 ## 新規要件定義と現行タスクの切替ゲート
@@ -105,15 +113,15 @@ threads/<thread-name>/
 
 新規運用開始時は、履歴退避を開始する前に `rules/history-initialization.md` に従って、Git追跡対象外のローカル `history/` と、サマリー・詳細・統合判定用8項目を持つ `history/index.md` を初期化する。初回タスクの既知情報を台帳へ登録し、`result/current-task.md`と一致することを確認する。
 
-`history/`に通常の履歴スナップショットや不明な資料があるのに`history/index.md`がない場合、既存台帳を推測で再構成せず、既存資料の移動・削除・改名・上書きを行わず停止する。今回の特殊な保全領域である`history/task-legacy-history-backup/`は、この初期化判定の対象外とし、内容を変更しない。初期化完了を確認できない間は、退避、復旧、統合候補判定、タスク切替を完了扱いにしない。
+`history/`に通常の履歴スナップショットや不明な資料があるのに`history/index.md`がない場合、既存台帳を推測で再構成せず、既存資料の移動・削除・改名・上書きを行わず停止する。今回の特殊な保全領域である`history/task-legacy-history-backup/`は、この初期化判定の対象外とし、内容を変更しない。初期化完了を確認できない間は、task-id採番後の対応中登録、退避、復旧、統合候補判定、タスク切替を完了扱いにしない。
 
 ## 改善サイクルとタスク境界
 
-改善事項は、発見、Plannerの汎用性・影響評価、Owner判断、計画、承認範囲の実装、Reviewer受入、実運用後の効果確認、再評価、記録更新、完了または継続の順で扱う。Reviewer受入は計画・実装・証跡の独立判定であり、実運用後の効果確認は受入後の別判定とする。受入だけで完了扱いにしない。
+改善事項は、発見、Plannerの汎用性・影響評価、Owner判断、計画、承認範囲の実装、Reviewer受入、Documenter記録、Owner完了判断の順で扱う。実運用上の観測は任意の後続改善材料であり、task完了・履歴退避・次task接続の条件にしない。
 
-- 効果確認中は、`task-progress.md`と担当resultへ状態、確認担当、確認日または次回確認日、証跡、継続条件、再評価条件を記録する。
+- 任意の運用観測は、根拠と後続扱いをOwner管理IRまたは新規im候補へ記録する。
 - 効果不足、想定外影響、適用範囲変更が承認範囲内なら、同じtaskで修正計画へ戻す。承認範囲外のルール変更、責務変更、移行仕様変更、追加機能が必要なら現行taskへ追加せず、Owner承認後に新しい`TASK-xxx`を計画する。
-- 次タスク開始前に、前タスクの最終判定、効果確認状態、未確認事項、Owner判断残件、履歴manifest、正本・更新責任・更新境界を確認する。欠落、不一致、判断残件があれば新タスクへ切り替えず停止する。
+- 次タスク開始前に、前タスクの最終判定、未確認事項、Owner判断残件、履歴manifest、正本・更新責任・更新境界を確認する。欠落、不一致、判断残件があれば新タスクへ切り替えず停止する。
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合は、変更前後の影響対象、正本・参照先・更新責任・更新境界、旧表現、矛盾・判定不能、共通仕様と固有設定の分離を確認し、未確認・矛盾・変更漏れが残る間は次worker接続・完了・履歴操作へ進まない。
 - 新しい`TASK-xxx`は論理タスク台帳から採番し、F-ID、IMP-ID、ファイル名、日時を採番根拠にしない。
 
@@ -121,25 +129,25 @@ threads/<thread-name>/
 
 他プロジェクトへ移行した時点から改善サイクルを有効にするには、共通rules、worker定義、報告テンプレート、導入確認手順、記録先、適用範囲、更新責任、停止条件が移行先で確認できることを必須とする。`current-task.md`と`task-progress.md`を初期作成でき、Planner、Implementer、Reviewer、Documenterの入力・出力・責務境界を確認できなければならない。
 
-移行先固有のproject/thread、過去task、Worker Registry、F-ID、IMP-ID、draftsを必須条件にしない。Documenterが未設定の場合は、導入時に受入後の記録責任者と記録先を明示する。共通サイクルの資料、責任、正本、記録先のいずれかが不足・不明・確認不能なら、状態を`未有効化`として停止し、導入作業を新しい`TASK-xxx`で計画する。
+移行先固有のproject/thread、過去task、Worker Registry、F-ID、IMP-ID、draftsを必須条件にしない。Documenterが未設定の場合は、導入時に受入後の記録責任者と記録先を明示する。不足・不明・確認不能は導入是正の理由として記録し、現行taskの完了ゲートにはせず、Owner管理IRまたは新しい`TASK-xxx`で計画する。`未有効化`は移行先の導入状態を表す履歴・改善上の分類であり、現行taskの完了状態へ自動的に混入させない。
 
-技術非依存性と媒体中立性の有効化では、役割、能力、入出力、状態、判定基準、証跡、停止条件が特定技術なしに説明でき、媒体を変更しても正本、責任、状態、証跡、完了条件の意味が維持されることを確認する。技術依存が不可避な場合は、依存理由、適用範囲・期間、代替可否、移行時影響、Owner判断、利用不能時の停止条件、分離先を例外記録へ残す。例外記録のない依存は共通仕様へ採用せず、移行先で確認できない場合は未有効化として停止する。
+技術非依存性と媒体中立性の有効化では、役割、能力、入出力、状態、判定基準、証跡、停止条件が特定技術なしに説明でき、媒体を変更しても正本、責任、状態、証跡、完了条件の意味が維持されることを確認する。技術依存が不可避な場合は、依存理由、適用範囲・期間、代替可否、移行時影響、Owner判断、利用不能時の停止条件、分離先を例外記録へ残す。例外記録のない依存は共通仕様へ採用せず、移行先では導入是正の理由として記録してOwner管理IRまたは新しい`TASK-xxx`へ分離する。これだけで現行taskの完了を停止しない。
 
 ## Documenter後のOwner完了ゲート
 
-Documenterは最後のworkerでもタスク完了を確定しない。記録完了後、未採番の改善候補がない場合は`Documenter記録完了・Owner完了確認待ち`、候補がある場合は`Documenter記録完了・Owner判断待ち`とする。候補の有無にかかわらず、Ownerのclose確認または判断を受けるまで、タスク完了、履歴退避、次タスク切替を停止する。候補がある場合は新規IMP採番も停止し、候補詳細はtask-log、停止状態はtask-progressへ記録する。Owner確認後にのみ対応完了、履歴退避、次タスク切替、新規改善記録の採番可否を確定する。
+Documenterは最後のworkerでもタスク完了を確定しない。記録完了後、Ownerへ完了判断の入力を返す。未採番の改善候補や任意観測がある場合は、候補詳細をtask-logへ記録し、Owner管理IRまたは新しいim候補へ分離する。候補の有無や効果確認の未実施だけを理由に、Reviewer受入後のDocumenter記録、Owner完了判断、履歴退避、次タスク切替を停止しない。
 
-## IMP同期を伴うタスク終了ゲート
+## task終了ゲート
 
-Ownerが新規taskの開始を明示した場合、その指示を現行task終了ゲートの発火契機とする。指示の対象task、現行task、Owner判断、全IMPの状態、効果確認、未確認事項が特定できない場合は終了・切替を行わず停止する。新規task開始の明示がない状態で、会話やファイル更新の類似表現だけから終了を推定しない。
+Ownerが新規taskの開始を明示した場合、その指示を現行task終了ゲートの発火契機とする。指示の対象task、現行task、Owner判断、未確認事項が特定できない場合は終了・切替を行わず停止する。新規task開始の明示がない状態で、会話やファイル更新の類似表現だけから終了を推定しない。
 
-発火後は、全IMPの公開ステータスと内部worker状態、サマリーと詳細、更新理由、証跡、次回確認条件を再確認し、別IMPの変更を`変更なし`・`外部更新`・`競合`・`検証不能`へ分類する。効果確認中のIMPは`継続評価`として残し、証跡なしの`対応完了`へ変更しない。同一IMPの並行更新は自動統合せず、Owner判断へ停止する。
+発火後は、現行taskの結果資料、Owner判断、履歴manifest、`history/index.md`を再確認する。任意の運用観測や残課題はOwner管理IRまたは新規im候補へ分離し、同一taskの終了を阻害しない。
 
-IMP状態の自動更新は、対象IMP・正本・証跡・更新責任者が特定され、サマリーと詳細が一致し、Owner判断残件・並行更新・競合がなく、状態遷移が共通ルールの一意な対応関係で決まる場合だけ許可する。対応開始は承認済み計画から`対応中`へ、Reviewer受入済みかつ効果確認未完了は`継続評価`へ自動更新できる。効果確認済み・記録更新済み・Owner完了確認が明示済みの場合だけ`対応完了`へ自動更新できる。自動更新時は変更前後、理由、証跡、更新日時、対象task-id、次回確認条件を記録する。
+IRの状態更新はOwner Agentだけが行う。taskの状態はhisiの`未着手`、`対応中`、`完了`を用い、完了はReviewer受入、Documenter記録、Owner完了判断が揃った場合に確定する。
 
-サマリーと詳細の不一致、同一IMPの競合、正本・証跡・更新責任者の不明、`適用外`・承認範囲外の是正、または`対応完了`に必要なOwner完了確認の欠落がある場合は、自動更新せずOwner判断へ停止する。自動更新の許可はタスク終了、履歴退避、次タスク切替、IMP採番の自動許可を意味しない。
+サマリーと詳細の不一致、同一IMPの競合、正本・証跡・更新責任者の不明、`適用外`・承認範囲外の是正は、改善記録の整合性問題としてOwnerへ返す。これらは現行taskの完了を自動的に停止しない。`対応完了`の確定にはOwner完了確認を要する。自動更新の許可はタスク終了、履歴退避、次タスク切替、IMP採番の自動許可を意味しない。
 
-条件不足がない場合の接続順序は、`現行状態とIMP更新 → 履歴manifestの作成・確認 → history/index.mdの更新 → 次taskのcurrent-task.md・task-progress.mdへの接続`とする。各段階の不一致、参照切れ、責任・更新境界不明、Owner判断残件、active task重複、履歴原本の変更要求があれば、その段階で停止し、期待値、実際値、証跡、影響、停止理由、再開条件を記録する。
+条件不足がない場合の接続順序は、`現行task状態の確定 → 履歴manifestの作成・確認 → history/index.mdの更新 → 次taskのcurrent-task.md・task-progress.mdへの接続`とする。IMPや後続改善情報の更新はOwner管理の別処理として扱い、終了順序の必須段階にしない。各段階の不一致、参照切れ、責任・更新境界不明、Owner判断残件、active task重複、履歴原本の変更要求があれば、その段階で停止し、期待値、実際値、証跡、影響、停止理由、再開条件を記録する。
 
 ## 共有ファイル更新時の注意
 
@@ -192,7 +200,7 @@ Planner起動後は、Plannerが`plan.md`をOwnerへ返却して承認を受け�
 - 作業中に `rules/` または `worker-definitions/` が変更された場合、次のworkerへ接続する前に親タスクがタスクへの影響を確認する
 - 影響がある場合は、影響範囲、再確認が必要なworker、Owner判断事項を記録し、必要な再検証が完了するまで次工程へ接続しない
 - 影響がない場合も、変更内容と影響なしの判断を親タスクの記録へ残す
-- IMP状態同期を伴う場合は、タスク開始、対応開始、Reviewer受入後、Documenter記録前後の4境界で全対象IMPを判定し、適用可能な遷移の更新または更新不能理由・影響・再開条件を記録するまで次workerへ接続しない
+- 任意の運用観測やIR候補を見つけた場合は、Ownerへ返却して後続扱いを決める。IRの不一致だけではtask本体の次worker接続を停止しない
 
 ## タスク履歴の保存
 
@@ -214,13 +222,16 @@ history/
 ```
 
 - 新規履歴ディレクトリは`history/<task-id>/`とし、同じtask-idのディレクトリが存在する場合は上書きせず停止してOwnerへ報告する。既存の`history/yyyyMMddhhmm/`を整理する場合は、Owner承認のもとで`history/task-legacy-history-backup/legacy/<yyyyMMddhhmm>/`へ旧配置の対応を保ったまままとめ、内容別に再分類しない。
-- Ownerの退避指示を受けた時点で、対象スレッドの `docs` と `result` を`history/<task-id>/`へコピーし、`manifest.md`へtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、理由、状態、対象資料、原典パスを記録する。新規manifestにhistory-key/run-idを追加しない。退避前、照合前、または履歴原本に対する削除・移動・上書きは禁止する。manifest・`history/index.md`・退避内容の照合成功とOwner承認後は、現行タスク領域の `docs` と `result` を初期化する。履歴本体と`history/index.md`は機密情報を含み得るためGit追跡対象外とする。
+- Ownerの退避指示を受けた時点で、対象スレッドの `docs` と `result` を`history/<task-id>/`へコピーし、`manifest.md`へtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、理由、状態、対象資料、原典パスを記録する。再開元となる同じtask-idの既存スナップショットがある場合は、`rules/history-initialization.md`の追記スナップショット方式を使用し、既存資料を上書きしない。新規manifestにhistory-key/run-idを追加しない。退避前、照合前、または履歴原本に対する削除・移動・上書きは禁止する。既存`history/index.md`は削除・再作成せず、既存行を保持したまま退避情報を追記・挿入する。manifest・`history/index.md`・退避内容の照合成功とOwner承認後に限り、現行タスク領域の `docs` と `result` を初期化する。履歴本体と`history/index.md`は機密情報を含み得るためGit追跡対象外とする。
 - 履歴はコピー完了後の読み取り専用スナップショットとし、再検証・修正で既存履歴の内容を変更しない。同じtask-idの重複履歴は作成せず、既存task-idとの関係が不明な場合はOwnerへ候補を提示する。作成・消費した履歴は、ローカルの`history/index.md`の新ルール統合判定台帳へ10項目で記録し、統合候補の比較には状態・最終更新を除く8項目だけを使用する。候補分類の詳細、Owner判断、manifestの詳細は結果資料へ記録する。Plannerはこの台帳を統合判断の唯一の情報源とし、`task-legacy-history-backup`は通常の類似候補検索・タスク継続・復旧に使用しない。
 - Owner承認済みの移行では、運用開始前のtimestamp形式historyのディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動できる。manifest、docs、resultの内容は変更せず、旧配置とbackup配置の対応をbackup manifestと`history/index.md`へ記録する。これは旧タスク個別へ論理task-idを遡及付与する処理ではない。
 - `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` はactive taskの現行作業領域とする。クローズ・終了・中断または新規task切替で履歴退避した後は初期化し、旧記録の読み取り互換領域として残してはならない。旧記録は`history/<task-id>/`を正本とし、旧resultを新タスクの正本へ自動変換・一括移行しない。
+- Ownerが完了判断したタスクは、次タスク開始時まで待たず、完了直後に履歴退避・manifest作成・`history/index.md`への追記・照合・現行`docs/`と`result/`の初期化を一連のクローズ処理として実施する。完了日時、退避結果、hisi既存内容の保持、新規追記の照合が確認できるまで完了扱いにしない。退避後の引継ぎ情報は`history/<task-id>/`に保持し、Ownerが選択したIRだけを新タスクのdocsへ継承する。
 - 履歴の参照は`manifest.md`からtask-id、タスク名、project/thread、状態、対象資料、原典パスを確認して行う。task-id、元スレッド、projectの対応が確定できない場合は停止する。`task-legacy-history-backup`は通常の参照候補から分離し、旧内容から論理task-idを遡及付与しない。
 
 ## history/indexの前後照合ゲート
+
+`history/index.md`の更新は既存内容を保持した追記・挿入方式とし、既存ファイルの削除、空ファイル化、再生成による置換を行わない。更新前の存在・内容・task-id集合を記録し、更新後に既存行が保持され、新規行だけが追加され、3表の集合・順序・内容が一致することを確認する。更新途中の失敗、部分書込み、照合不能が発生した場合は、`docs/`と`result/`を初期化せず、hisi更新を未完了として停止する。
 
 退避、復旧、統合候補の確定、タスク完了、タスク切替・退避開始では、操作前後に`history/index.md`の該当行を正本候補として確認し、`current-task.md`、`docs/task-progress.md`、現行result、履歴manifestと照合する。操作整合性の照合対象はtask-id、タスク名、目的、対象、未完了事項、元project/thread、状態、統合候補、Owner判断、履歴パス、正本・根拠、最終更新とする。ただし、統合候補の比較条件は判定境界に定める8項目だけであり、この運用照合項目によって拡張しない。
 
@@ -238,9 +249,9 @@ history/
 1. Ownerが復旧対象のtask-idを指定し、`history/<task-id>/manifest.md`のtask-id、タスク名、目的、元projectId、元スレッド名、退避日時、状態、対象資料を確認する。`task-legacy-history-backup`は復旧対象外とし、欠落・不一致時は停止する。
 2. 履歴の`docs/`と`result/`を読み取り、復旧対象の断面、未解決事項、競合を確認する。履歴自体は変更しない。
 3. Ownerの復旧方式指定がない場合は、新規Codexプロジェクトと新規スレッドを作成する。「このプロジェクトで」などの明示指示がある場合だけ、現在の作業スレッドを先に新しい履歴へ退避・アーカイブし、同じproject内に新規復旧スレッドを作成する。既存スレッドを上書き・再利用しない。
-4. 復旧先のprojectId、threadId、hostId、実行ディレクトリ、対象リポジトリ、新スレッド名を確認し、元project/threadとの対応を`manifest.md`へ追記する。対象リポジトリ不一致時は停止する。
+4. 復旧先のOwner session、Subagent親子関係、実行ディレクトリ、対象リポジトリ、結果資料の対応を確認し、元taskとの対応を`manifest.md`へ追記する。独立sidebar workerや新規チャットを復旧先にしない。対象リポジトリ不一致時は停止する。
 5. Ownerの明示的な復旧承認後、復旧先の初期ファイルや未保存変更を上書きせず、競合がない場合だけ履歴の`docs/`と`result/`を復旧先へコピーする。`history/`自身は復旧対象に含めない。
-6. 復旧先でtask-id、projectId、threadId、Codex実行ディレクトリ、結果ファイル、Worker Registry、`docs/task-progress.md`を確認し、復旧元task-id、復旧日時、manifest確認、docs/result反映、復旧判定、未確認事項を復旧先の`docs/task-progress.md`へ簡略記録する。
+6. 復旧先でtask-id、Owner session、Subagent ID、Codex実行ディレクトリ、結果ファイル、Worker Registry、`docs/task-progress.md`を確認し、復旧元task-id、復旧日時、manifest確認、docs/result反映、復旧判定、未確認事項を復旧先の`docs/task-progress.md`へ簡略記録する。
 7. 復旧先の読み取り確認が成功し、Ownerが履歴消費を承認した場合だけ、復旧元`history/<task-id>/`と`history/index.md`の該当行を削除する。manifest自体を復旧先へ通常資料としてコピーしない。
 8. 復旧失敗、部分成功、不一致、復旧先の確認不能、Owner承認不明の場合は、復旧元manifest、history、index行を削除せず停止する。
 
@@ -256,7 +267,7 @@ Ownerは次の手順でworkerを再接続する。
 
 1. 対象プロジェクト、対象スレッド、対象リポジトリを確認する
 2. 既存workerチャットの重複、所属不明、誤ったCodex実行ディレクトリを確認する
-3. `rules/worker-health-check.md`へ接続し、現行・アーカイブ一覧、期待threadIdと役割名のproject横断照合、個別thread読取を再実行する。Ownerの確認前に状態変更を行わず、アクセス不能workerの手動アーカイブが必要な場合はOwnerへ対象と根拠を提示する
+3. `rules/worker-health-check.md`へ接続し、Owner session配下のSubagent ID、親session、役割、状態、設定、resultを再実行する。Ownerの確認前に状態変更を行わず、アクセス不能Subagentの整理が必要な場合はOwnerへ対象と根拠を提示する
 4. 手動整理後の再ヘルスチェックで不足と判定された役割だけを再確認する。Ownerが `不足workerを追加` と明示した場合に限り、不足役割だけを役割名で作成する。不一致、重複、実行中、アーカイブ済み、アクセス不能、対象外候補を再作成や追加の理由にしない
 5. 追加した場合は `rules/worker-health-check.md` の追加後全件再ヘルスチェックを実行し、失敗時は追加を繰り返さず停止する。追加しない場合も、確認結果と未確認範囲を同ルールの結果記録へ保存する
 6. `current-task.md` と既存のresultファイルを入力として、Plannerから通常の承認フローを再開する。Planner結果は先にOwnerへ返却し、Owner承認後にのみImplementerへ接続する

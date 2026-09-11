@@ -8,11 +8,15 @@
 
 このリポジトリは、CodexなどのAIエージェントを開発プロセスへ組み込むための、汎用的なルール・成果物・プロンプトを提供します。
 
+skillを扱う共通基盤は`rules/skill-framework.md`を正本とし、個別skillの定義には`rules/skill-definition-template.md`を使用します。既存rules、grill、worker分業、正本管理、停止条件、履歴管理、Owner承認ゲートを置換せず、skill単位へ段階的に整理します。
+
 ## 導入
 
 本リポジトリは、特定プロジェクトを直接運用するための作業場所ではなく、各プロジェクトへ展開するスターターパックです。共通ルールとworker定義を対象リポジトリへ適用し、対象プロジェクトの構成・技術・実行環境に合わせたタスクと検証計画をPlannerに作成させます。
 
-改善サイクルは、改善事項の発見、汎用性評価、Owner判断、計画、実装、Reviewer受入、実運用後の効果確認、再評価、記録更新、完了または継続の順で運用します。Reviewer受入だけでは改善完了とせず、効果確認の状態・証跡・次回確認日・再評価条件を別に記録します。共通仕様は `rules/development-improvement-record.md` を正本とします。
+改善サイクルは、改善事項の発見、汎用性評価、Owner判断、計画、実装中の即時有効化、同一タスク内の検証、Reviewer受入、記録更新、完了または継続の順で運用します。履歴台帳のhisi状態は`未着手`・`対応中`・`完了`の3状態に統一し、IMP/IR内部の`継続評価`等とは分離します。効果測定は有効化や完了の前提にせず、運用中に不都合が発生した場合の是正材料として扱います。共通仕様は `rules/development-improvement-record.md` を正本とします。
+
+自動化は `rules/automation-operation.md` に従い、Agentが受入条件の達成を検知してReviewer・Ownerへの承認要求を起動します。承認要求の起動と受入・承認の確定は分離し、未承認時は自動切替せず停止します。
 
 共通仕様は特定の言語、shell、実行可能プログラム、外部ライブラリ、製品、ベンダー、OS、実行環境を前提にしません。役割、能力、入出力、状態、判定基準、証跡、停止条件で目的を確認し、記録媒体を変更しても正本、責任、状態、証跡、完了条件の意味を維持します。避けられない技術依存は理由、適用範囲・期間、代替可否、移行時影響、Owner判断、停止条件、分離先を例外記録へ残します。
 
@@ -25,17 +29,17 @@
 3. `rules/current-task-template.md` を使って対象リポジトリの `threads/<thread-name>/result/current-task.md` を作成し、Task ContextとTask Definitionを記載する。作業ブランチは、既存ブランチを指定しない限り `記述ルールに従い新規作成` とする
 4. 初回タスクの既知情報を `history/index.md` へ登録し、`result/current-task.md`との一致を確認する
 5. Plannerへ対象リポジトリの内訳確認と `plan.md` の作成を依頼する
-6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
+6. Plannerの計画をOwnerが確認・承認してから、後続workerを接続する。Planner接続時の作業ブランチ未決定は許容し、Implementer接続前にだけ確定・実体照合する。計画関連Owner向け回答の必須情報は `rules/plan-approval-required-info.md` に従う
 
 `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は、展開先で生成されるタスク固有の作業領域です。次タスク以降、進行中タスクの共通台帳は`docs/task-progress.md`、worker固有の完了報告は`result/`に分けます。本リポジトリではGit管理対象外とし、共通の仕組みには含めません。共通ルールを更新した場合は、派生先で差分を確認してから必要な内容だけを取り込みます。
 
 Codexの再起動後にworkerの表示やプロジェクト所属が不一致になった場合は、作業を開始せず、Ownerがworkerを正しいプロジェクトへ再作成・再接続します。復旧手順は `rules/thread-operation.md` の「同期失敗時の復旧」を参照してください。
 
-Ownerが「ヘルスチェックを実行して」と明示した場合、または作業中にworkerへ接続できなかった場合は、`rules/worker-health-check.md` に従って同一projectId内のworker一覧、アクセス可否、状態、重複、不一致、不足を確認します。接続失敗時も自動作成へ進まず、Ownerの確認前にworkerの状態を変更しません。不足workerの追加はOwnerが明示的に指示した場合だけ行います。
+Ownerが「ヘルスチェックを実行して」と明示した場合、または作業中にSubagentへ接続できなかった場合は、`rules/worker-health-check.md` に従ってOwner session配下のSubagent ID、親session、状態、モデル・推論、結果資料、重複、不一致、不足を読み取り確認します。接続失敗時も自動作成へ進まず、Ownerの確認前にSubagentの状態を変更しません。資料は読み取り専用とし、不足Subagentの追加はOwnerが明示的に指示した場合だけ行います。
 
 各スレッドは専用のCodexプロジェクトと1対1で対応させ、通常時は1つのactiveなproject/thread/taskだけを扱います。復旧時の例外を含む分離・履歴・整合性の詳細は `rules/thread-operation.md` と `rules/workflow-consistency-check.md` に従います。
 
-作業開始、worker接続、履歴退避、復旧、task切替の前に、現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリを照合します。Owner会話は判断・承認、クルー会話はworker実行、ファイル側threadは資料保存のための別単位です。不一致、未確認、複数候補では資料操作・接続・履歴操作を停止します。
+ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程です。Codex会話、クルー会話、worker、project、task、識別子、history台帳は作成・接続・採番せず、要件定義開始後に別ゲートで扱います。作業開始、worker接続、履歴退避、復旧、task切替の前に、現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリを照合します。Owner会話は判断・承認、Codex会話は作業会話、クルー会話はworker実行、ファイル側threadは資料保存のための別単位です。不一致、未確認、複数候補では資料操作・接続・履歴操作を停止します。
 
 実装媒体はリポジトリの実態と承認済みtask範囲で判定します。文書中心ではMarkdownを中心にし、コードを含む開発リポジトリでは承認済み範囲で既存コード・テスト・解析・ビルドを扱えます。混在リポジトリでは変更対象ごとに判断し、新規依存、外部操作、本番接続、破壊的操作、承認範囲外の変更は停止または個別承認対象です。
 
@@ -92,8 +96,9 @@ Documenter：判断・結果・教訓を記録
 5. TesterとSecurity Operatorに、それぞれ実測ベースの検証と安全性確認を依頼する
 6. 両方の完了報告を確認してからReviewerに独立レビューを依頼する
 7. Reviewer受入後に実運用の効果を確認し、Documenterまたは導入時に指定した記録責任者が結果・残課題・次回条件を記録する
-8. 効果不足や承認範囲外の是正がある場合は、同一TASKの修正または新しいTASK-xxxの計画をOwnerが判断する
-9. 人間が採用、修正、中止、マージ、リリースを判断する
+8. Documenterの通常task記録完了後、Owner AgentがIR正本を確認し、IRありなら`未対応`・`延期`・`別タスク候補`を全件提示し、IRなしならその旨をtask-logへ記録する。IRの不一致・未分類・取得失敗はIR処理のみ保留し、task本体を自動停止しない
+9. 効果不足や承認範囲外の是正がある場合は、同一TASKの修正または新しいTASK-xxxの計画をOwnerが判断する
+10. 人間が採用、修正、中止、マージ、リリースを判断する
 
 ## 移行先での初期有効化確認
 

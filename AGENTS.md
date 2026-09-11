@@ -8,11 +8,12 @@
 - 変更内容と検証結果を記録する
 - 既存の手動変更を勝手に上書きしない
 - ルールや機能の追加は、現行タスクだけの一時対応ではなく、タスク完了後も残り続け、他プロジェクトへの移行時点から有効になるシステム機能として設計する。詳細は `rules/README.md` と適用対象の共通ルールに従う
-- 改善事項は、発見・汎用性評価・Owner判断・計画・実装・Reviewer受入・実運用後の効果確認・再評価・記録更新・完了または継続の共通サイクルで扱う。Reviewer受入と効果確認を混同せず、詳細は `rules/development-improvement-record.md` に従う
-- 他プロジェクトへ移行した際は、共通rules、worker定義、テンプレート、記録先、責任者、停止条件を確認するまで有効化完了としない。不足時は未有効化として停止する
+- 改善事項は、発見・汎用性評価・Owner判断・計画・実装・Reviewer受入・Documenter記録・Owner完了判断の共通サイクルで扱う。実運用上の観測は後続改善の材料であり、完了ゲートにしない。詳細は `rules/development-improvement-record.md` に従う
+- 他プロジェクトへ移行した際は、共通rules、worker定義、テンプレート、記録先、責任者、停止条件を確認するまで有効化完了としない。不足は停止理由として記録し、導入是正を新規im候補へ分離する
 - 技術非依存性は役割、能力、入出力、状態、判定基準、証跡、停止条件で確認し、媒体変更後も正本・責任・状態・証跡・完了条件の意味を維持する。避けられない技術依存は例外記録なしに共通仕様へ組み込まない
 - コミットは1目的にまとめ、コミットメッセージ規約に従う
 - workerの役割、作業領域、入出力は `worker-definitions/` の定義に従う
+- worker役割は常設エージェントを意味しない。標準は同一task内で再利用するDelivery Subagent 1件（Planner・Implementer・Documenter）と独立Reviewer Subagent 1件だけとし、同時に開くSubagentは1件までとする。Tester・Security OperatorはOwner承認済み例外だけである。担当resultとtask-logの照合後は完了済みSubagentをcloseする。既存Subagentのresumeまたは親sessionへのsend_inputが明示的に不可能でも、Ownerの個別承認なしに代替Subagentを自動作成せず、作成拒否時はOwner本体が継続または停止理由を記録する。現行Subagent一覧は履歴として保持し、削除操作を前提にしない。詳細は `rules/automation-operation.md` に従う
 - worker間の正式な引き継ぎは会話ではなく、対象スレッドの `threads/<thread-name>/result/` の結果ファイルで行う
 - 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
 - 各workerの完了報告の項目順・Owner判断の配置は `rules/worker-report-template.md` に従う
@@ -22,7 +23,6 @@
 ## 禁止事項
 
 - 秘密情報、個人情報、顧客固有情報の追加
-- 認証情報を含む外部サービスへの書き込み
 - 特定のプログラミング言語、shellプログラム、実行可能プログラム、外部ライブラリによる機能実装。詳細は `rules/implementation-medium.md` に従う
 - Ownerの明示承認がないファイルの削除
 - 破壊的なGit操作
@@ -62,22 +62,23 @@
 - `rules/task-initialization-and-requirement-gate.md`: docs/result初期化、issue-memo更新、正本照合、worker接続の実施ゲート
 - `rules/rule-refresh.md`: ルール更新後の自動再読込、影響確認、停止ゲート
 - `rules/local-rules.md`: ローカルルールの正本配置、命名、適用判定、保護対象、証跡、移行・欠落時の共通ルール
+- ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程とし、会話・worker・project・task・識別子の作成・接続・採番は要件定義開始後の別ゲートで行う。詳細は`rules/glossary.md`、`rules/thread-operation.md`、`rules/task-initialization-and-requirement-gate.md`を参照する
 
 ## workerの流れ
 
 ```text
 threads/<thread-name>/result/current-task.md
   ↓
-Planner
+Delivery（Planner）
   ↓ Owner承認
-Implementer
+Delivery（Implementer）
   ↓
-Tester / Security Operator
+独立Reviewer
   ↓
-Reviewer
-  ↓
-Documenter
-  ↓ Ownerがマージ・リリースを判断
+Delivery（Documenter）
+  ↓ Ownerが完了を判断
+
+※ Tester / Security Operatorは、承認済み計画とOwner例外承認がある場合だけ、前工程close後に接続する。
 ```
 
 - worker固有の現行結果ファイル、Documenterの`task-log.md`、動作確認記録のパスは `worker-definitions/` と `rules/thread-operation.md` に従う。履歴退避後の更新境界も同ルールに従う

@@ -24,6 +24,8 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 
 Registryは期待値、一覧・個別読取・Owner確認はそれぞれ独立した確認値として扱い、相互に代替しない。
 
+ファイル側threadの初期登録は資料保存領域の準備だけであり、Codex会話、クルー会話、worker、project、task、識別子、history台帳を発生させない。接続前照合・Worker Registry・active taskの確認は、要件定義開始とtask識別情報が確定した後に行う。初期登録とtask開始を区別できない場合はdocs/result/historyの更新と接続を停止する。
+
 ## ルール変更時の影響確認
 
 共通rules、worker定義、報告テンプレート、README、workflow整合性資料、移行先導入手順を変更する前後では、次の順序で影響を確認する。対象を特定できない場合は実装を開始せず、`changes.md`へ停止記録を残す。
@@ -68,7 +70,7 @@ worker自身のCodexプロジェクト所属・実行環境
 
 現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリをこの順で照合する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
 
-Worker Registryは`current-task.md`を期待値の正本、一覧・個別読取・health-check・接続差分を実測の根拠とする。既存候補を先に照合し、役割、threadId、hostId、所属projectId、モデル・推論レベル、実行ディレクトリ、状態を比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。
+Worker Registryは`current-task.md`を期待値の正本、Subagent実測・health-check・接続差分を実測の根拠とする。既存Subagentを先に照合し、役割、Subagent ID、親session、モデル・推論レベル、実行ディレクトリ、状態、担当resultを比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。独立sidebar workerや新規チャットを正規経路として扱わない。
 
 projectIdまたは対象ファイル側threadが未確認・不一致・複数候補、会話種別を区別不能、Registryと実測が不一致・重複・未確認の場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止し、期待値、実際値、根拠、影響、再開条件を親タスクへ報告する。
 

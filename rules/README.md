@@ -1,5 +1,7 @@
 # Rules運用
 
+共通rules全体の冪等性・再実行安全性・固定値禁止は `rules/idempotency.md` を正本とする。`rules/local/`を除く`rules/`配下のルール、README、worker定義、共通テンプレート、移行資料へ適用する。
+
 ## 適用範囲
 
 - `rules/` 配下のMarkdownファイルは、原則として共通ルールである
@@ -10,6 +12,12 @@
 - 新しい共通ルールを追加するとき、worker定義の入力欄を更新する必要はない
 - 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報は `rules/plan-approval-required-info.md` を参照する
 - Plannerへ指示する前の要件定義提案フォーマットと接続ゲートは `rules/requirement-definition-format.md` を参照する
+- imの入口テンプレート、必須10観点、質問ごとの更新記録、Planner接続前チェックは `rules/im-template.md` を参照する
+- im開始時の`owner-jadge.md`作成、OJ回答直後の正本同期、欠落時停止は `rules/task-initialization-and-requirement-gate.md` を参照する
+- IRの正本、Owner Agentの更新責任、Documenter非関与、リマインド、task本体との停止境界は `rules/improvement-reminder-operation.md` を参照する
+- Documenter記録完了を契機としたOwner AgentのIR全件確認・リマインド・task-log記録は `rules/improvement-reminder-operation.md` の必須ゲートとする
+- IRのサマリー・詳細構成、IR-ID昇順ソート、両表の集合一致は `rules/improvement-reminder-operation.md` を参照する
+- 共通ルール全体の冪等性、再実行時の重複防止、実体値の恒久化禁止は `rules/idempotency.md` を参照する。IR固有の補足は `rules/improvement-reminder-operation.md` を参照する
 - 実装媒体をルール・プロンプト・Markdownに限定する場合は `rules/implementation-medium.md` を参照する
 - 新規運用開始時のローカル`history/`と`history/index.md`の初期化は `rules/history-initialization.md` を参照する
 - 人間向け資料、`owner-jadge.md`、`task-progress.md`、`issue-memo.md`の共通形式・責務・作成・復元・移行手順は `rules/human-facing-documentation.md` を参照する
@@ -21,7 +29,9 @@
 - 前回health-checkと現在worker一覧の差分確認は `rules/worker-connection-diff.md`を参照し、比較可能な2回目以降だけ専用resultへ記録する
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
+- 自動化操作、受入要求の自動起動、外部接続・worker作成の安全ゲート、監査証跡、停止・再開条件は `rules/automation-operation.md` を正本とする
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
+- Reviewer修正依頼の総合報告、一括修正、全正本横断照合、再レビュー接続は `rules/worker-task-settings.md` と `rules/worker-evidence.md` を参照する
 - ローカルルールの配置、命名、最小本文、読込・適用タイミング、優先順位、保護対象、証跡、ライフサイクル、移行・欠落時の扱いは `rules/local-rules.md` を参照する
 
 ## 用語・共通認識の参照ゲート
