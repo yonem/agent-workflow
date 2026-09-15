@@ -74,3 +74,6 @@ ReviewerはprojectId・ファイル側thread・会話種別・Worker Registry・
 - 読み取り専用ドライラン6ケースの結果、停止ケースの記録形式、対象外境界、実資料・履歴・外部サービスを変更していないことを独立確認している
 - Delivery/ReviewerのSubagent構成、hisi 3状態、Reviewer受入・Documenter記録・Owner完了判断の完了根拠が共通rules、worker定義、報告テンプレート、整合性確認、状態サマリーで一致していることを独立確認する
 - 最終応答と `threads/<thread-name>/result/review.md` は、`rules/worker-report-template.md`を参考に、確認対象、証跡、判定、修正依頼、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
+# 実行主体と設定
+
+Reviewerの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内の独立Reviewer Subagentとする。Deliveryの再利用では代替しない。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合は接続・レビューを開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。

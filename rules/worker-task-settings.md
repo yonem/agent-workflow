@@ -13,6 +13,10 @@
 
 ## 運用ルール
 
+- Planner、Implementer、Reviewer、Documenterの実行主体は、親チャットやファイル側threadではなく、実際に接続・再開されたSubagentとする。Deliveryは同一Subagentを明示resumeして論理責務を切り替え、Reviewerは独立Subagentとする。
+- Subagent ID、役割、task-id、親Subagentまたは親session、指定モデル、実測モデル、推論レベル、状態、result証跡をWorker Registryへ記録する。ユーザー向けCodexスレッド／会話ID、ファイル側thread名、Codex project IDをSubagent IDとして扱わない。
+- 接続前に指定モデル・推論を確認できない場合は、接続・resume・作業を開始しない。指定済みSubagentの実測値を取得できない場合は、実測値を`未確認`として根拠をresult/task-logへ記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。親チャット・ファイル側thread・新規ユーザー向けスレッドを代替実行主体にしない。
+
 - 役割ごとの標準モデル・推論レベルは本表を正本とする。ただし、適用条件が完全一致し、共通rulesの保護対象と競合しない`rules/local/`のOwner確認済みルールは、対象taskのモデル・推論レベルを具体化できる。適用結果とRegistryとの照合をresultへ記録し、切替を確認できない場合は作業を開始しない
 - Testerがテスト設計、失敗原因分析、複数資料の整合性判断を要する場合は、設定を変更せずReviewerへ引き継ぐ
 - 推論レベルを変更する場合は、変更理由をルートの `development-improvement.md` に記録する

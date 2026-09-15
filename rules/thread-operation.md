@@ -67,7 +67,7 @@ threads/<thread-name>/
 - `threads/<thread-name>/docs/task-progress.md` は、次タスク以降の進行中タスクの共通台帳の正本とする。改修範囲、現行/変更後、共通検証、影響、Owner判断、参照関係を記録する
 - `docs/issue-memo.md` と `docs/task-progress.md` は人間向けに整理した要約・判断・進捗資料とし、関連会話または状態変化の都度、既存項目を更新・統合する。会話本文や詳細証跡を機械的に追記しない
 - AI・workerが必要とする詳細な引継ぎ、実施結果、照合値、受入根拠、原典一覧は `result/` の担当資料へ記録し、`docs/` へ全文複製しない
-- `threads/<thread-name>/docs/operation-check.md` は、Documenterが動作確認の手順・結果を記録する補助資料とする
+- `threads/<thread-name>/docs/operation-check.md` は、要件定義担当が固定形式で初期作成し、Documenterが動作確認の手順・結果で最終更新する補助資料とする
 - `threads/<thread-name>/result/task-log.md` は、worker間の状態遷移・判定・エスカレーションを記録する運用正本である。各workerは自身のイベントを追記し、過去記録を変更しない。親タスクはtask-logの最新イベントを確認して次worker接続可否を確定する。`docs/task-progress.md`はtask-logから作成する人間向け要約であり、現行状態の独立した正本にしない。Documenterはtask-logと各worker resultを照合し、要約・operation-check・最終記録を更新する。退避指示時は履歴スナップショットを先に保存する
 - `threads/<thread-name>/result/` は、そのスレッドのworker間で受け渡すタスク固有の結果を格納する
 - `threads/<thread-name>/docs/health-check.md` は、Ownerの明示トリガーがある場合だけ作成する人間向けworker状態確認の正本であり、完了報告・台帳・manifestの代替にしない。旧`result/health-check.md`は保全資料として変更しない
@@ -226,7 +226,7 @@ history/
 - 履歴はコピー完了後の読み取り専用スナップショットとし、再検証・修正で既存履歴の内容を変更しない。同じtask-idの重複履歴は作成せず、既存task-idとの関係が不明な場合はOwnerへ候補を提示する。作成・消費した履歴は、ローカルの`history/index.md`の新ルール統合判定台帳へ10項目で記録し、統合候補の比較には状態・最終更新を除く8項目だけを使用する。候補分類の詳細、Owner判断、manifestの詳細は結果資料へ記録する。Plannerはこの台帳を統合判断の唯一の情報源とし、`task-legacy-history-backup`は通常の類似候補検索・タスク継続・復旧に使用しない。
 - Owner承認済みの移行では、運用開始前のtimestamp形式historyのディレクトリだけを`history/task-legacy-history-backup/legacy/<旧名>/`へ移動できる。manifest、docs、resultの内容は変更せず、旧配置とbackup配置の対応をbackup manifestと`history/index.md`へ記録する。これは旧タスク個別へ論理task-idを遡及付与する処理ではない。
 - `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` はactive taskの現行作業領域とする。クローズ・終了・中断または新規task切替で履歴退避した後は初期化し、旧記録の読み取り互換領域として残してはならない。旧記録は`history/<task-id>/`を正本とし、旧resultを新タスクの正本へ自動変換・一括移行しない。
-- Ownerが完了判断したタスクは、次タスク開始時まで待たず、完了直後に履歴退避・manifest作成・`history/index.md`への追記・照合・現行`docs/`と`result/`の初期化を一連のクローズ処理として実施する。完了日時、退避結果、hisi既存内容の保持、新規追記の照合が確認できるまで完了扱いにしない。退避後の引継ぎ情報は`history/<task-id>/`に保持し、Ownerが選択したIRだけを新タスクのdocsへ継承する。
+- Ownerが完了判断したタスクは、次タスク開始時まで待たず、完了直後に履歴退避・manifest作成・`history/index.md`への追記・照合・現行`docs/`と`result/`の初期化を一連のクローズ処理として実施する。完了日時、退避結果、hisi既存内容の保持、新規追記の照合が確認できるまで完了扱いにしない。退避には当該taskのIR全件を含め、新タスクには対応済みIRを除く未完了IR全件を継承する。未完了IRが0件ならIRファイルを作成しない。
 - 履歴の参照は`manifest.md`からtask-id、タスク名、project/thread、状態、対象資料、原典パスを確認して行う。task-id、元スレッド、projectの対応が確定できない場合は停止する。`task-legacy-history-backup`は通常の参照候補から分離し、旧内容から論理task-idを遡及付与しない。
 
 ## history/indexの前後照合ゲート

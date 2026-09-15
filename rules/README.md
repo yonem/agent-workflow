@@ -4,6 +4,12 @@
 
 ## 適用範囲
 
+### ルート直下の新規ディレクトリ作成禁止
+
+現時点では、リポジトリルート直下に新しいディレクトリを作成してはならない。タスク資料、worker結果、計画提案、履歴、ローカルルールは、既存の正本配置である`threads/<thread-name>/docs/`、`threads/<thread-name>/result/`、`history/`、`rules/local/`など、対象ルールが指定する領域へ作成する。既存の`threads/`、`rules/`、`worker-definitions/`などの管理領域内に必要な下位ディレクトリを作成する場合は許可する。
+
+作成前に対象パスを絶対パスで解決し、リポジトリルート直下の新規ディレクトリに該当しないことを確認する。該当、判定不能、正本配置の指定不一致の場合は作成せず停止する。作成後は実在パスと正本指定を照合し、誤配置を検出した場合は次工程・承認・完了へ進まず是正する。
+
 - `rules/` 配下のMarkdownファイルは、原則として共通ルールである
 - 作業リポジトリ・利用シーン固有のローカルルールは `rules/local-rules.md` に従い、正本をGit管理外の `rules/local/<rule-name>.md` に置く。`rules/local/` の本文は共通rulesへ複製せず、適用中の状態・条件・証跡は対象taskの正本へ記録する
 - workerは作業開始前に `rules/README.md` を確認し、適用対象のルールを読み取る
@@ -30,6 +36,7 @@
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
 - 自動化操作、受入要求の自動起動、外部接続・worker作成の安全ゲート、監査証跡、停止・再開条件は `rules/automation-operation.md` を正本とする
+- 読み取り専用の正本整合チェックと承認ゲートの入力、判定、出力、人の判断境界は `rules/read-only-automation-gates.md` を正本とする
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
 - Reviewer修正依頼の総合報告、一括修正、全正本横断照合、再レビュー接続は `rules/worker-task-settings.md` と `rules/worker-evidence.md` を参照する
 - ローカルルールの配置、命名、最小本文、読込・適用タイミング、優先順位、保護対象、証跡、ライフサイクル、移行・欠落時の扱いは `rules/local-rules.md` を参照する

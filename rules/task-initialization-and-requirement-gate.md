@@ -32,10 +32,10 @@ scope: all-workers
 要件定義中の会話は、会話履歴だけを正本としない。Owner回答、worker報告、停止・再開、履歴操作、ルール変更、次工程判断が発生した直後に、`issue-memo.md`、`owner-jadge.md`、`task-log.md`、`operation-check.md`のうち該当する資料を更新し、更新成功を確認する。更新が完了するまで次の質問、接続、完了、履歴操作へ進まない。会話が中断・消失しても、最新の正本資料だけで現状、判断、次工程、停止理由を復元できる状態を維持する。
 
 1. 現行taskの`docs/`・`result/`を初期化する前に、history、manifest、`history/index.md`、退避内容を照合する。同じtask-idの再開前スナップショットがある場合は、`rules/history-initialization.md`の追記スナップショットを作成・照合する。hisi更新とdocs/result初期化を同一処理として扱わない。
-2. 照合成功後、現行taskの`docs/`・`result/`内のファイルを削除する。ディレクトリは残してよい。
+2. 照合成功後かつOwnerが削除対象を明示承認した場合だけ、現行taskの`docs/`・`result/`内の対象ファイルを削除する。ディレクトリは残してよい。承認がない場合は削除せず停止する。
 3. 新taskの`result/current-task.md`を最初に作成し、Planner入力の正本とする。
 4. task-id確定後、`rules/history-initialization.md`に従いhisiのサマリー・詳細・統合判定用パートへ同じtask-idを登録し、サマリー・詳細の状態を`対応中`として3表の一致・昇順を照合する。
-5. Ownerが継承を選択したIRがある場合だけ、新taskの`docs/`へ継承情報を記録する。未選択IR、対応済みIR、旧taskの一般資料は継承しない。
+5. 退避した旧taskのIR全件から対応済みIRだけを除外し、未完了IR全件を新taskの`docs/`へ継承する。未完了IRが0件なら`improvement-reminders.md`を作成しない。未選択を理由に未完了IRを継承から除外しない。
 6. 必要な`docs/`・`result/`資料だけを新規作成する。
 7. 作成後、全ファイルについてtask-id、タスク名、目的、対象、状態、Owner判断、未完了事項、次工程、停止条件を照合する。
 8. 旧task-id、旧目的、旧完了条件、旧進捗、旧worker結果が残っている場合は、旧history参照として明示されている場合を除き停止する。
@@ -51,10 +51,10 @@ Plannerまたは後続workerへ接続するには、次の全項目を実施済�
 
 ```text
 [ ] history・manifest・history/index.mdの照合（hisi更新とdocs/result初期化を別工程として確認）
-[ ] docs/・result/の旧ファイル削除
+[ ] Ownerの明示承認を確認した対象だけ、docs/・result/の旧ファイルを削除
 [ ] result/current-task.mdの作成
 [ ] task-id確定直後のhisi対応中登録と3表照合
-[ ] Owner選択IRだけの継承
+[ ] 退避IR全件と対応済みIRの除外を照合し、未完了IR全件を継承（0件ならIRファイルなし）
 [ ] 必要資料の新規作成
 [ ] 全資料のtask-id・目的・状態・Owner判断の照合
 [ ] issue-memo.mdの最新決定事項反映

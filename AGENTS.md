@@ -50,8 +50,8 @@
 - `threads/<thread-name>/result/task-log.md`: Documenterが現行タスクの判断・結果・残課題を記録する正式結果ファイル。履歴退避と更新境界は `rules/thread-operation.md` に従う
 - `development-improvement.md`: Documenterが全スレッド共通の開発サイクル改善を一覧で積み上げる永続記録
 - `worker-definitions/`: workerごとの役割、作業領域、入出力、完了条件
-- `threads/<thread-name>/result/`: workerが同じスレッドの後続工程へ渡す現行タスクの結果ファイル。worker別のサブフォルダは作成せず、退避指示時は`history/yyyyMMddhhmm/`へ先に保存する
-- `history/yyyyMMddhhmm/`: Ownerの退避指示時点で保存するタスク・worker結果の読み取り専用スナップショット
+- `threads/<thread-name>/result/`: workerが同じスレッドの後続工程へ渡す現行タスクの結果ファイル。worker別のサブフォルダは作成せず、Owner承認済みの退避時は`history/<task-id>/`へ先に保存する
+- `history/<task-id>/`: Owner承認済みの退避時点で保存するタスク・worker結果の読み取り専用スナップショット
 - `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
 - `rules/current-task-template.md`: 各スレッドの`current-task.md`に記載する識別情報とタスク定義のテンプレート
 - `rules/worker-report-template.md`: 各workerの完了報告と結果ファイルの共通テンプレート

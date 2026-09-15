@@ -15,19 +15,35 @@ status: active
 - 外部接続の承認・検証は既存`integration-ledger`を唯一の正本とする。新しい接続台帳を作成しない。
 - 削除、上書き、完了確定、承認の代行は自動化しない。
 
+## OwnerとOrchestratorの分離
+
+- `Owner`は人間が直接指示・承認を行うチャット／役割である。
+- `Orchestrator`は、従来`Owner Agent`と呼んでいたタスク進行担当のチャット／Agentである。
+- Orchestratorはクルー接続、result照合、工程遷移、IRリマインド、停止、承認要求を担当する。
+- 人間への承認要求・エスカレーションはOrchestratorチャット上で直接提示する。
+- OwnerとOrchestratorの間に自動接続、転送、専用heartbeatを設定しない。
+
 ## 計画承認後の即時有効化
 
 Ownerが計画を承認した時点で、承認範囲内の対象機能を「対応中・有効」として扱い、Agentは実装、設定、記録同期、検証の手順を直ちに開始する。別の開始指示、実運用効果測定、次タスク開始を発動条件にしてはならない。
 
-対象機能を有効化できない場合は、実行基盤の不存在を理由に放置せず、承認済み計画に定義した媒体中立の手順へ切り替える。手順自体が定義されていない場合は、その不足を同一タスク内で是正し、実行可能な発動条件・入力・出力・証跡・停止条件を記録する。
+対象機能を有効化できない場合は、実行基盤の不存在を理由に放置せず、承認済み計画に定義した媒体中立の手順へ切り替える。手順自体が定義されていない場合は、計画外変更として停止し、不足、影響、実行可能な発動条件・入力・出力・証跡・停止条件を記録してOwnerへ再承認または新規taskを求める。
 
-## Owner AgentによるSubagentオーケストレーション
+## OrchestratorによるSubagentオーケストレーション
 
-Owner Agentは計画承認後、Delivery Subagentを自身のsessionに属するSubagentとしてresumeし、Implementer責務を接続する。Delivery完了後はcloseして独立Reviewerを接続し、Reviewer受入後はDeliveryをresumeしてDocumenter責務を接続する。Subagentの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。Worker実行中にOwner Agentが常時待機・定期ポーリングすることは要求しない。
+Ownerが計画を承認し、次工程の実施を指示した場合、Orchestratorは承認済み計画に従って実Subagentを接続し、結果を照合して次工程へ渡す。オーケストレーションを任意扱いにしたり、親チャットの作業・ファイル側thread・ユーザー向けCodex会話で代替したりしてはならない。接続、完了通知、Registry更新、結果照合の各事実は同一taskの`task-log.md`へ直ちに記録する。
+
+計画承認後からDocumenterの記録完了までは、Orchestratorが自律的に工程を継続する。人間へ処理を返す状態は、(1)承認済み範囲では解決できない続行不能事項についてOwner判断を求める状態、または(2)記録完了後にOwnerへ作業完了確認を求める状態だけとする。「次工程待ち」「Reviewer待ち」「再接続待ち」を理由に人間へ続行指示を求めてはならず、必要なSubagent接続、再接続、結果照合、修正サイクルをこのtask内で実行する。各工程の完了報告は次工程接続の入力であり、Ownerへの追加承認要求ではない。
+
+Subagent自身の報告にある「接続機能なし」「実行不可」等の環境主張は、親Orchestratorの接続ツール結果を覆さない。親Orchestratorは、接続ツールが返したSubagent ID、status、submission、close結果を接続事実の正本とし、Subagent報告と食い違う場合は「報告不整合」としてtask-logへ記録する。接続事実が存在する限り、報告不整合だけを理由にOwnerへ続行判断を求めたり、受入工程を人間へ返したりせず、実行済みSubagentをcloseして次の承認済み工程へ自律接続する。
+
+Orchestratorは計画承認後、Delivery Subagentを自身のsessionに属するSubagentとしてresumeし、Implementer責務を接続する。Delivery完了後はcloseして独立Reviewerを接続し、Reviewer受入後はDeliveryをresumeしてDocumenter責務を接続する。Subagentの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。人間のOwnerとOrchestratorの間に自動接続は作らず、承認要求はOrchestratorチャット上で人間へ提示する。
+
+ここでいうSubagentは実際に接続・再開されたworker実行単位であり、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectでは代替できない。Deliveryは同一task内でPlanner→Implementer→Documenterの論理責務を担当し、必要な切替は同じDelivery Subagentの明示resumeで行う。Reviewerは独立した実Subagentとして接続する。Planner、Implementer、Reviewer、Documenterはいずれも`rules/worker-task-settings.md`の`gpt-5.6-luna` / `low`を接続前に指定・照合する。指定設定が確認できない場合は接続・作業を停止する。指定済みSubagentの実測値が取得不能な場合は未確認として証跡を記録するが、それだけを理由に自律オーケストレーション、受入、記録完了を停止しない。新規ユーザー向けCodexスレッド／会話の作成をSubagent接続の代替手段にしてはならない。
 
 ## 最小Subagent運用
 
-workerの役割は責務の区分であり、常設Subagentや事前作成済みの役割枠を意味しない。Owner Agentは、承認済み計画の次工程に必要な役割だけをjust-in-timeで接続する。
+workerの役割は責務の区分であり、常設Subagentや事前作成済みの役割枠を意味しない。Orchestratorは、承認済み計画の次工程に必要な役割だけをjust-in-timeで接続する。
 
 - 同時に開いてよいSubagentは1件だけとする。TesterとSecurity Operatorを含め、並行接続を行わない。
 - Worker Registryの役割行は接続許可または在庫を示さない。未接続役割は`準備中`、計画上不要な役割は`対象外`として記録し、Subagentを作成しない。
@@ -39,15 +55,15 @@ workerの役割は責務の区分であり、常設Subagentや事前作成済み
 - Subagentの恒久構成は、Delivery 1件と独立Reviewer 1件を上限とする。既存Subagentのresumeまたは親sessionへのsend_inputが明示的に不可能と検証された場合でも、Ownerの個別承認なしに代替Subagentを自動作成してはならない。作成拒否・接続不能時はOwner本体が作業を継続し、必要なら停止理由を記録する。
 - 現行Subagent一覧は運用・監査履歴として保持し、一覧を減らすための削除操作を前提にしない。完了済みSubagentはclose状態として記録し、履歴上の存在と現在のopen件数を分けて扱う。
 
-Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Owner threadにはheartbeat起動機構を1件だけ設定する。heartbeatはactive taskが存在する間だけ`ACTIVE`にし、active taskがない初期状態では`PAUSED`にする。Ownerが明示的なim開始を受けた時は、要件定義・worker接続より先に既存heartbeatを`ACTIVE`へ更新する。Documenter記録後にOwnerが完了を承認し、履歴退避・hisi更新・docs/result初期化が完了した時は、既存heartbeatを`PAUSED`へ更新する。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Ownerの処理を無応答で終了する。要対応事項がある場合だけOwner Agentを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOwner実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
+Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Orchestrator threadにはheartbeat起動機構を1件だけ設定する。heartbeatは計画承認前のim・Planner工程では`PAUSED`にする。Ownerが計画を承認した後、Implementerへ接続する直前に既存heartbeatを`ACTIVE`へ更新する。監視対象はImplementer接続からReviewer受入、Documenter記録完了までとし、Documenter記録完了を確認した時点で既存heartbeatを`PAUSED`へ更新する。Owner完了判断、履歴退避、hisi更新、docs/result初期化はheartbeat停止後の別工程とする。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Orchestratorの処理を無応答で終了する。要対応事項がある場合だけOrchestratorを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOrchestrator実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
 
-heartbeatの設定名、対象Owner thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Owner実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`はactive taskなしの待機状態でのみ許可し、active task中の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Owner Agentが人間へ復旧判断を求める。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
+heartbeatの設定名、対象Orchestrator thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Orchestrator実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`は計画承認前、Documenter記録完了後、またはactive taskなしの待機状態で許可する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Orchestratorが人間へ復旧判断を求める。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
 
 ## heartbeat輻輳防止ガード
 
-heartbeatは設定の一意性だけでなく、エスカレーションイベントごとの排他制御を行う。正本は現行taskの`result/heartbeat-events.md`とし、Owner Agentだけが更新する。
+heartbeatは設定の一意性だけでなく、エスカレーションイベントごとの排他制御を行う。正本は現行taskの`result/heartbeat-events.md`とし、Orchestratorだけが更新する。
 
-1. Ownerは処理前に、task-id、発生源（Subagent IDまたは資料）、結果資料、内容フィンガープリントから再実行安全なイベントIDを確定する。日時だけをイベントIDに使用しない。
+1. Orchestratorは処理前に、task-id、発生源（Subagent IDまたは資料）、結果資料、内容フィンガープリントから再実行安全なイベントIDを確定する。日時だけをイベントIDに使用しない。
 2. 同一イベントIDが`processing`または`completed`なら、資料更新、通知、worker接続、OJ提示を行わず終了する。
 3. 別イベントが`processing`なら、後続イベントを到着順に`queued`として記録し、並行処理・通知・worker接続を行わず終了する。queued化だけを理由に人間判断を求めてはならない。
 4. `processing`イベントを`completed`へ更新した後、最も早い`queued`イベントを1件だけ`processing`としてclaimし、自動処理を再開する。
@@ -56,9 +72,9 @@ heartbeatは設定の一意性だけでなく、エスカレーションイベ�
 
 `heartbeat-events.md`は少なくともイベントID、task-id、発生源、結果資料、内容フィンガープリント、状態、claim責任、処理結果、再開条件を保持する。状態は`queued`、`processing`、`completed`を使用する。`processing`が残る場合は同一イベントを再実行せず、queuedイベントも進めない。台帳不整合または復旧不能だけをOwner判断の停止理由とする。
 
-工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→Documenter→Owner AgentのIRリマインド・完了判断要求とする。人間はOwner Agentだけへ指示し、個別Subagentへの直接指示・既存サイドバーチャット間の任意送信を行わない。
+工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→Documenter→OrchestratorのIRリマインド・完了判断要求とする。人間はOrchestratorへ指示し、個別Subagentへの直接指示・既存サイドバーチャット間の任意送信を行わない。次工程の接続前に、直前workerの実Subagent ID、完了状態、結果ファイル、Owner判断、Registry更新を照合し、いずれかが欠けた場合は欠落を記録して次工程へ進めない。停止・再開の扱いはOwner判断または記録完了の工程境界でのみ確定する。
 
-Subagentの完了通知が取得不能な場合は、Owner Agentの次回実行時に現行resultと`task-log.md`を照合して未接続工程を復旧する。独立チャットへの送信拒否、通知本文の再送失敗、サイドバー表示の有無だけでは工程を停止しない。結果資料の欠落、不一致、停止判定、Owner判断残件は停止条件とする。
+Subagentの完了通知が取得不能な場合は、Orchestratorの次回実行時に現行resultと`task-log.md`を照合して未接続工程を復旧する。独立チャットへの送信拒否、通知本文の再送失敗、サイドバー表示の有無だけでは工程を停止しない。結果資料の欠落、不一致、停止判定、Owner判断残件は停止条件とする。
 
 ## 自動受入要求の発動条件
 

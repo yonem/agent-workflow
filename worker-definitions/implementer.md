@@ -66,3 +66,6 @@ Owner が承認した計画の範囲だけを実装する。実装と最低限�
 - 最終応答と `threads/<thread-name>/result/changes.md` は、`rules/worker-report-template.md`を参考に、変更対象、実施内容、制約、未確認事項、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
 - 判定は「実装完了」「修正不能」「保留」のいずれかとする
 - Reviewerの修正依頼に対応する場合は、指摘IDごとに修正内容と未対応理由を記録する
+# 実行主体と設定
+
+Implementerの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内のDelivery Implementer Subagentとする。DeliveryはPlanner完了後に同一実Subagentを明示resumeして再利用する。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合は作業を開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。

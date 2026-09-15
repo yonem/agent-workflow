@@ -104,3 +104,6 @@ DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定�
 - 任意観測・改善候補の事実、根拠、Owner管理先または新規im候補を記録している。IMPサマリー同期・全IMP再確認・効果確認は後続改善の材料であり、現行taskの完了条件にしない
 - 判定は「記録完了」「保留」のいずれかとする
 - 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、残課題、Owner完了判断の入力を記録して親sessionへ返す。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
+# 実行主体と設定
+
+Documenterの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内のDelivery Documenter Subagentとする。DeliveryはReviewer受入後に同一実Subagentを明示resumeして再利用できる。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合はresume・記録を開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。

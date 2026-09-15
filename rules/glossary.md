@@ -5,9 +5,10 @@
 | 用語 | 標準的な意味 | 取り違え防止 |
 | --- | --- | --- |
 | Owner会話 | Ownerの判断・承認・明示トリガーを記録する会話 | ファイル側thread登録のために新規作成しない |
-| Codex会話 | Codex上の作業会話 | ファイル側threadやtaskと同一視せず、必要性確定後に作成・再利用を判断する |
-| クルー会話 | workerを実行する会話単位 | Owner会話やファイル側threadと混同しない |
-| Codexプロジェクト | 会話・作業環境の所属境界 | `projectId`は所属を示し、task-idやthread名から推測しない |
+| ユーザー向けCodexスレッド／会話 | Owner・利用者が見るCodex上の会話・作業画面 | ファイル側thread、Subagent、Codex projectと同一視しない。Subagent接続の代替に作成しない |
+| Codex会話 | ユーザー向けCodexスレッド／会話の旧表現 | 新規資料では上記の正式名を使用する |
+| クルー会話 | workerを実行する実Subagentの実行単位 | ユーザー向け会話、ファイル側thread、Codex projectと混同しない |
+| Codex project | taskの実行環境・所属境界 | `projectId`は所属を示し、task-idやthread名から推測しない。Subagentやthreadそのものではない |
 | ファイル側thread | `threads/<thread-name>/`の資料保存領域 | 会話・worker・taskを自動作成するものではない |
 | task | 目的、対象、完了条件を持つ論理作業単位 | 明示トリガー後に採番し、初期登録だけでは発生しない |
 
@@ -15,9 +16,10 @@
 
 | 用語 | 標準的な意味 | 備考 |
 | --- | --- | --- |
-| Owner／オーナー／親 | 人間から指示を受ける起点Agent。他のクルーへ指示を出し、IR・OJ・タスク進行を管理する | この会話の人間と同一視しない。一般的な所有者、親スレッド、または他クルーの役割名を指さない |
+| Owner Agent | Orchestratorの旧称 | 人間のOwnerや親sessionを指さない。新規のルール・資料では`Orchestrator`を使用する |
 | docu | Documenterを指す略称。文脈で判断する | 一般的な略称や別の役割名と決めつけない |
 | di | `development-improvement`を指す略称。文脈で判断する | `Dependency Injection`とは区別する |
+| hb | heartbeatを指す略称。文脈で判断する | 心拍、稼働監視一般、または別の自動化機構と同一視しない |
 | hc | `health-check`を指す略称。文脈で判断する | 一般的な略称や別の確認手順と決めつけない |
 | oc | `operation-check`を指す略称。文脈で判断する | 一般的な略称や別の運用確認を指すものと決めつけない |
 | hisi | `history/index.md`を指す略称。文脈で判断する | 一般的な履歴資料や`history/`配下の別資料と決めつけない |
@@ -30,6 +32,11 @@
 | so | Security Operatorを指す略称。文脈で判断する | 一般的な英単語や別の略称と決めつけない |
 | ～を共有して／～を見せて | 実作業をせず、実行計画を共有する指示。文脈で判断する | 実作業の開始指示や実装完了の報告と決めつけない |
 | クルー | プロジェクト内で役割を分担するworkerの集合（Planner、Implementer、Tester、Security Operator、Reviewer、Documenter等） | 対象リポジトリの機能名や、単一のworkerだけを指さない |
-| スレッド | Codexプロジェクトと対になる`threads/`内で、1つのタスクを処理する単位 | プロジェクト全体、worker全体、または単一workerだけを指さない、Codexプロジェクト内のスレッド(チャット)を指さない |
+| Owner | 人間から直接指示・承認を受けるプロジェクト内の管理用チャット／役割 | Orchestratorや単一workerと同一視しない。OwnerとOrchestrator間の自動接続は行わない |
+| Orchestrator | タスク進行・クルー接続・正本照合・承認要求を担当するプロジェクト内の実行チャット／Agent | 人間のOwnerとは別の役割。`Owner Agent`は旧称としてのみ扱う。人間への承認要求はOrchestratorチャット上で提示する |
+| orch | Orchestratorの短縮語 | Ownerやworkerと混同せず、タスク進行を担当するAgent／チャットを指す |
+| ファイル側thread | Codexプロジェクトと対になる`threads/`内のtask資料保存領域 | ユーザー向けCodex会話、Subagent、Codex project、taskの実行単位ではない |
+| Subagent | 同一task内でworker役割を実行する実行単位 | 親チャット、ユーザー向け会話、ファイル側threadで代替しない。ID・役割・task・状態をRegistryで管理する |
+| スレッド | 文脈によりユーザー向けCodexスレッド／会話またはファイル側threadを指し得る一般語 | 曖昧な場合は4概念を特定し、未特定なら停止する |
 | 報告書 | `result/`内に保存するworker間引継ぎ・実施結果・受入結果などの正式な結果資料 | `docs/`の人間向け要約資料や、会話本文そのものと同一視しない |
 | ルール | `rules/`、`README.md`、`AGENTS.md`など、このシステムの共通運用を定める資料群 | 現行タスクだけの一時指示や、個別プロジェクトの機能仕様だけを指さない |

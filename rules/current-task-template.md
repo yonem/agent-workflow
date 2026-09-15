@@ -44,25 +44,25 @@ status: active
 
 ## Worker Registry
 
-Worker Registryはworker再利用時の期待値の正本であり、実測値ではない。初回導入時に値が未確認なら、推測で埋めず接続前にOwnerが確認する。
+Worker Registryは、接続前の指定設定と、接続後に取得できる実測値・状態を分けて記録する正本である。ユーザー向けCodexスレッド／会話、ファイル側thread、同一task内のSubagent、Codex projectを混同しない。接続前の指定設定が確認できない場合は接続しない。指定済みSubagentの実測値を取得できない場合は`未確認`として記録するが、それだけで自律オーケストレーション・受入・完了を停止せず、親チャット、会話、ファイル側threadを実Subagentの代替にしない。
 
-| 論理責務 | Subagent種別 | subagentId | 親session | 所属projectId | モデル・推論レベル | 実行ディレクトリ | 状態 | 確認日時 | 更新責任者 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Planner | Delivery |  | Owner session |  |  |  | 準備中 |  | Owner |
-| Implementer | Delivery（Planner完了後にresume） |  | Owner session |  |  |  | 準備中 |  | Owner |
-| Documenter | Delivery（Reviewer受入後にresume） |  | Owner session |  |  |  | 準備中 |  | Owner |
-| Reviewer | 独立Reviewer |  | Owner session |  |  |  | 準備中 |  | Owner |
-| Tester | 例外 |  | Owner session |  |  |  | 対象外 |  | Owner |
-| Security Operator | 例外 |  | Owner session |  |  |  | 対象外 |  | Owner |
+| 論理責務 | Subagent種別 | 実Subagent ID | 親Orchestrator session | 所属Codex project ID | 指定モデル・推論 | 実測モデル・推論 | 実行ディレクトリ | 状態 | 確認日時・証跡 | 更新責任者 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planner | Delivery |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
+| Implementer | Delivery（Planner完了後に明示resume） |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
+| Documenter | Delivery（Reviewer受入後に明示resume） |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
+| Reviewer | 独立Reviewer Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
+| Tester | 例外Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 対象外 |  | Orchestrator |
+| Security Operator | 例外Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 対象外 |  | Orchestrator |
 
 ### 親session返却先
 
 | 項目 | 値 |
 | --- | --- |
-| Owner session |  |
-| 報告対象 | Owner sessionのみ |
+| 親Orchestrator session |  |
+| 報告対象 | 親Orchestrator session。Owner判断はOrchestratorがOwnerへ提示する |
 
-workerはOwner sessionのSubagentとして作成されたことを確認する。標準SubagentはDelivery 1件と独立Reviewer 1件であり、Deliveryは同一task内でclose/resumeしてPlanner、Implementer、Documenterの論理責務を順次担当する。独立チャットのthreadId・hostIdは返却先として使用しない。親sessionが確認不能ならworker接続を開始しない。TesterとSecurity Operatorは、承認済み計画に外部接続、高リスク変更、または独立検証が明記され、Owner例外承認がある場合だけ`対象外`から更新する。
+workerは親Orchestrator sessionの実Subagentとして接続されたことを確認する。標準SubagentはDelivery 1件と独立Reviewer 1件であり、Deliveryは同一task内で明示resumeしてPlanner、Implementer、Documenterの論理責務を順次担当する。Reviewerは独立した実Subagentである。ユーザー向けCodexスレッド／会話ID、ファイル側thread名、Codex project ID、親session IDは実Subagent IDの代替に使用しない。親Orchestrator sessionまたは接続前の指定設定が確認不能なら接続を開始しない。実測値が取得不能なら未確認として証跡を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。TesterとSecurity Operatorは、承認済み計画に外部接続、高リスク変更、または独立検証が明記され、Owner例外承認がある場合だけ`対象外`から更新する。
 ```
 
 ## 記載ルール
@@ -75,7 +75,7 @@ workerはOwner sessionのSubagentとして作成されたことを確認する�
 - 新規作成した作業ブランチ名は、作成後に `current-task.md` と担当結果ファイルへ記録する
 - `Task Definition`はPlannerが計画を作成できる具体性で記載する
 - `Task Lifecycle`はタスクの開始、完了、退避、復旧を追跡するために記載する。履歴へ退避しない場合も、未実施理由を結果ファイルへ記録する
-- Worker RegistryはOwnerがDelivery、Reviewer、例外workerの接続・再利用方針を承認して更新する。Deliveryの論理責務行は同一subagentIdを共有してよい。各Subagentは開始前にRegistryを期待値として実測値と照合し、不一致、重複、未確認では接続・作業を停止する。
+- Worker RegistryはOrchestratorがDelivery、Reviewer、例外workerの接続・再利用方針を承認済み計画と照合して更新する。Deliveryの論理責務行は同一実Subagent IDを共有してよい。各Subagentは開始前に指定値を照合し、指定値不一致・重複・未確認では接続・作業を停止する。接続後に実測値が取得不能な場合は未確認として証跡を残すが、それだけで自律オーケストレーション・受入・完了を停止しない。
 - `current-task.md`は識別情報・対象・Task Lifecycleの正本とし、共通進捗は`task-progress.md`、承認済み計画は`result/plan.md`、Implementer結果は`result/changes.md`、Reviewer判定は`result/review.md`を正本とする。`history/index.md`は要約・候補の参照であり、これらのresultを代替しない
 - 各資料の更新責任と更新境界は`rules/thread-operation.md`の資料マップに従う。正本候補が複数、参照切れ、責務重複、更新境界不明の場合は推測で補正せず停止する
 - `タスクID`は新規タスクの論理識別子として必須とし、Task DefinitionとTask Lifecycleで同じ値を記録する。タスク名だけで別タスクを統合しない
