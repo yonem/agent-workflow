@@ -15,19 +15,27 @@ status: active
 - 外部接続の承認・検証は既存`integration-ledger`を唯一の正本とする。新しい接続台帳を作成しない。
 - 削除、上書き、完了確定、承認の代行は自動化しない。
 
+## OwnerとOrchestratorの分離
+
+- `Owner`は人間が直接指示・承認を行うチャット／役割である。
+- `Orchestrator`は、従来`Owner Agent`と呼んでいたタスク進行担当のチャット／Agentである。
+- Orchestratorはクルー接続、result照合、工程遷移、IRリマインド、停止、承認要求を担当する。
+- 人間への承認要求・エスカレーションはOrchestratorチャット上で直接提示する。
+- OwnerとOrchestratorの間に自動接続、転送、専用heartbeatを設定しない。
+
 ## 計画承認後の即時有効化
 
 Ownerが計画を承認した時点で、承認範囲内の対象機能を「対応中・有効」として扱い、Agentは実装、設定、記録同期、検証の手順を直ちに開始する。別の開始指示、実運用効果測定、次タスク開始を発動条件にしてはならない。
 
 対象機能を有効化できない場合は、実行基盤の不存在を理由に放置せず、承認済み計画に定義した媒体中立の手順へ切り替える。手順自体が定義されていない場合は、その不足を同一タスク内で是正し、実行可能な発動条件・入力・出力・証跡・停止条件を記録する。
 
-## Owner AgentによるSubagentオーケストレーション
+## OrchestratorによるSubagentオーケストレーション
 
-Owner Agentは計画承認後、Delivery Subagentを自身のsessionに属するSubagentとしてresumeし、Implementer責務を接続する。Delivery完了後はcloseして独立Reviewerを接続し、Reviewer受入後はDeliveryをresumeしてDocumenter責務を接続する。Subagentの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。Worker実行中にOwner Agentが常時待機・定期ポーリングすることは要求しない。
+Orchestratorは計画承認後、Delivery Subagentを自身のsessionに属するSubagentとしてresumeし、Implementer責務を接続する。Delivery完了後はcloseして独立Reviewerを接続し、Reviewer受入後はDeliveryをresumeしてDocumenter責務を接続する。Subagentの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。人間のOwnerとOrchestratorの間に自動接続は作らず、承認要求はOrchestratorチャット上で人間へ提示する。
 
 ## 最小Subagent運用
 
-workerの役割は責務の区分であり、常設Subagentや事前作成済みの役割枠を意味しない。Owner Agentは、承認済み計画の次工程に必要な役割だけをjust-in-timeで接続する。
+workerの役割は責務の区分であり、常設Subagentや事前作成済みの役割枠を意味しない。Orchestratorは、承認済み計画の次工程に必要な役割だけをjust-in-timeで接続する。
 
 - 同時に開いてよいSubagentは1件だけとする。TesterとSecurity Operatorを含め、並行接続を行わない。
 - Worker Registryの役割行は接続許可または在庫を示さない。未接続役割は`準備中`、計画上不要な役割は`対象外`として記録し、Subagentを作成しない。
@@ -39,9 +47,9 @@ workerの役割は責務の区分であり、常設Subagentや事前作成済み
 - Subagentの恒久構成は、Delivery 1件と独立Reviewer 1件を上限とする。既存Subagentのresumeまたは親sessionへのsend_inputが明示的に不可能と検証された場合でも、Ownerの個別承認なしに代替Subagentを自動作成してはならない。作成拒否・接続不能時はOwner本体が作業を継続し、必要なら停止理由を記録する。
 - 現行Subagent一覧は運用・監査履歴として保持し、一覧を減らすための削除操作を前提にしない。完了済みSubagentはclose状態として記録し、履歴上の存在と現在のopen件数を分けて扱う。
 
-Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Owner threadにはheartbeat起動機構を1件だけ設定する。heartbeatはactive taskが存在する間だけ`ACTIVE`にし、active taskがない初期状態では`PAUSED`にする。Ownerが明示的なim開始を受けた時は、要件定義・worker接続より先に既存heartbeatを`ACTIVE`へ更新する。Documenter記録後にOwnerが完了を承認し、履歴退避・hisi更新・docs/result初期化が完了した時は、既存heartbeatを`PAUSED`へ更新する。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Ownerの処理を無応答で終了する。要対応事項がある場合だけOwner Agentを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOwner実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
+Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Owner threadにはheartbeat起動機構を1件だけ設定する。heartbeatは計画承認前のim・Planner工程では`PAUSED`にする。Ownerが計画を承認した後、Implementerへ接続する直前に既存heartbeatを`ACTIVE`へ更新する。監視対象はImplementer接続からReviewer受入、Documenter記録完了までとし、Documenter記録完了を確認した時点で既存heartbeatを`PAUSED`へ更新する。Owner完了判断、履歴退避、hisi更新、docs/result初期化はheartbeat停止後の別工程とする。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Ownerの処理を無応答で終了する。要対応事項がある場合だけOwner Agentを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOwner実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
 
-heartbeatの設定名、対象Owner thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Owner実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`はactive taskなしの待機状態でのみ許可し、active task中の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Owner Agentが人間へ復旧判断を求める。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
+heartbeatの設定名、対象Owner thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Owner実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`は計画承認前、Documenter記録完了後、またはactive taskなしの待機状態で許可する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Owner Agentが人間へ復旧判断を求める。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
 
 ## heartbeat輻輳防止ガード
 

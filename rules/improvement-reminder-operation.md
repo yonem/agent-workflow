@@ -14,6 +14,8 @@ status: active
 
 ## 正本と責任
 
+人間の`Owner`とタスク進行を担う`Orchestrator`を分離する。IRの追加・更新・削除・リマインド判断はOrchestratorが行い、判断が必要な場合はOrchestratorチャット上で人間のOwnerへ提示する。OwnerとOrchestrator間の自動接続は行わない。
+
 - `threads/<thread-name>/docs/improvement-reminders.md`をIR（`improvement-reminders`）の正本とする。
 - IR正本は`## サマリー`と`## 詳細`で構成し、サマリーは一覧、詳細はIRごとの根拠・状態・継承・次回条件を記録する。
 - サマリーの列順は`IR-ID`、`状態`、`内容`、`継承理由`で固定する。列の追加、削除、並べ替え、別表への置換は禁止する。task-idは対応未定のIRへ付与しないため、サマリーには記載しない。

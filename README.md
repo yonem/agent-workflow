@@ -33,6 +33,8 @@ skillを扱う共通基盤は`rules/skill-framework.md`を正本とし、個別s
 
 `threads/<thread-name>/docs/` と `threads/<thread-name>/result/` は、展開先で生成されるタスク固有の作業領域です。次タスク以降、進行中タスクの共通台帳は`docs/task-progress.md`、worker固有の完了報告は`result/`に分けます。本リポジトリではGit管理対象外とし、共通の仕組みには含めません。共通ルールを更新した場合は、派生先で差分を確認してから必要な内容だけを取り込みます。
 
+現時点では、リポジトリルート直下に新しいディレクトリを作成しません。タスク資料・結果・計画提案は必ず対象スレッド配下の正本領域へ作成し、作成前後に絶対パスを照合します。
+
 Codexの再起動後にworkerの表示やプロジェクト所属が不一致になった場合は、作業を開始せず、Ownerがworkerを正しいプロジェクトへ再作成・再接続します。復旧手順は `rules/thread-operation.md` の「同期失敗時の復旧」を参照してください。
 
 Ownerが「ヘルスチェックを実行して」と明示した場合、または作業中にSubagentへ接続できなかった場合は、`rules/worker-health-check.md` に従ってOwner session配下のSubagent ID、親session、状態、モデル・推論、結果資料、重複、不一致、不足を読み取り確認します。接続失敗時も自動作成へ進まず、Ownerの確認前にSubagentの状態を変更しません。資料は読み取り専用とし、不足Subagentの追加はOwnerが明示的に指示した場合だけ行います。
@@ -171,6 +173,8 @@ Documenter：判断・結果・教訓を記録
 `threads/<thread-name>/` は、Codexプロジェクトと1対1で対応するタスク単位の作業領域です。スレッド名は用途に応じて自由に決定し、新しいスレッドは同じ構成で追加します。`rules/` 配下のMarkdownファイルは共通ルールとして扱い、適用範囲や優先順位は `rules/README.md`、スレッドの分離方法は `rules/thread-operation.md` を参照してください。
 
 ## 役割
+
+`Owner`は人間が直接指示・承認を行うプロジェクト内チャットです。`Orchestrator`は、従来Owner Agentと呼んでいたタスク進行用のプロジェクト内チャットで、クルー接続、正本照合、heartbeat監視、停止、承認要求を担当します。OwnerとOrchestratorは別チャットとして扱い、両者の自動接続は行いません。人間への承認要求はOrchestratorチャット上で提示します。
 
 `Owner` は人間の承認者です。Planner、Implementer、Tester、Security Operator、Reviewer、Documenter が worker として作業します。各 worker の詳細は対応する `worker-definitions/*.md` を参照してください。
 

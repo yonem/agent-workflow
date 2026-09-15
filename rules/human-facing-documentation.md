@@ -32,6 +32,7 @@ Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判�
 
 - `issue-memo.md`と`task-progress.md`は、人間向けに整理した資料として`docs/`に置く。
 - `result/current-task.md`、`result/plan.md`、`result/changes.md`、`result/review.md`、`result/task-log.md`は、Planner・worker・Documenterが扱う詳細な正式結果として`result/`に置く。
+- Plannerの人間向け計画提案資料は、必ず`threads/<thread-name>/docs/plan-proposal.md`へ置く。リポジトリルートの`docs/plan-proposal.md`や`result/plan.md`を人間向け計画提案資料の正本として扱わない。作成前に`current-task.md`のthread名・projectIdと配置先を照合し、誤配置を検出した場合は計画承認へ進まず正しいパスへ是正する。
 - `docs/`へ`result/`本文を全文複製せず、必要な場合は正本パスと短い要約だけを記載する。
 - `result/`へ人間向けサマリーを重複作成せず、Owner判断や進捗の見える化は`docs/`の正本を参照する。
 
