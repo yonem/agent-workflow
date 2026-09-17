@@ -28,8 +28,6 @@ Planner → Owner承認
   ↓
 Implementer
   ↓
-Tester / Security Operator（接続しない場合はOwner承認済みの標準設定を確認）
-  ↓
 Reviewer
   ↓
 Documenter
@@ -43,7 +41,7 @@ worker役割は論理的な責務であり、6件のSubagentを常設または�
 
 各Subagentは担当resultと`task-log.md`へ結果を記録して親sessionへ完了を返す。Orchestratorは完了通知を受けて結果資料・入力ゲートを照合し、問題がなければ次workerを自動接続する。WorkerからOwnerチャットまたは別workerチャットへ任意の可視メッセージを送ることは、正規のエスカレーション経路ではない。
 
-計画承認後は、OrchestratorがImplementer→必要なTester / Security Operator→Reviewer→Documenterを自動で接続する。停止するのは、担当resultの判定、必須証跡、Owner判断、入力ゲートに未確認または不一致がある場合だけとする。通知経路の失敗だけで工程を停止しない。人間への承認要求はOrchestratorチャット上で提示する。
+計画承認後は、OrchestratorがImplementer→Reviewer→Documenterを自動で接続する。TesterまたはSecurity OperatorはOwner承認済みの例外として計画に明記された場合だけ、Reviewerの前に順番に接続する。停止するのは、担当resultの判定、必須証跡、Owner判断、入力ゲートに未確認または不一致がある場合だけとする。通知経路の失敗だけで工程を停止しない。人間への承認要求はOrchestratorチャット上で提示する。
 
 各workerの完了報告は担当resultへ保存し、親sessionへ判定、結果パス、未確認事項、次workerを返す。Owner判断残件、入力不一致、正本不明、参照切れ、履歴操作要求、移行先の責任者・記録先・停止条件の未確認がある場合は次工程へ接続しない。
 

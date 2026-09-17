@@ -5,6 +5,10 @@ status: active
 
 # 自動化操作・受入要求ルール
 
+## TASK-033標準工程の参照境界
+
+標準工程はDelivery（Planner→Implementer→Documenter）と独立Reviewerを基本とし、同時稼働は1件とする。Tester・Security OperatorはOwner承認済み計画に明記された例外の場合だけ接続する。用語は`rules/glossary.md`、固有責務は`worker-definitions/`、完了境界は`rules/development-improvement-record.md`を正本として参照する。
+
 ## 目的
 
 承認済み計画の対象機能は、タスク対応中に直ちに有効化し、同じタスク内で検証する。計画承認完了を自動発動契機とし、人間の別途開始指示を待たない。Agentは条件達成を検知して承認要求を起動するが、Reviewer受入・Owner承認・不可逆操作を自動確定しない。
@@ -57,7 +61,7 @@ workerの役割は責務の区分であり、常設Subagentや事前作成済み
 
 Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Orchestrator threadにはheartbeat起動機構を1件だけ設定する。heartbeatは計画承認前のim・Planner工程では`PAUSED`にする。Ownerが計画を承認した後、Implementerへ接続する直前に既存heartbeatを`ACTIVE`へ更新する。監視対象はImplementer接続からReviewer受入、Documenter記録完了までとし、Documenter記録完了を確認した時点で既存heartbeatを`PAUSED`へ更新する。Owner完了判断、履歴退避、hisi更新、docs/result初期化はheartbeat停止後の別工程とする。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Orchestratorの処理を無応答で終了する。要対応事項がある場合だけOrchestratorを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOrchestrator実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
 
-heartbeatの設定名、対象Orchestrator thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Orchestrator実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`は計画承認前、Documenter記録完了後、またはactive taskなしの待機状態で許可する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Orchestratorが人間へ復旧判断を求める。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
+heartbeatの設定名、対象Orchestrator thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Orchestrator実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`は計画承認前、Documenter記録完了後、active taskなしの待機状態、または同一原因の再試行が最大2回に達した後の停止状態で使用する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Orchestratorが人間へ復旧判断を求める。同一原因の再試行が最大2回に達した場合は、自動継続を停止し、heartbeat設定を直ちに`PAUSED`へ更新したうえで、6項目エスカレーションを記録する。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
 
 ## heartbeat輻輳防止ガード
 
@@ -97,7 +101,7 @@ Agentは次の条件をすべて確認した時点で、Reviewer受入要求を�
 
 承認要求の起動から一定時間応答がない場合も、Agentは自動切替せず、未承認として停止状態を維持し、再通知またはエスカレーションを記録する。
 
-再通知・承認要求のリトライは最大2回までとする。2回に達しても応答がない場合、または同一原因の失敗が続く場合は、自動継続せず6項目エスカレーションへ移行する。
+再通知・承認要求のリトライは最大2回までとする。2回に達しても応答がない場合、または同一原因の失敗が続く場合は、自動継続せず、heartbeat設定を直ちに`PAUSED`へ更新してから6項目エスカレーションへ移行する。復旧条件を満たしOwnerが再開を承認するまで、heartbeatを`ACTIVE`へ戻してはならない。
 
 ## 外部接続・worker作成
 

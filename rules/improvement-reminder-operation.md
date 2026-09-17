@@ -7,7 +7,7 @@ status: active
 
 ## ファイルライフサイクル
 
-- `improvement-reminders.md`が存在しない場合、Owner AgentがIR追加を明示した時だけ新規作成する。
+- `improvement-reminders.md`が存在しない場合、Owner AgentのIR追加指示、またはクローズ後の初期化直後に未完了IRを継承する場合だけ新規作成する。
 - 新規作成時は`## サマリー`と`## 詳細`を作成し、現行ファイル内で未使用のIR-IDを採番する。既存ファイルがない状態で最初に登録する場合だけIR-001とする。
 - IRが0件になった場合は、Owner Agentが`improvement-reminders.md`を削除する。
 - ファイル不存在は異常ではなく、IRが0件の状態として扱う。IR追加指示なしに自動作成しない。
@@ -30,12 +30,12 @@ status: active
 
 - IR-IDはOwner Agentが連番で付与し、追加前に重複・意味衝突・対象不明を確認する。
 - 既存IRの変更は上書きせず、変更理由と変更履歴を残す。
-- 対応済みIRは、対応したtaskの現行IRへ状態を残したまま退避対象に含める。次taskのIRを初期化する時点で対応済みIRだけを一覧・詳細から削除し、未完了IRだけを引き継ぐ。IRだけの独立履歴は作成しない。
-- 次taskへ引き継ぐ未完了IRが0件の場合は、`improvement-reminders.md`を作成・継承しない。
+- 対応済みIRは、対応したtaskの現行IRへ状態を残したまま退避対象に含める。クローズ後の初期化直後または次taskのIRを初期化する時点で対応済みIRだけを一覧・詳細から削除し、未完了IRだけを引き継ぐ。IRだけの独立履歴は作成しない。
+- クローズ後の初期化直後または次taskの初期化時に引き継ぐ未完了IRが0件の場合は、`improvement-reminders.md`を作成・継承しない。未完了IRがある場合は、クローズ後の初期化直後から`docs/improvement-reminders.md`へ未完了全件を継承する。
 - IR-IDの採番は現行の未完了IRに存在する番号だけを対象とし、次taskで削除された対応済みIRの番号を予約しない。
 - IRの状態は`未対応`、`対応中`、`対応済み`、`延期`、`別タスク候補`、`Owner除外`で管理する。
 - task-idは計画承認後にだけ採番する。対応未定のIRへtask-idを付与しない。
-- IRはタスク単位の選択引継ぎ資料ではなく、現行の未完了全件リストとする。task退避時は対応済みIRを含む当該taskの全IRを退避し、新taskでは対応済みIRを除いた未完了IR全件を現行`improvement-reminders.md`へ継承する。
+- IRはタスク単位の選択引継ぎ資料ではなく、現行の未完了全件リストとする。task退避時は対応済みIRを含む当該taskの全IRを退避し、旧docs/result初期化直後に対応済みIRを除いた未完了IR全件を現行`docs/improvement-reminders.md`へ継承する。次taskはこの資料を入力として開始する。
 - OwnerがIRを除外する場合は対象IR、理由、判断をtask-logへ記録する。未選択を理由に未完了IRを履歴だけへ残してはならない。
 - active taskは1つに限定する。
 

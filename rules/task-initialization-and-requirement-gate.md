@@ -78,8 +78,8 @@ Ownerがタスクの作業完了を判断した場合、次タスクの開始を
 2. 現行`docs/`と`result/`の一覧、task-id、projectId、thread、状態、Owner判断、未確認事項、次工程を照合する。
 3. `history/<task-id>/`が存在しないことを確認し、現行`docs/`と`result/`をコピーしてmanifestを作成する。同一task-idの履歴が存在する場合は上書きせず停止する。
 4. 退避先、manifest、`history/index.md`、退避ファイルの内容と件数を相互照合する。部分成功、不一致、欠落、読取不能の場合は現行領域を初期化しない。
-5. 照合成功とOwner承認後、現行`docs/`と`result/`のファイルを削除し、ディレクトリだけを残す。クローズ済みの現行領域へ旧taskの資料、OJ、状態、worker結果を残してはならない。
-6. 引継ぎ、効果確認、再評価条件は履歴manifestおよび履歴スナップショットを正本とする。現行領域へ複製しない。
-7. 操作前後の一覧、退避先、manifest、照合結果、初期化結果を記録し、次タスクは現行領域が空であることを確認してから開始する。
+5. 照合成功とOwner承認後、現行`docs/`と`result/`の旧task資料を削除する。削除直後に履歴の全IRから対応済みIRだけを除外し、未完了IRがある場合は未完了全件を新規の`docs/improvement-reminders.md`へ継承する。未完了IRが0件の場合は同ファイルを作成しない。
+6. 初期化直後に作成できるのは未完了IRの継承資料だけとし、旧task-id・旧OJ・旧進捗・旧worker結果、新taskのtask-id・OJ・current-task・issue-memo・task-progressを推測・作成しない。次タスク開始時はこのIR資料を入力として新task資料を初期化する。
+7. 引継ぎの正本は履歴manifest・履歴スナップショットおよび初期化直後の`docs/improvement-reminders.md`とし、全IR集合、対応済みIRの除外、未完了IRのサマリー・詳細一致を照合する。操作前後の一覧、退避先、manifest、照合結果、初期化結果、IR継承結果を記録する。
 
 完了判断後に現行`docs/`または`result/`が残っている、完了日時が空欄、履歴manifestがない、または履歴とindexの照合が未完了の場合は、タスクを完全なクローズと扱わず、次タスク接続・worker接続・履歴消費を停止する。

@@ -97,7 +97,7 @@ Documenter：判断・結果・教訓を記録
 4. Implementerに承認済みの範囲だけを実装させる
 5. TesterとSecurity Operatorに、それぞれ実測ベースの検証と安全性確認を依頼する
 6. 両方の完了報告を確認してからReviewerに独立レビューを依頼する
-7. Reviewer受入後に実運用の効果を確認し、Documenterまたは導入時に指定した記録責任者が結果・残課題・次回条件を記録する
+7. Reviewer受入後、Documenterが受入根拠・変更・未確認事項を記録する。実運用の効果確認は任意の後続改善材料として分離し、タスク完了ゲートにしない
 8. Documenterの通常task記録完了後、Owner AgentがIR正本を確認し、IRありなら`未対応`・`延期`・`別タスク候補`を全件提示し、IRなしならその旨をtask-logへ記録する。IRの不一致・未分類・取得失敗はIR処理のみ保留し、task本体を自動停止しない
 9. 効果不足や承認範囲外の是正がある場合は、同一TASKの修正または新しいTASK-xxxの計画をOwnerが判断する
 10. 人間が採用、修正、中止、マージ、リリースを判断する
@@ -111,7 +111,7 @@ Documenter：判断・結果・教訓を記録
 - `rules/history-initialization.md`に従って、ローカルの`history/`とサマリー・詳細・統合判定用8項目の`history/index.md`を初期化できる
 - `current-task.md`、`task-progress.md`、worker結果ファイル、汎用改善記録、タスク固有ログの記録先が確認できる
 - Planner、Implementer、Reviewer、Documenterの責務と、Documenterを省略する場合の記録責任者・記録先が確認できる
-- Reviewer受入と実運用後の効果確認、継続評価、再評価、新TASK起票、停止条件の境界が確認できる
+- Reviewer受入とDocumenter記録・Owner完了判断を完了境界とし、実運用後の効果確認、継続評価、再評価、新TASK起票、停止条件を分離して確認できる
 - 特定の過去task、project/thread、Worker Registry、F-ID、IMP-ID、draftsなしで初回サイクルを開始できる
 - 共通資料の正本・参照先・更新責任・更新境界、旧表現の扱い、影響確認と変更後再確認の手順を確認できる
 - 移行先固有のproject/thread、Worker Registry、task-id、IMP-ID、現在のブランチ、実行ディレクトリを共通仕様の必須条件にせず、必要な固有設定を導入時に分離して設定できる

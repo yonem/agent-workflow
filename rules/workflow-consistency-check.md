@@ -5,6 +5,18 @@ status: active
 
 # ワークフロー整合性チェック
 
+## TASK-034 第4段階の横断照合境界（CHG-034-01）
+
+IR-005の横断照合では、`current-task.md`、`docs/task-progress.md`、現行`result/`、Owner判断、作業ブランチ、project/thread/task境界、次工程、Worker Registryを入力とする。各項目を「一致」「不一致」「未確認」「対象外」に分類し、未確認または不一致を検出した場合は接続・更新・次工程を停止する。照合結果は担当`result/changes.md`へ記録し、履歴原本・外部サービス・秘密情報を入力へ追加しない。
+
+## TASK-034 第4段階の影響分析境界（CHG-034-02）
+
+IR-006のルール変更影響分析は、変更対象、直接参照、記録対象、移行先導入対象を抽出し、旧用語・旧工程・参照切れ・重複記載・相反する停止条件・共通仕様と固有設定の混在を分類する。機械的な抽出結果は人の承認・受入を代替せず、誤検出または判定不能は未確認として記録し、自己判断で対象範囲を拡張しない。
+
+## TASK-034 第4段階の状態表示境界（CHG-034-03）
+
+IR-007の状態表示は読み取り専用とし、task/thread/project/branch、次工程、OJ、Subagent状態を「正常」「警告」「未確認」「停止」に分類する。表示は正本を変更せず、状態の更新責任は各正本の所有者に残す。表示値と正本が一致しない場合は警告または停止として記録し、表示から承認・接続・完了を自動実行しない。
+
 worker接続前および作業開始前に、`current-task.md`、`docs/task-progress.md`、スレッドの結果ファイル、workerの実行環境が同じタスクを指していることを確認するための共通手順。
 
 本書は記載値と実環境の照合手順を正本とする。用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。6項目とTask Definition/Task Lifecycleの記載形式は `rules/current-task-template.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、project/thread/taskのライフサイクルは `rules/thread-operation.md`に従う。共通台帳の正本は次タスク以降`docs/task-progress.md`とする。
