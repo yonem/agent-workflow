@@ -35,7 +35,7 @@ Ownerが計画を承認した時点で、承認範囲内の対象機能を「対
 
 ## OrchestratorによるSubagentオーケストレーション
 
-Ownerが計画を承認し、次工程の実施を指示した場合、Orchestratorは承認済み計画に従って実Subagentを接続し、結果を照合して次工程へ渡す。オーケストレーションを任意扱いにしたり、親チャットの作業・ファイル側thread・ユーザー向けCodex会話で代替したりしてはならない。接続、完了通知、Registry更新、結果照合の各事実は同一taskの`task-log.md`へ直ちに記録する。
+Ownerが計画を承認した場合、Orchestratorは追加の開始指示を待たず、承認済み計画に従って実Subagentを接続し、結果を照合して次工程へ渡す。オーケストレーションを任意扱いにしたり、親チャットの作業・ファイル側thread・ユーザー向けCodex会話で代替したりしてはならない。接続、完了通知、Registry更新、結果照合の各事実は同一taskの`task-log.md`へ直ちに記録する。
 
 計画承認後からDocumenterの記録完了までは、Orchestratorが自律的に工程を継続する。人間へ処理を返す状態は、(1)承認済み範囲では解決できない続行不能事項についてOwner判断を求める状態、または(2)記録完了後にOwnerへ作業完了確認を求める状態だけとする。「次工程待ち」「Reviewer待ち」「再接続待ち」を理由に人間へ続行指示を求めてはならず、必要なSubagent接続、再接続、結果照合、修正サイクルをこのtask内で実行する。各工程の完了報告は次工程接続の入力であり、Ownerへの追加承認要求ではない。
 
@@ -69,7 +69,7 @@ workerの役割は責務の区分であり、常設Subagentや事前作成済み
 
 Subagentの完了、担当resultの更新、または未回答Owner判断を検出するため、Orchestrator threadにはheartbeat起動機構を1件だけ設定する。heartbeatは計画承認前のim・Planner工程では`PAUSED`にする。Ownerが計画を承認した後、Implementerへ接続する直前に既存heartbeatを`ACTIVE`へ更新する。監視対象はImplementer接続からReviewer受入、Documenter記録完了までとし、Documenter記録完了を確認した時点で既存heartbeatを`PAUSED`へ更新する。Owner完了判断、履歴退避、hisi更新、docs/result初期化はheartbeat停止後の別工程とする。heartbeatをタスクごとに削除・新規作成・複製してはならない。heartbeatは前回確認結果と現行状態を比較し、新規の完了・差分・判断待ち・不一致がない場合、Orchestratorの処理を無応答で終了する。要対応事項がある場合だけOrchestratorを再開し、結果を照合して承認済み範囲の次工程へ接続するか、人間へ指定形式のOwner判断を求める。次工程接続、結果記録、またはOwner判断の提示が完了し、新しいエスカレーションがなければ、そのOrchestrator実行を終了する。heartbeatは不可逆操作、承認代行、サイドバーworker・新規チャットの作成を行わない。
 
-heartbeatの設定名、対象Orchestrator thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Orchestrator実行の終了理由は、読み取り専用health-checkと現行taskの記録へ残す。`PAUSED`は計画承認前、Documenter記録完了後、active taskなしの待機状態、または同一原因の再試行が最大2回に達した後の停止状態で使用する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Orchestratorが人間へ復旧判断を求める。同一原因の再試行が最大2回に達した場合は、自動継続を停止し、heartbeat設定を直ちに`PAUSED`へ更新したうえで、6項目エスカレーションを記録する。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
+heartbeatの設定名、対象Orchestrator thread、状態、監視対象、前回結果、比較結果、最後に処理したエスカレーション、Orchestrator実行の終了理由は、`task-progress.md`または`result/heartbeat-events.md`へ記録する。人間向け`health-check.md`には固定のSubagent照合表と必要な結果資料への短い参照だけを残し、heartbeat詳細を重複記載しない。`PAUSED`は計画承認前、Documenter記録完了後、active taskなしの待機状態、または同一原因の再試行が最大2回に達した後の停止状態で使用する。計画承認後かつDocumenter記録完了前の欠落・停止・対象不一致・重複は自動接続を有効と扱わず、Orchestratorが人間へ復旧判断を求める。同一原因の再試行が最大2回に達した場合は、自動継続を停止し、heartbeat設定を直ちに`PAUSED`へ更新したうえで、6項目エスカレーションを記録する。heartbeatの重複作成は禁止し、既存設定を状態更新して維持する。
 
 ## heartbeat輻輳防止ガード
 
@@ -84,7 +84,7 @@ heartbeatは設定の一意性だけでなく、エスカレーションイベ�
 
 `heartbeat-events.md`は少なくともイベントID、task-id、発生源、結果資料、内容フィンガープリント、状態、claim責任、処理結果、再開条件を保持する。状態は`queued`、`processing`、`completed`を使用する。`processing`が残る場合は同一イベントを再実行せず、queuedイベントも進めない。台帳不整合または復旧不能だけをOwner判断の停止理由とする。
 
-工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→Documenter→OrchestratorのIRリマインド・完了判断要求とする。人間はOrchestratorへ指示し、個別Subagentへの直接指示・既存サイドバーチャット間の任意送信を行わない。次工程の接続前に、直前workerの実Subagent ID、完了状態、結果ファイル、Owner判断、Registry更新を照合し、いずれかが欠けた場合は欠落を記録して次工程へ進めない。停止・再開の扱いはOwner判断または記録完了の工程境界でのみ確定する。
+工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→Documenter→OrchestratorのIRリマインド・完了判断要求とする。人間はOrchestratorへ指示し、個別Subagentへの直接指示・既存サイドバーチャット間の任意送信を行わない。次工程の接続前に、直前workerの接続要求・完了／close結果、完了状態、結果ファイル、Owner判断、Registry更新を照合し、実Subagent IDが取得できる場合は照合する。実Subagent IDの取得不能だけでは停止せず、代替証跡に矛盾がある場合、結果ファイルが欠落している場合、または承認・project・親session・実行ディレクトリが不一致の場合に停止する。停止・再開の扱いはOwner判断または記録完了の工程境界でのみ確定する。
 
 Subagentの完了通知が取得不能な場合は、Orchestratorの次回実行時に現行resultと`task-log.md`を照合して未接続工程を復旧する。独立チャットへの送信拒否、通知本文の再送失敗、サイドバー表示の有無だけでは工程を停止しない。結果資料の欠落、不一致、停止判定、Owner判断残件は停止条件とする。
 
