@@ -39,13 +39,21 @@ Ownerが計画を承認し、次工程の実施を指示した場合、Orchestra
 
 計画承認後からDocumenterの記録完了までは、Orchestratorが自律的に工程を継続する。人間へ処理を返す状態は、(1)承認済み範囲では解決できない続行不能事項についてOwner判断を求める状態、または(2)記録完了後にOwnerへ作業完了確認を求める状態だけとする。「次工程待ち」「Reviewer待ち」「再接続待ち」を理由に人間へ続行指示を求めてはならず、必要なSubagent接続、再接続、結果照合、修正サイクルをこのtask内で実行する。各工程の完了報告は次工程接続の入力であり、Ownerへの追加承認要求ではない。
 
-Subagent自身の報告にある「接続機能なし」「実行不可」等の環境主張は、親Orchestratorの接続ツール結果を覆さない。親Orchestratorは、接続ツールが返したSubagent ID、status、submission、close結果を接続事実の正本とし、Subagent報告と食い違う場合は「報告不整合」としてtask-logへ記録する。接続事実が存在する限り、報告不整合だけを理由にOwnerへ続行判断を求めたり、受入工程を人間へ返したりせず、実行済みSubagentをcloseして次の承認済み工程へ自律接続する。
+Subagent自身の報告にある「接続機能なし」「実行不可」等の環境主張は、親Orchestratorの接続ツール結果を覆さない。親Orchestratorは、接続ツールが返したSubagent ID、status、submission、close結果を接続事実の正本とする。Subagent報告と接続ツール結果が食い違う場合は「報告不整合」としてtask-logへ記録し、接続ツール結果をWorker Registryと担当resultへ同期して継続する。報告不整合だけでは停止しない。接続ツール結果自体の欠落、project・親session・作業ディレクトリの不一致、または作成前に指定・確定したモデル／推論設定の欠落だけを停止条件とする。
 
 Orchestratorは計画承認後、Delivery Subagentを自身のsessionに属するSubagentとしてresumeし、Implementer責務を接続する。Delivery完了後はcloseして独立Reviewerを接続し、Reviewer受入後はDeliveryをresumeしてDocumenter責務を接続する。Subagentの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。人間のOwnerとOrchestratorの間に自動接続は作らず、承認要求はOrchestratorチャット上で人間へ提示する。
 
 ここでいうSubagentは実際に接続・再開されたworker実行単位であり、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectでは代替できない。Deliveryは同一task内でPlanner→Implementer→Documenterの論理責務を担当し、必要な切替は同じDelivery Subagentの明示resumeで行う。Reviewerは独立した実Subagentとして接続する。Planner、Implementer、Reviewer、Documenterはいずれも`rules/worker-task-settings.md`の`gpt-5.6-luna` / `low`を接続前に指定・照合する。指定設定が確認できない場合は接続・作業を停止する。指定済みSubagentの実測値が取得不能な場合は未確認として証跡を記録するが、それだけを理由に自律オーケストレーション、受入、記録完了を停止しない。新規ユーザー向けCodexスレッド／会話の作成をSubagent接続の代替手段にしてはならない。
 
 ## 最小Subagent運用
+
+### 接続後報告不整合の継続基準
+
+- Subagent作成前に、モデル・推論設定を指定・確定し、接続ツールへ渡す。作成前に確定できない場合は接続しない。
+- 接続後にSubagent報告のID、状態、結果パスが接続ツール結果と異なる場合、接続ツール結果を実測正本としてWorker Registry、担当result、task-logへ同期する。
+- 上記の報告差分だけでは停止しない。接続ツール結果自体の欠落、project・親session・実行ディレクトリの不一致、作成前モデル・推論の未確定だけを停止条件とする。
+- Reviewerの実Subagent IDはレビューAttempt単位の値とする。再接続で新しいIDが発行されることは正常であり、過去AttemptのIDを現行資料の不一致として扱わない。現行AttemptのIDだけを接続ツール結果・現行`review.md`・Worker Registryへ同期し、過去AttemptのIDは履歴として保持する。
+- タスク工程状態（次worker、Documenter接続可否、受入状態）はReviewer IDと別に管理する。ID変更だけでは工程状態を未同期・不受入と判定しない。
 
 workerの役割は責務の区分であり、常設Subagentや事前作成済みの役割枠を意味しない。Orchestratorは、承認済み計画の次工程に必要な役割だけをjust-in-timeで接続する。
 

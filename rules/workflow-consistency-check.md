@@ -80,11 +80,11 @@ worker自身のCodexプロジェクト所属・実行環境
 
 ## project境界・会話種別・Worker Registryの照合
 
-現在のCodex projectId、Ownerが指定したファイル側thread、`current-task.md`のprojectId・対象リポジトリ・実行ディレクトリをこの順で照合する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
+現在のCodex projectId、対象リポジトリ、実行ディレクトリを照合する。ファイル側thread名・thread IDは資料の保存先と履歴追跡の補助情報として記録するが、worker接続、受入、次工程、完了の必須一致条件から除外する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
 
 Worker Registryは`current-task.md`を期待値の正本、Subagent実測・health-check・接続差分を実測の根拠とする。既存Subagentを先に照合し、役割、Subagent ID、親session、モデル・推論レベル、実行ディレクトリ、状態、担当resultを比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。独立sidebar workerや新規チャットを正規経路として扱わない。
 
-projectIdまたは対象ファイル側threadが未確認・不一致・複数候補、会話種別を区別不能、Registryと実測が不一致・重複・未確認の場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止し、期待値、実際値、根拠、影響、再開条件を親タスクへ報告する。
+projectId、対象リポジトリ、実行ディレクトリが未確認・不一致、会話種別を区別不能、Registryと実測が不一致・重複・未確認の場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止する。ファイル側thread名・thread IDの不一致だけでは停止せず、実際値と履歴注記を記録して継続する。
 
 ## 実装媒体・承認範囲の照合
 

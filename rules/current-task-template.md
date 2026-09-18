@@ -75,7 +75,8 @@ workerは親Orchestrator sessionの実Subagentとして接続されたことを�
 - 新規作成した作業ブランチ名は、作成後に `current-task.md` と担当結果ファイルへ記録する
 - `Task Definition`はPlannerが計画を作成できる具体性で記載する
 - `Task Lifecycle`はタスクの開始、完了、退避、復旧を追跡するために記載する。履歴へ退避しない場合も、未実施理由を結果ファイルへ記録する
-- Worker RegistryはOrchestratorがDelivery、Reviewer、例外workerの接続・再利用方針を承認済み計画と照合して更新する。Deliveryの論理責務行は同一実Subagent IDを共有してよい。各Subagentは開始前に指定値を照合し、指定値不一致・重複・未確認では接続・作業を停止する。接続後に実測値が取得不能な場合は未確認として証跡を残すが、それだけで自律オーケストレーション・受入・完了を停止しない。
+- Worker RegistryはOrchestratorがDelivery、Reviewer、例外workerの接続・再利用方針を承認済み計画と照合して更新する。Deliveryの論理責務行は同一実Subagent IDを共有してよい。各Subagentは開始前に指定モデル・推論を確定して接続ツールへ渡し、確定不能なら接続・作業を停止する。接続後に実測値が取得不能またはworker報告と異なる場合は、接続ツールの実測値を正本へ同期し、差分を履歴注記として記録して継続する。接続ツール結果自体のproject・親session・実行ディレクトリ不一致は停止する。
+- Reviewerの実Subagent IDはレビューAttempt単位で記録する。再接続後は現行AttemptのIDをWorker Registryと現行`review.md`へ記録し、過去AttemptのIDは履歴として保持する。過去AttemptとのID差分、またはID変更だけを理由に工程状態を不一致・未受入へ戻さない。
 - `current-task.md`は識別情報・対象・Task Lifecycleの正本とし、共通進捗は`task-progress.md`、承認済み計画は`result/plan.md`、Implementer結果は`result/changes.md`、Reviewer判定は`result/review.md`を正本とする。`history/index.md`は要約・候補の参照であり、これらのresultを代替しない
 - 各資料の更新責任と更新境界は`rules/thread-operation.md`の資料マップに従う。正本候補が複数、参照切れ、責務重複、更新境界不明の場合は推測で補正せず停止する
 - `タスクID`は新規タスクの論理識別子として必須とし、Task DefinitionとTask Lifecycleで同じ値を記録する。タスク名だけで別タスクを統合しない
