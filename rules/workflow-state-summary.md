@@ -18,7 +18,7 @@ current-task.md
 
 ## 入力条件
 
-対象スレッド、projectId、対象リポジトリ、実行ディレクトリ、ブランチ、task-id、タスク名、目的が `current-task.md` と一致することを確認する。新規運用ではhistory-key/run-idを入力にしない。入力が欠落・矛盾している場合、要約を `確認済み` として出力しない。
+対象スレッド、実行コンテキストID、対象リポジトリ、実行ディレクトリ、ブランチ、task-id、タスク名、目的が `current-task.md` と一致することを確認する。実行コンテキストIDの形式は選択したバックエンドから取得し、特定製品のproject IDを共通必須値にしない。新規運用ではhistory-key/run-idを入力にしない。入力が欠落・矛盾している場合、要約を `確認済み` として出力しない。
 
 次の資料から、記録値だけを抽出する。
 
@@ -44,16 +44,14 @@ current-task.md
 
 ## 改善サイクルの状態集約
 
-Reviewer受入、Documenter記録、Owner完了判断が揃えば対応完了とする。任意の運用観測は後続改善材料として要約し、完了を妨げない。次の状態を`task-progress.md`と担当resultから要約する。
+Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了判断が揃えば対応完了とする。Reviewer受入は自律サイクルの終点であり、Documenter開始はOwner承認を必要とする。運用中の不具合・改善点は現行taskへ混在させず、発生時のOwner依頼として簡易モードを新たに判定する。次の状態を`task-progress.md`と担当resultから要約する。
 
 - `未着手`：対応タスクが開始されていないことを表示する。任意の効果観測の有無は状態判定に使用しない
 - `未着手`：改善候補として把握されているが、Owner承認済みの計画・実装・受入に着手していないことを表示する
 - `対応中`：Owner承認後の計画・実装・受入を含む対応が進行中であることを表示する。細部のworker工程は`current-task.md`、`task-progress.md`、各resultから別途表示する
-- `後続改善候補`：任意の運用観測、想定外影響、承認範囲外の是正をOwner管理IRまたは新規im候補として表示する
+- `Reviewer受入・Documenter開始承認待ち`：Reviewerが`受入`または`条件付き受入`を返し、自律サイクルが終了したため、OwnerによるDocumenter開始承認を待っている状態を表示する。この状態でDocumenterを自動接続しない
 - `Documenter記録完了・Owner完了確認待ち`：現行taskの記録が完了し、Ownerのclose確認を待っている状態を表示する。後続候補の有無は別欄で表示し、候補だけでtask状態を停止しない
-- `後続改善候補・Owner判断待ち`：任意観測・残課題・承認範囲外の是正をOwner管理IRまたは新規im候補へ分離し、現行taskの3状態とは別に表示する
 - `operation-check.md`構成欠落：必須6見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、状態台帳との整合の欠落・不一致箇所と、後続Documenterによる是正待ちを表示する
-- 任意観測・改善候補：実運用上の観測、残課題、効果確認相当の情報は、必要な場合だけOwner管理IRまたは新規im候補として表示し、hisiのtask状態や完了ゲートへ混入させない
 - ルール変更影響確認：直接対象、参照対象、記録対象、移行先導入対象、正本・参照先・更新責任・更新境界、旧表現、判定分類、変更前後の確認結果、未確認事項、停止理由・再開条件を表示する
 - IR/IMPはtask本体の必須ゲートではなく、Ownerが管理する後続改善情報として表示する。欠落や未確認だけでtask本体を停止しない
 - 新規task開始の終了ゲート：Ownerの明示指示、現行状態更新、manifest、`history/index.md`、次task接続の各段階を表示する。IMP再確認は後続改善の記録であり、task本体の完了ゲートではない
@@ -64,10 +62,10 @@ Documenter記録後は現行taskの記録状態、Ownerのclose確認または�
 
 ## 要約項目と照合順序
 
-1. Task Contextとして、task-id、タスク名、目的、対象スレッド、対象project、対象リポジトリ、実行ディレクトリ、ブランチ、状態、原典パスを表示する。
-2. Worker Registryを論理責務、Subagent種別、subagentId、親session、Registry上の状態として表示する。Deliveryは3論理責務で同一IDを共有し、Reviewerは独立IDとする。Registry記録は `記録済み` とし、live worker状態は常に `未確認` と分けて表示する。
+1. Task Contextとして、task-id、タスク名、目的、対象スレッド、実行コンテキストまたは代替境界証跡、対象リポジトリ、実行ディレクトリ、ブランチ、状態、原典パスを表示する。
+2. Worker Registryを論理責務、実行単位種別、実行単位ID、親Coordinatorコンテキスト、Registry上の状態として表示する。Deliveryは3論理責務で同一IDを共有し、Reviewerは独立IDとする。Registry記録は `記録済み` とし、live worker状態は常に `未確認` と分けて表示する。
 3. 現行resultの存在、担当worker、次worker、未確認事項を表示する。履歴resultを現行resultの代替として扱わない。
-4. Owner判断表から `要判断`、`未回答`、`保留`、不明、本文不一致を抽出し、残件として表示する。
+4. Owner判断表から工程影響が`停止`の`要判断`、`未回答`、`保留`、不明、本文不一致を停止残件として、`非停止`判断を後続候補として分けて表示する。
 5. 進行中タスクの共通台帳に記録されている対象外・後続候補・安全性制約を短く表示する。
 6. `history/index.md`の該当行をcurrent-task、task-progress、現行result、manifestと照合し、task-id、状態、未完了事項、Owner判断、履歴パス、正本・根拠、最終更新の不一致を未確認または矛盾として表示する。これは操作整合性の確認であり、統合候補の類似判定は8項目に限定する。操作前後の片側だけを確認済みとしない。
 7. backup・legacyが存在する場合は通常候補・復旧対象外として表示し、backup内部の旧task-id/run-idを現行識別情報へ取り込まない。
@@ -83,9 +81,9 @@ Documenter記録後は現行taskの記録状態、Ownerのclose確認または�
 
 次の場合は、状態サマリーを次worker接続の承認根拠にしない。
 
-- Worker Registryと現行resultの論理責務・subagentId・親session・projectIdが一致しない
+- Worker Registryと現行resultの論理責務・実行単位ID・親Coordinatorコンテキスト・実行コンテキストが一致しない
 - live状態が取得できないのに「実行中」「完了」「正常」と記録しようとする
-- Owner判断残件が1件でもある
+- 工程影響が`停止`のOwner判断残件が1件でもある
 - current-taskとresult/historyのtask-id、タスク名、目的、project/thread、対象、原典パスが混在している
 - 次workerがWorker Registryに存在しない
 - `history/index.md`の必須項目が欠落・読取不能・古い、またはcurrent-task、task-progress、現行result、manifestと不一致
@@ -93,13 +91,14 @@ Documenter記録後は現行taskの記録状態、Ownerのclose確認または�
 - task-idの採番根拠が候補資料の識別子、ファイル名、日時だけ、または論理タスク台帳の棚卸しが未確認
 - 既承認Owner判断の継承、範囲変更による再判断、未回答、新規の分類がない
 - hisiの3状態以外の内部工程名をtask状態へ混入している
-- task完了の根拠がReviewer受入、Documenter記録、Owner完了判断以外へ置き換えられている
+- task完了の根拠がReviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了判断以外へ置き換えられている
 - サマリーと詳細の不一致、並行更新、正本・証跡・更新責任者の不明、`適用外`・承認範囲外の是正を自動更新で処理している
 - ルール変更の直接対象・参照対象・記録対象・移行先導入対象のいずれかが不明、変更前後の確認結果がない、旧表現の扱いが不明、または正本・参照先・責任・境界が不一致である
 - 影響確認を`影響なし`・`対象外`とした根拠がなく、`未確認`・`矛盾`・`変更漏れ`を残したまま受入・完了・移行先有効化を進めている
 - 承認済み範囲の実装・検証・受入・記録が不足したまま次worker接続・受入・完了へ進めている。IMP判定表や効果確認の未実施だけではtask本体を停止しない
 - `対応中`へ変更したのにOwner承認・計画・実装・受入の根拠がない
 - Documenter記録完了後のOwner完了確認またはOwner判断がない
+- Reviewer受入後にOwnerのDocumenter開始承認がないままDocumenterを接続している
 - Owner確認前に完了、履歴退避、次タスク切替、新規IMP採番を確定している
 - docs側`operation-check.md`の固定必須見出しの順序、7列の対応前後比較表、根拠区分、未確認区分、状態台帳との整合の欠落・不一致を検出したまま、受入・完了・次worker接続・履歴操作を確定している。これは通常のworker result本文の形式とは別である
 - Reviewerの修正依頼、保留、未確認が残る間に`task-progress.md`または`history/index.md`をOwner完了確認待ちへ進めている
@@ -111,7 +110,7 @@ Documenter記録後は現行taskの記録状態、Ownerのclose確認または�
 | ケース | 入力状態 | 期待判定 | 要約上の扱い |
 | --- | --- | --- | --- |
 | Registry記録のみ | workerはRegistryにあり、live状態を取得していない | `確認済み` | Registryは`記録済み`、liveは`未確認` |
-| Owner残件 | Owner判断に`要判断`または`保留`がある | `未確認` | 残件を表示し、次worker接続を停止 |
+| Owner残件 | Owner判断に`要判断`または`保留`の`停止`判断がある | `未確認` | 残件を表示し、次worker接続を停止 |
 | result欠落 | plan、changes、task-progressのいずれかがない | `未確認` | 欠落パスと影響を表示 |
 | task不一致 | current-taskとresultのtask-id、タスク名、目的、project/thread、対象のいずれかが不一致 | `矛盾` | 正本を推測せず停止 |
 
@@ -128,11 +127,11 @@ Markdownの最小形式:
 - task-id: <task-id>
 - タスク名: <task-name>
 - 目的: <purpose>
-- 対象project/thread: <projectId>/<thread-name>
+- 対象実行コンテキスト/thread: <execution-context-id>/<thread-name>
 - 次worker: <role>
 - live worker状態: 未確認（Registryの記録値のみ）
 
-| 役割 | subagentId | 親session | Registry | live |
+| 役割 | 実行単位ID | 親Coordinatorコンテキスト | Registry | live |
 | --- | --- | --- | --- | --- |
 | Reviewer | <subagent-id> | <parent-session> | 記録済み | 未確認 |
 
@@ -152,13 +151,13 @@ JSONの最小形式:
   "taskId": "<task-id>",
   "taskName": "<task-name>",
   "purpose": "<purpose>",
-  "project": "<projectId>",
+  "executionContext": "<execution-context-id または not-applicable>",
   "thread": "<thread-name>",
   "workers": [
     {
       "role": "Reviewer",
-      "subagentId": "<subagent-id>",
-      "parentSession": "<parent-session>",
+      "executionUnitId": "<execution-unit-id>",
+      "parentCoordinatorContext": "<parent-coordinator-context>",
       "registryStatus": "記録済み",
       "liveStatus": "未確認"
     }
@@ -172,7 +171,7 @@ JSONの最小形式:
 
 ## Owner判断プロンプト
 
-残件がある場合は、状態サマリーだけで判断を補完せず、未回答・保留・不明な判断と今回新たに発生した増分判断だけを`changes.md`に記録して停止する。回答済みの判断は回答プロンプトへ再掲しない。Owner回答ブロックにはOJ行だけを記載し、計画関連の必須4項目は別ブロックへ記載する。
+`停止`判断の残件がある場合は、状態サマリーだけで判断を補完せず、未回答・保留・不明な判断と今回新たに発生した増分判断だけを`changes.md`に記録して停止する。`非停止`判断はIRまたは新規im候補の参照先を表示して通常工程を継続する。回答済みの判断は回答プロンプトへ再掲しない。Owner回答ブロックにはOJ行だけを記載し、計画関連の必須4項目は別ブロックへ記載する。
 
 ```text
 OJ-xxx（要約: 状態サマリーの<残件>）=yes
@@ -182,12 +181,12 @@ OJ-xxx（要約: 状態サマリーの<残件>）=yes
 
 ```text
 対象リポジトリ: <絶対パス>
-Codex実行ディレクトリ: <絶対パス>
+実行ディレクトリ: <絶対パス>
 ベースブランチ: <branch>
 作業ブランチ: <branch>
 ```
 
-全件が `判断済み` または `反映確認済み` になるまで、次worker接続、履歴操作、worker状態変更を行わない。残件がない場合は `Owner判断残件：なし`、`回答プロンプト：なし` と記録する。
+すべての`停止`判断が `判断済み` または `反映確認済み` になるまで、次worker接続、履歴操作、worker状態変更を行わない。`非停止`判断はIRまたは新規im候補へ分離済みであれば通常工程を妨げない。残件がない場合は `Owner判断残件：なし`、`回答プロンプト：なし` と記録する。
 
 ## 結果ファイルへの記録
 

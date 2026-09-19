@@ -17,22 +17,24 @@ status: active
 | 資料 | 正本 | 主な利用者 | 主な責任 |
 | --- | --- | --- | --- |
 | 要件定義メモ | `threads/<thread-name>/docs/issue-memo.md` | Owner、Planner | 要件定義担当／Owner |
+| 簡易IM | `threads/<thread-name>/docs/quick-im.md` | Owner、簡易対応の実行主体 | 複数の簡易対応候補の備忘録。標準IM、task、Owner判断、履歴ではない |
 | Planner入力 | `threads/<thread-name>/result/current-task.md` | Planner | Ownerまたは指定作成責任者 |
 | 現行タスク進捗 | `threads/<thread-name>/docs/task-progress.md` | Owner、全worker | Implementerが実装状態、Reviewerが受入状態、Documenterが記録状態を人間向けに要約 |
-| Owner判断 | `threads/<thread-name>/docs/owner-jadge.md` | Owner、全worker | Planner・各worker・Owner |
+| Owner判断 | `threads/<thread-name>/docs/owner-judge.md` | Owner、全worker | Planner・各worker・Owner |
 | Worker照合 | `threads/<thread-name>/docs/health-check.md` | Owner、人間 | OwnerまたはPlanner |
 | 汎用改善 | `<作業ディレクトリroot>/development-improvement.md` | Owner、全プロジェクト | Documenter／Owner |
 | 履歴台帳 | `<作業ディレクトリroot>/history/index.md` | Owner、AI | Owner |
 
-Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判断だけ、`task-progress.md`は現行タスクの進捗・証跡への参照・停止条件だけを扱い、互いの責務を重複させない。用語の標準的な意味と取り違え防止は`rules/glossary.md`を参照し、長い根拠・履歴・責任者・例外一覧を用語集へ混在させない。
+Owner判断の正本は`owner-judge.md`とする。`owner-judge.md`はOwner判断だけ、`task-progress.md`は現行タスクの進捗・証跡への参照・停止条件だけを扱い、互いの責務を重複させない。用語の標準的な意味と取り違え防止は`rules/glossary.md`を参照し、長い根拠・履歴・責任者・例外一覧を用語集へ混在させない。
 
 ## docsとresultの使い分け
 
 `docs/`はOwnerや人間が読む要約・判断・進捗の資料、`result/`はworker間の引継ぎ、Planner入力、詳細な実施結果、受入結果、証跡の資料として使い分ける。AIが参照することだけを理由に人間向け資料を`result/`へ移さない。人間向け資料の詳細は人間が読める説明とし、AIだけが必要とする詳細・原典一覧・実施証跡は`result/`へ記録する。
 
 - `issue-memo.md`と`task-progress.md`は、人間向けに整理した資料として`docs/`に置く。
+- `quick-im.md`は複数の簡易対応候補だけを記録する一時資料とし、標準IM・task・Owner判断・進捗の正本にしない。作成・削除条件は`rules/quick-operation.md`を正本とする。
 - `result/current-task.md`、`result/plan.md`、`result/changes.md`、`result/review.md`、`result/task-log.md`は、Planner・worker・Documenterが扱う詳細な正式結果として`result/`に置く。
-- Plannerの人間向け計画提案資料は、必ず`threads/<thread-name>/docs/plan-proposal.md`へ置く。リポジトリルートの`docs/plan-proposal.md`や`result/plan.md`を人間向け計画提案資料の正本として扱わない。作成前に`current-task.md`のthread名・projectIdと配置先を照合し、誤配置を検出した場合は計画承認へ進まず正しいパスへ是正する。
+- Plannerの人間向け計画提案資料は、必ず`threads/<thread-name>/docs/plan-proposal.md`へ置く。リポジトリルートの`docs/plan-proposal.md`や`result/plan.md`を人間向け計画提案資料の正本として扱わない。作成前に`current-task.md`のthread名・実行コンテキストまたは代替境界証跡と配置先を照合し、誤配置を検出した場合は計画承認へ進まず正しいパスへ是正する。
 - `docs/`へ`result/`本文を全文複製せず、必要な場合は正本パスと短い要約だけを記載する。
 - `result/`へ人間向けサマリーを重複作成せず、Owner判断や進捗の見える化は`docs/`の正本を参照する。
 
@@ -51,11 +53,11 @@ Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判�
 - 内容が未確認、重複、不一致、対応先不明の場合は並び替えや推測補完で解消せず停止する。
 - 対応する識別子がない資料では、日付やファイル名を新たな論理識別子として付与しない。
 
-## `owner-jadge.md`の形式
+## `owner-judge.md`の形式
 
 ### 配置と責務
 
-`threads/<thread-name>/docs/owner-jadge.md`をOwner判断の正本とする。Owner判断のサマリー、詳細、回答プロンプトだけを記録し、タスク概要・進捗・証跡・停止条件は`task-progress.md`へ記録する。
+`threads/<thread-name>/docs/owner-judge.md`をOwner判断の正本とする。Owner判断のサマリー、詳細、回答プロンプトだけを記録し、タスク概要・進捗・証跡・停止条件は`task-progress.md`へ記録する。
 
 ### 固定レイアウト
 
@@ -102,7 +104,7 @@ Owner判断の正本は`owner-jadge.md`とする。`owner-jadge.md`はOwner判�
 
 ## `task-progress.md`の形式
 
-`threads/<thread-name>/docs/task-progress.md`は、現行タスクの共通進捗、正本・証跡、停止・再開条件を人間向けに要約する正本とする。Owner判断の質問本文は`owner-jadge.md`へ置き、同じ内容を重複記載しない。
+`threads/<thread-name>/docs/task-progress.md`は、現行タスクの共通進捗、正本・証跡、停止・再開条件を人間向けに要約する正本とする。Owner判断の質問本文は`owner-judge.md`へ置き、同じ内容を重複記載しない。
 
 `task-progress.md`は人間向けの現行状態サマリーであり、AIが確認する詳細証跡の保存先ではない。状態、工程、Owner判断、停止・再開条件に変化があった会話またはworker境界ごとに更新するが、既存の関連行・節を更新し、同じ内容を機械的に追記しない。詳細な実施結果、照合値、原典一覧、受入根拠は対応する`result/`へ記録し、`task-progress.md`には短い要約と参照先だけを残す。
 
@@ -216,10 +218,10 @@ worker間連携用の`result/`本文は、意思疎通に必要な内容が伝�
 別プロジェクトへ移行した時点から有効化するため、次を確認する。
 
 - 共通`rules/`、worker定義、テンプレート、記録先、責任者、停止条件が存在する。
-- `result/current-task.md`、`task-progress.md`、`owner-jadge.md`、`health-check.md`を標準形式で新規作成できる。
+- `result/current-task.md`、`task-progress.md`、`owner-judge.md`、`health-check.md`を標準形式で新規作成できる。
 - `history/index.md`を`rules/history-initialization.md`の形式で初期化できる。
 - `issue-memo.md`から`result/current-task.md`へ要件を確定転記できる。
-- Owner判断、Reviewer受入、Documenter記録、効果確認、再評価の責任境界を確認できる。
+- Owner判断、Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、効果確認、再評価の責任境界を確認できる。
 
 不足、責任不明、記録先不明、形式不一致、正本不明がある場合は`未有効化`として停止する。
 
@@ -242,5 +244,5 @@ worker間連携用の`result/`本文は、意思疎通に必要な内容が伝�
 - 変更前後に正本、参照先、更新責任、作成条件、復元条件、停止条件を照合する。
 - 人間向け資料のサマリーと詳細、詳細の昇順、IDトレースを確認する。
 - `health-check.md`の表形式は`rules/worker-health-check.md`、`history/index.md`の形式は`rules/history-initialization.md`へ照合する。
-- Reviewer受入、Documenter記録、Owner完了確認、効果確認を混同しない。
+- Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了確認、効果確認を混同しない。
 - 共通ルール、テンプレート、導入手順へ反映されていない要件は、TASK-012の現行資料に記録されていても永続化済みとは判定しない。

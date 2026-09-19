@@ -19,14 +19,16 @@
 - 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報は `rules/plan-approval-required-info.md` を参照する
 - Plannerへ指示する前の要件定義提案フォーマットと接続ゲートは `rules/requirement-definition-format.md` を参照する
 - imの入口テンプレート、必須10観点、質問ごとの更新記録、Planner接続前チェックは `rules/im-template.md` を参照する
-- im開始時の`owner-jadge.md`作成、OJ回答直後の正本同期、欠落時停止は `rules/task-initialization-and-requirement-gate.md` を参照する
-- IRの正本、Owner Agentの更新責任、Documenter非関与、リマインド、task本体との停止境界は `rules/improvement-reminder-operation.md` を参照する
-- Documenter記録完了を契機としたOwner AgentのIR全件確認・リマインド・task-log記録は `rules/improvement-reminder-operation.md` の必須ゲートとする
+- 全依頼の軽量入口判定、簡易対応、標準タスクへの自動昇格、軽量状態応答は `rules/quick-operation.md` を参照する
+- 複数の簡易対応候補を記録する備忘録の形式と削除境界は `rules/quick-im-template.md` を参照する
+- im開始時の`owner-judge.md`作成、OJ回答直後の正本同期、欠落時停止は `rules/task-initialization-and-requirement-gate.md` を参照する
+- IRの正本、Workflow Coordinatorの更新責任、Documenter非関与、リマインド、task本体との停止境界は `rules/improvement-reminder-operation.md` を参照する
+- Documenter記録完了を契機としたWorkflow CoordinatorのIR全件確認・リマインド・task-log記録は `rules/improvement-reminder-operation.md` の必須ゲートとする
 - IRのサマリー・詳細構成、IR-ID昇順ソート、両表の集合一致は `rules/improvement-reminder-operation.md` を参照する
 - 共通ルール全体の冪等性、再実行時の重複防止、実体値の恒久化禁止は `rules/idempotency.md` を参照する。IR固有の補足は `rules/improvement-reminder-operation.md` を参照する
 - 実装媒体をルール・プロンプト・Markdownに限定する場合は `rules/implementation-medium.md` を参照する
 - 新規運用開始時のローカル`history/`と`history/index.md`の初期化は `rules/history-initialization.md` を参照する
-- 人間向け資料、`owner-jadge.md`、`task-progress.md`、`issue-memo.md`の共通形式・責務・作成・復元・移行手順は `rules/human-facing-documentation.md` を参照する
+- 人間向け資料、`owner-judge.md`、`task-progress.md`、`issue-memo.md`の共通形式・責務・作成・復元・移行手順は `rules/human-facing-documentation.md` を参照する
 - 用語・標準的な意味・取り違え防止の正本は `rules/glossary.md` とし、用語そのものを対応キーとして参照する
 - 次タスク以降の進行中タスク台帳は `threads/<thread-name>/docs/task-progress.md` を正本とし、worker固有結果は `threads/<thread-name>/result/`へ記録する。配置・履歴境界は `rules/thread-operation.md`を参照する
 - `docs/issue-memo.md`と`docs/task-progress.md`は人間向けに整理した要約・判断・進捗とし、関連会話・状態変化の都度、既存項目を更新・統合する。AI・worker向けの詳細な引継ぎ・証跡は`result/`へ記録し、会話本文や`result/`本文をdocsへ機械的に複製しない。共通の形式・責任・作成・復元・移行境界は `rules/human-facing-documentation.md`を参照する
@@ -36,9 +38,14 @@
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
 - 自動化操作、受入要求の自動起動、外部接続・worker作成の安全ゲート、監査証跡、停止・再開条件は `rules/automation-operation.md` を正本とする
+- 実行環境の移植性、実行バックエンドの能力、handoff event、イベント駆動の工程遷移、復旧監査の境界は `rules/execution-portability.md` を正本とする
+- handoff event台帳の必須項目、状態遷移、claim、処理確定点は `rules/handoff-event-contract.md` を正本とする
+- 選択した実行バックエンド固有の能力対応、復旧監査起動機構、固有証跡の境界は、対応するバックエンド規約を正本とする。Codex選択時の規約は `rules/codex-execution-backend.md` を参照する
 - 読み取り専用の正本整合チェックと承認ゲートの入力、判定、出力、人の判断境界は `rules/read-only-automation-gates.md` を正本とする
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
+- 共通要件の正本と参照先の一覧、更新漏れの影響確認は `rules/rule-dependency-map.md` を正本とする
 - Reviewer修正依頼の総合報告、一括修正、全正本横断照合、再レビュー接続は `rules/worker-task-settings.md` と `rules/worker-evidence.md` を参照する
+- 指摘の即時分類に使う代表ケースと固定処理は `rules/issue-classification-cases.md` を参照する
 - ローカルルールの配置、命名、最小本文、読込・適用タイミング、優先順位、保護対象、証跡、ライフサイクル、移行・欠落時の扱いは `rules/local-rules.md` を参照する
 
 ## 用語・共通認識の参照ゲート

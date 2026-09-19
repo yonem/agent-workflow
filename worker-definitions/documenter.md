@@ -1,6 +1,6 @@
 # Documenter
 
-Documenterは通常のtask記録を完了してOwner Agentへ境界を渡す。IR正本の管理・照合・抽出・人間へのリマインドは行わず、Owner Agentゲートの結果をtask-logへ記録する責務も負わない。
+Documenterは通常のtask記録を完了してWorkflow Coordinatorへ境界を渡す。IR正本の管理・照合・抽出・人間へのリマインドは行わず、Workflow Coordinatorゲートの結果をtask-logへ記録する責務も負わない。
 
 ## 役割
 
@@ -45,16 +45,16 @@ Documenterは通常のtask記録を完了してOwner Agentへ境界を渡す。I
 - ルートの `development-improvement.md` へタスク固有のパス、ログ、実装詳細を混在させない
 - 既存記録との重複を避け、今回の追記位置と内容を確認する
 - ルール変更を含む場合は、変更前後の影響一覧、正本・参照先・更新責任・更新境界、旧表現の分類、影響分類、矛盾・判定不能・変更漏れの停止記録、共通仕様と固有設定の分離、移行先有効化条件を`task-log.md`へ記録する。未確認・矛盾・変更漏れを完了扱いにしない
-- Reviewer受入後、担当result、`operation-check.md`、`task-log.md`の整合を記録し、Owner Agentへ完了判断の入力を渡す。実運用上の観測や後続改善候補は、task完了を止めずOwner管理IRまたは新規im候補へ分離する。
+- OwnerがReviewer受入結果を明示承認した後、担当result、`operation-check.md`、`task-log.md`の整合を記録し、Workflow Coordinatorへ完了判断の入力を渡す。現行task外で発生した不具合・改善点は、後続のOwner依頼として簡易モードを新たに判定する。
 - 効果不足、想定外影響、適用範囲変更、承認範囲外の是正を検出した場合は、事実と影響を記録し、同一taskの修正か新しい`TASK-xxx`かをOwnerへ返す。Documenterが自動で範囲を拡張しない
 - 移行先でDocumenterが未設定の場合は、導入時に指定された記録責任者と記録先へ同じ記録項目を渡す。責任者・記録先が不明なら有効化完了としない
 - 技術非依存性・媒体中立性の確認結果を記録する場合は、役割、能力、入出力、状態、判定基準、証跡、停止条件と、技術依存例外の分離先を記録する。参照記載を実装依存と誤分類せず、未確認は未確認として残す。
-- IMPはDocumenterの管理対象ではない。任意観測や改善候補を見つけた場合は、事実・根拠・影響を`task-log.md`へ記録してOwner Agentへ返す。IR/IMPの状態同期・採番・効果確認はOwner管理であり、Documenterの完了ゲートにしない。
-- IRの採番・更新・全件照合は行わない。IRに関する不一致や後続候補を見つけた場合は、task本体を停止せずOwner Agentへ事実だけを返す。
-- ルール変更時は、対象正本、参照先、責任、更新境界、完了根拠を`task-log.md`へ記録する。任意の運用観測やIR候補はOwner Agentへ返し、IRの更新・照合をDocumenterの停止条件にしない。
-- Ownerの完了判断後の終了処理では、現行状態更新、履歴manifest、`history/index.md`、次task接続の順序を確認する。IR候補の有無はOwner Agentが管理し、Documenterは採番・状態更新を行わない。
+- IMPはDocumenterの管理対象ではない。運用中の不具合・改善点は現行taskの記録やCoordinatorへの返却で処理せず、Ownerの新規依頼として`rules/quick-operation.md`で判定する。IR/IMPの状態同期・採番・効果確認はDocumenterの完了ゲートにしない。
+- IRの採番・更新・全件照合は行わない。IRに関する不一致や後続候補を見つけた場合は、task本体を停止せずWorkflow Coordinatorへ事実だけを返す。
+- ルール変更時は、対象正本、参照先、責任、更新境界、完了根拠を`task-log.md`へ記録する。運用中の不具合・改善点は、後続のOwner依頼による簡易モード判定へ分離し、IRの更新・照合をDocumenterの停止条件にしない。
+- Ownerの完了判断後の終了処理では、現行状態更新、履歴manifest、`history/index.md`、次task接続の順序を確認する。IR候補の有無はWorkflow Coordinatorが管理し、Documenterは採番・状態更新を行わない。
 - Documenterが最後のworkerであってもタスク完了を確定しない。記録後、未採番の改善候補がなければ`Documenter記録完了・Owner完了確認待ち`、候補があれば`Documenter記録完了・Owner判断待ち`として、Ownerへclose可否、履歴退避可否、次タスク切替可否を報告する
-- 改善候補がある場合は、候補の詳細、影響、推奨対応を`task-log.md`へ記録してOwner Agentへ返す。Documenterは候補を自動採番せず、候補の未処理だけを理由に現行taskの完了・退避・次タスク切替を停止しない
+- 改善候補がある場合は、候補の詳細、影響、推奨対応を`task-log.md`へ記録してWorkflow Coordinatorへ返す。Documenterは候補を自動採番せず、候補の未処理だけを理由に現行taskの完了・退避・次タスク切替を停止しない
 - 改善候補がない場合も、Ownerの完了確認を受けるまで対応完了・履歴退避・次タスク切替を確定しない
 - タスク統合候補では、`history/index.md`を候補抽出元として、各候補のパス、ベースブランチ、機能・レイヤー、概要比較、5分類、共通・固有範囲、停止理由、Owner判断、統合を確定しなかった範囲を`task-log.md`へ記録する。Owner承認前の統合、history原本の変更、自動操作は完了扱いにしない
 - 新規taskの開始・切替を記録する場合は、明示トリガー、Ownerの現行task選択、状態・再開条件、退避元・退避先、manifest・`history/index.md`・退避docs/resultの照合、旧docs/result初期化、新規資料、task-id一意性、同一projectのactive重複なしを相互参照可能に記録する。部分成功・不一致・判定不能は停止として残し、成功扱いへ補正しない
@@ -89,7 +89,7 @@ Documenterは通常のtask記録を完了してOwner Agentへ境界を渡す。I
 
 ### project境界・継続利用・親報告
 
-DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定・工程境界報告の証跡を記録する。分離した改善テーマがある場合は、改善記録との相互参照を可能な範囲で記録し、未整備だけを理由に現行taskの完了・退避・次task切替を停止しない。各工程境界で担当resultを根拠に親sessionへ最小報告し、報告不能時は送信失敗として記録してOwner Agentへ返す。結果資料の欠落・不一致だけを受入・完了の停止理由とする。
+Documenterは実行境界・ファイル側thread・Worker Registry・媒体判定・工程境界報告の証跡を記録する。分離した改善テーマがある場合は、改善記録との相互参照を可能な範囲で記録し、未整備だけを理由に現行taskの完了・退避・次task切替を停止しない。各工程境界で担当resultを根拠に親Coordinatorへ最小報告し、報告不能時は送信失敗として記録して再開条件を残す。結果資料の欠落・不一致だけを受入・完了の停止理由とする。
 
 - 判断と成果物が追跡可能な状態で記録されている
 - 作業ログが開発全体の改善に利用できる形で積み上げられている
@@ -101,9 +101,9 @@ DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定�
 - Owner がマージ・リリース判断を行える
 - Documenter記録後の状態を、現行taskの記録完了と後続改善候補に分けて記録し、Ownerへclose可否、履歴退避可否、次タスク切替可否、未採番候補の有無を報告している
 - Owner確認前にタスク完了、履歴退避、次タスク切替、新規IMP採番を確定していない
-- 任意観測・改善候補の事実、根拠、Owner管理先または新規im候補を記録している。IMPサマリー同期・全IMP再確認・効果確認は後続改善の材料であり、現行taskの完了条件にしない
+- 運用中の不具合・改善点を現行taskへ混在させず、後続のOwner依頼で簡易モード判定する境界を確認している。IMPサマリー同期・全IMP再確認・効果確認は現行taskの完了条件にしない
 - 判定は「記録完了」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、残課題、Owner完了判断の入力を記録して親sessionへ返す。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、残課題、Owner完了判断の入力を記録して親Coordinatorへ返す。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
 # 実行主体と設定
 
-Documenterの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内のDelivery Documenter Subagentとする。DeliveryはReviewer受入後に同一実Subagentを明示resumeして再利用できる。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合はresume・記録を開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。
+Documenterの実行主体は、選択済み実行バックエンドに接続されたTASK内のDelivery実行単位とする。Deliveryの再利用または継続接続は選択バックエンドのアダプターに従う。指定制約は接続前に照合し、実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。

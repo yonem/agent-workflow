@@ -8,16 +8,17 @@
 - 変更内容と検証結果を記録する
 - 既存の手動変更を勝手に上書きしない
 - ルールや機能の追加は、現行タスクだけの一時対応ではなく、タスク完了後も残り続け、他プロジェクトへの移行時点から有効になるシステム機能として設計する。詳細は `rules/README.md` と適用対象の共通ルールに従う
-- 改善事項は、発見・汎用性評価・Owner判断・計画・実装・Reviewer受入・Documenter記録・Owner完了判断の共通サイクルで扱う。実運用上の観測は後続改善の材料であり、完了ゲートにしない。詳細は `rules/development-improvement-record.md` に従う
+- 改善事項は、発見・汎用性評価・Owner判断・計画・実装・Reviewer受入・Reviewer受入結果に対するOwnerのDocumenter開始承認・Documenter記録・Owner完了判断の共通サイクルで扱う。運用中の不具合・改善点は、発生時のOwner依頼として簡易モードを新たに判定する。詳細は `rules/development-improvement-record.md` に従う
+- IM・要件定義はOwnerと人間が直接行う一問一答であり、Workflow Coordinatorやworkerは介入しない。一問一答は判断回数の最適化、質問集約、回答推定、代行の対象外とする。人間がIMを確定しPlannerへの計画作成を明示指示するまで、自律サイクル、event、heartbeat、worker接続を開始しない。Coordinatorの自律工程は計画承認後からReviewer受入までとし、Reviewer受入後のDocumenter接続はOwnerの明示承認だけをトリガーにする
 - 他プロジェクトへ移行した際は、共通rules、worker定義、テンプレート、記録先、責任者、停止条件を確認するまで有効化完了としない。不足は停止理由として記録し、導入是正を新規im候補へ分離する
 - 技術非依存性は役割、能力、入出力、状態、判定基準、証跡、停止条件で確認し、媒体変更後も正本・責任・状態・証跡・完了条件の意味を維持する。避けられない技術依存は例外記録なしに共通仕様へ組み込まない
 - コミットは1目的にまとめ、コミットメッセージ規約に従う
 - workerの役割、作業領域、入出力は `worker-definitions/` の定義に従う
-- worker役割は常設エージェントを意味しない。標準は同一task内で再利用するDelivery Subagent 1件（Planner・Implementer・Documenter）と独立Reviewer Subagent 1件だけとし、同時に開くSubagentは1件までとする。Tester・Security OperatorはOwner承認済み例外だけである。担当resultとtask-logの照合後は完了済みSubagentをcloseする。既存Subagentのresumeまたは親sessionへのsend_inputが明示的に不可能でも、Ownerの個別承認なしに代替Subagentを自動作成せず、作成拒否時はOwner本体が継続または停止理由を記録する。現行Subagent一覧は履歴として保持し、削除操作を前提にしない。詳細は `rules/automation-operation.md` に従う
+- worker役割は常設エージェントを意味しない。標準は同一task内で再利用または継続接続するDelivery実行単位1件（Planner・Implementer・Documenter）と独立Reviewer実行単位1件だけとし、同時に稼働する実行単位は1件までとする。Tester・Security OperatorはOwner承認済み例外だけである。担当resultとtask-logの照合後は完了済み実行単位を選択バックエンドの終了状態へ遷移する。既存実行単位の再開または親Coordinatorへの結果返却が明示的に不可能でも、Ownerの個別承認なしに代替実行単位を自動作成せず、接続不能時はOwner本体が継続または停止理由を記録する。現行実行単位一覧は履歴として保持し、削除操作を前提にしない。バックエンド固有の操作は選択されたアダプター、共通の責務と停止条件は `rules/automation-operation.md` に従う
 - worker間の正式な引き継ぎは会話ではなく、対象スレッドの `threads/<thread-name>/result/` の結果ファイルで行う
 - 各workerは完了時に親タスクへ判定、結果ファイル、未確認事項、次のworkerを報告し、親タスクは確認後に次工程へ接続する
 - 各workerの完了報告の項目順・Owner判断の配置は `rules/worker-report-template.md` に従う
-- Owner判断の意味、OJ採番、本文表示、IDなし・不明・重複・対象外回答の扱いは `rules/worker-evidence.md` に従う
+- Owner判断の意味、OJ採番、本文表示、IDなし・不明・重複・対象外回答の扱いは `rules/worker-evidence.md` に従う。計画必須情報とOJ回答プロンプトは同ルールのOwner回答コードブロックゲートに従い、必ず別々のコードブロックへ記載する。OJ回答プロンプトにはID・要約・既定値`=yes`だけを記載し、自己判断で省略・併記・分割しない
 - 用語の正本、標準的な意味、取り違え防止、未登録語・意味衝突時の停止条件は `rules/glossary.md` を参照する。個別資料へ用語定義を重複掲載しない
 
 ## 禁止事項
@@ -41,7 +42,7 @@
 - 形式は `<prefix>: <What>。<Why>` とする
 - Prefixの詳細は `rules/commit-convention.md` を参照する
 - 計画外の変更を同じコミットへ混在させない
-- Codexはコミット前にメッセージ案を提示し、人間の確認を受ける
+- 作業担当はコミット前にメッセージ案を提示し、人間の確認を受ける
 
 ## 作業領域
 
@@ -55,14 +56,18 @@
 - `rules/`: コミット規約やworkerタスク設定などの恒久的な開発ルール
 - `rules/current-task-template.md`: 各スレッドの`current-task.md`に記載する識別情報とタスク定義のテンプレート
 - `rules/worker-report-template.md`: 各workerの完了報告と結果ファイルの共通テンプレート
-- `rules/workflow-consistency-check.md`: current-task、結果ファイル、projectId、実行環境の整合性チェック手順
+- `rules/workflow-consistency-check.md`: current-task、結果ファイル、実行コンテキストまたは代替境界証跡、実行環境の整合性チェック手順
 - `rules/worker-health-check.md`: Owner起点のworkerアクセス・状態確認、不足worker追加前後の手順
 - `rules/plan-approval-required-info.md`: 計画関連Owner向け回答の対象・実行環境・ブランチ必須情報
 - `rules/requirement-definition-format.md`: Planner接続前の要件定義提案フォーマットと接続ゲート
 - `rules/task-initialization-and-requirement-gate.md`: docs/result初期化、issue-memo更新、正本照合、worker接続の実施ゲート
 - `rules/rule-refresh.md`: ルール更新後の自動再読込、影響確認、停止ゲート
+- `rules/rule-dependency-map.md`: 共通要件の正本・参照先・更新責任と、ルール変更時の影響確認一覧
+- `rules/issue-classification-cases.md`: 指摘の3分類へ即時適用する代表ケース、固定処理、禁止処理
+- `rules/quick-operation.md`: 全依頼の簡易入口判定、標準タスクへの自動昇格、最小確認、軽量状態応答
+- `rules/quick-im-template.md`: 複数の簡易対応候補を扱う備忘録の形式と削除境界
 - `rules/local-rules.md`: ローカルルールの正本配置、命名、適用判定、保護対象、証跡、移行・欠落時の共通ルール
-- ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程とし、会話・worker・project・task・識別子の作成・接続・採番は要件定義開始後の別ゲートで行う。詳細は`rules/glossary.md`、`rules/thread-operation.md`、`rules/task-initialization-and-requirement-gate.md`を参照する
+- ファイル側threadの初期登録は資料保存領域だけを準備する非実行工程とし、会話・worker・実行コンテキスト・task・識別子の作成・接続・採番は要件定義開始後の別ゲートで行う。詳細は`rules/glossary.md`、`rules/thread-operation.md`、`rules/task-initialization-and-requirement-gate.md`を参照する
 
 ## workerの流れ
 
@@ -74,7 +79,7 @@ Delivery（Planner）
 Delivery（Implementer）
   ↓
 独立Reviewer
-  ↓
+  ↓ OwnerがReviewer受入結果を承認
 Delivery（Documenter）
   ↓ Ownerが完了を判断
 
@@ -93,15 +98,15 @@ Delivery（Documenter）
 - Implementerは実装と最低限の変更記録を行い、詳細な検証・整合性確認・受入判定はReviewerへ移譲する。固有責務は `worker-definitions/` に従う
 - 共通の入力ゲート、証跡、報告、履歴、接続サイクル、計画回答、動作確認、worker状態は対応する `rules/` の正本を参照する
 - `rules/local/` のローカルルールを参照する場合は、共通rulesを先に読み、適用条件・責任者・競合・証跡を `rules/local-rules.md` に従って確認する。共通rulesの保護対象を弱めるローカルルール、判定不能なルール、欠落した正本は適用せず停止する
-- 全タスクで`threads/<thread-name>/docs/operation-check.md`を作成または更新し、固定6見出し・7列の対応前後比較・根拠区分・未確認区分をPlanner計画、Reviewer受入、Documenter記録の各境界で確認する。欠落時は受入・完了・履歴操作・次タスク接続を停止する
+- 全タスクで`threads/<thread-name>/docs/operation-check.md`を作成または更新し、固定6見出し・7列の対応前後比較・根拠区分・未確認区分をPlanner計画、Reviewer受入・OwnerによるDocumenter開始承認、Documenter記録の各境界で確認する。欠落時は受入・完了・履歴操作・次タスク接続を停止する
 - Plannerは計画承認前に実装を開始せず、計画外変更・停止条件・安全性懸念は親タスクへ報告する
-- Owner判断に未回答・保留・不明・対応不明が残る場合は、次工程、完了、履歴操作を停止し、残件ごとの回答プロンプトを提示する。詳細は `rules/worker-evidence.md` に従う
-- Reviewerが修正依頼と判定した場合は `rules/worker-task-settings.md` の再確認サイクルに従い、受入後にDocumenterへ接続する
+- Owner判断に未回答・保留・不明・対応不明の`停止`判断が残る場合は、次工程、完了、履歴操作を停止し、残件ごとの回答プロンプトを提示する。`非停止`判断はIRまたは新規im候補へ分離して通常工程を継続する。詳細は `rules/worker-evidence.md` に従う
+- Reviewerが修正依頼と判定した場合は `rules/worker-task-settings.md` の再確認サイクルに従う。Reviewer受入後はOwnerの明示承認までDocumenterへ接続しない
 
 ## 停止条件
 
 - 計画外の変更が必要になった
-- 同じ検証に2回連続で失敗した
+- 同じ検証が`current-task.md`で解決した再試行上限に達した
 - 要件の解釈が複数に分かれた
 - 承認されていない削除、上書き、公開など不可逆な操作が必要になった
 - 外部サービスの認証や権限が必要になった

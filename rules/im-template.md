@@ -5,18 +5,21 @@ status: active
 
 # im（要件定義）テンプレート
 
-このテンプレートは、要件定義開始からPlanner接続までの入力と停止判定を一つの形式で管理する。`issue-memo.md`の詳細正本は`rules/human-facing-documentation.md`、要件定義案の出力順は`rules/requirement-definition-format.md`を参照する。
+このテンプレートは、標準taskの要件定義開始からPlanner接続までの入力と停止判定を一つの形式で管理する。`issue-memo.md`の詳細正本は`rules/human-facing-documentation.md`、要件定義案の出力順は`rules/requirement-definition-format.md`を参照する。複数の簡易対応候補を扱う備忘録は`rules/quick-im-template.md`を使用し、本テンプレートへ混在させない。
 
-IRの責任境界、Documenter記録完了時にOwner Agentが行う全件確認・リマインド、task本体との停止境界は`rules/improvement-reminder-operation.md`を正本とする。
+IRの責任境界、Documenter記録完了時にWorkflow Coordinatorが行う全件確認・リマインド、task本体との停止境界は`rules/improvement-reminder-operation.md`を正本とする。
 
 ## 使用条件
 
 - 明示的にim、要件定義開始、新規task作成、または新機能追加が指示された場合に使用する。
+- `rules/quick-operation.md`の昇格条件に該当した簡易対応は、標準IMとして本テンプレートを使用する。
 - 相談・補足・確認だけでは資料を変更しない。
 - 新規taskへ切り替える場合は、現行taskの扱い、履歴退避、manifest、`history/index.md`、旧docs/result初期化を先に完了する。
-- すべての質問・回答・実測確認の直後に`issue-memo.md`と本チェック項目を更新する。
-- im開始時に`owner-jadge.md`を作成し、OJを提示する前にOwner判断の正本として存在させる。
-- OJの提示・回答ごとに、回答直後に`owner-jadge.md`、`issue-memo.md`、更新記録を同時更新する。
+- IMはOwnerと人間が直接行う一問一答である。Workflow Coordinator、worker、event、heartbeatは質問・回答・判断・記録更新に介入しない。
+- すべての質問・人間の回答・実測確認の直後にOwnerが`issue-memo.md`と本チェック項目を更新する。一問一答は質問集約、回答推定、回数削減、判断最適化の対象外とする。
+- Ownerへ質問または回答を求める各本文は、`rules/worker-evidence.md`のOwner回答コードブロックゲートを適用する。これは一問一答の直接性を維持するための回答形式の表示であり、質問集約やCoordinatorの介入を許可しない。
+- im開始時に`owner-judge.md`を作成し、OJを提示する前にOwner判断の正本として存在させる。
+- OJの提示・回答ごとに、回答直後に`owner-judge.md`、`issue-memo.md`、更新記録を同時更新する。
 
 ## im記録テンプレート
 
@@ -84,7 +87,7 @@ IRの責任境界、Documenter記録完了時にOwner Agentが行う全件確認
 - [ ] 未解決・未確認・不一致・Owner保留がない
 - [ ] `issue-memo.md`と本テンプレート、`current-task.md`の内容が一致
 - [ ] OJ判断が完了し、Planner接続の承認範囲が確定
-- [ ] `owner-jadge.md`が存在し、提示済み・回答済みOJと一致
+- [ ] `owner-judge.md`が存在し、提示済み・回答済みOJと一致
 - [ ] `operation-check.md`の初期化・対応前後比較・根拠・未確認区分を確認済み
 
 ## 8. 停止・再開条件
@@ -96,7 +99,7 @@ IRの責任境界、Documenter記録完了時にOwner Agentが行う全件確認
 
 ## 品質ゲート
 
-- 表の省略、列の変更、必須10観点の一括判定、質問ごとの更新記録の省略は禁止する。
+- 表の省略、列の変更、必須10観点の一括判定、質問ごとの更新記録の省略、Coordinatorによる質問・回答・判断の代行は禁止する。
 - 1項目でも未確認・未解決・不一致が残る場合、Planner接続、task確定、後工程接続を停止する。
-- `owner-jadge.md`がない、OJの提示・回答・反映が一致しない場合は、imの継続、次の質問、Planner接続、task確定を停止する。
+- `owner-judge.md`がない、OJの提示・回答・反映が一致しない場合は、imの継続、次の質問、Planner接続、task確定を停止する。
 - 作成者は保存前に、`issue-memo.md`、`current-task.md`、`operation-check.md`、Owner判断正本との整合を確認する。

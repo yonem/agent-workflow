@@ -9,7 +9,7 @@ scope: all-workers
 ## 初期登録時（要件定義開始前）
 
 - Ownerがファイル側threadの登録だけを明示した場合は、`threads/<thread-name>/`と未指定または空の後続入力領域だけを準備する。
-- この段階ではCodex会話、クルー会話、worker、Codexプロジェクト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境、history台帳を作成・接続・採番・推測しない。
+- この段階ではユーザー向け実行会話、クルー会話、worker、実行コンテキスト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境、history台帳を作成・接続・採番・推測しない。製品固有の会話・projectは、選択した実行バックエンドの能力契約で必要な場合だけ扱う。
 - 要件定義開始が明示されていない補足・相談・確認では、task資料・task-id・historyを作成または変更しない。
 - 初期登録と要件定義開始を区別できない、対象領域が未確認、既存active taskとの境界が不明な場合は停止する。
 
@@ -17,19 +17,21 @@ scope: all-workers
 
 ## 要件定義開始時
 
-要件定義資料は`rules/im-template.md`を入口テンプレートとして作成する。`issue-memo.md`、必須10観点、現状・要求状態比較、質問ごとの更新記録、Planner接続前チェックを分散資料で代替してはならない。
+要件定義資料は`rules/im-template.md`を入口テンプレートとして作成する。IM段階はOwnerと人間の直接一問一答であり、Workflow Coordinator、worker、event、heartbeatは介入しない。`issue-memo.md`、必須10観点、現状・要求状態比較、質問ごとの更新記録、Planner接続前チェックを分散資料で代替してはならない。
+
+`rules/quick-operation.md`に従う`docs/quick-im.md`がある場合、新規標準taskの開始をOwnerが明示したことを削除承認として、標準IMの初期化前に削除できる。退避・履歴化・転記は行わない。対象が簡易IMであることを確認できない、標準IMや現行task資料と混在している、または削除できない場合は削除せず停止する。
 
 1. `docs/issue-memo.md`を作成または現行task用に初期化する。
-2. `docs/owner-jadge.md`を作成または現行im用に初期化し、OJの正本を確保する。
+2. `docs/owner-judge.md`を作成または現行im用に初期化し、OJの正本を確保する。
 3. task-id、目的、対象、対象外、開始理由、未決定事項、停止条件を記録する。
 4. `rules/human-facing-documentation.md`の固定7列で、`issue-memo.md`へ現状・要求状態比較表を作成する。未確認項目は`未確認`と記載し、表を省略しない。
-5. 会話で決定・変更された事項は、次の計画・worker接続・Owner回答の前に、既存項目と比較表の関連行へ統合して`issue-memo.md`を更新する。会話本文の機械的な追記は禁止する。
-6. OJの提示・回答ごとに、`owner-jadge.md`、`issue-memo.md`、更新記録の反映結果を照合する。
-7. `issue-memo.md`、`owner-jadge.md`、または現状・要求状態比較表が存在しない、更新されていない、列順が不一致、OJが不一致、または現行taskと不一致の場合は、次の質問、計画、Planner接続を停止する。
+5. 人間との各直接対話で決定・変更された事項は、Ownerが次の質問・計画・worker接続の前に、既存項目と比較表の関連行へ反映して`issue-memo.md`を更新する。会話本文の機械的な追記は禁止する。
+6. OJの提示・回答ごとに、`owner-judge.md`、`issue-memo.md`、更新記録の反映結果を照合する。
+7. `issue-memo.md`、`owner-judge.md`、または現状・要求状態比較表が存在しない、更新されていない、列順が不一致、OJが不一致、または現行taskと不一致の場合は、次の質問、計画、Planner接続を停止する。
 
 ## タスク切替・初期化
 
-要件定義中の会話は、会話履歴だけを正本としない。Owner回答、worker報告、停止・再開、履歴操作、ルール変更、次工程判断が発生した直後に、`issue-memo.md`、`owner-jadge.md`、`task-log.md`、`operation-check.md`のうち該当する資料を更新し、更新成功を確認する。更新が完了するまで次の質問、接続、完了、履歴操作へ進まない。会話が中断・消失しても、最新の正本資料だけで現状、判断、次工程、停止理由を復元できる状態を維持する。
+要件定義中の会話は、会話履歴だけを正本としない。Owner回答、worker報告、停止・再開、履歴操作、ルール変更、次工程判断が発生した直後に、`issue-memo.md`、`owner-judge.md`、`task-log.md`、`operation-check.md`のうち該当する資料を更新し、更新成功を確認する。更新が完了するまで次の質問、接続、完了、履歴操作へ進まない。会話が中断・消失しても、最新の正本資料だけで現状、判断、次工程、停止理由を復元できる状態を維持する。
 
 1. 現行taskの`docs/`・`result/`を初期化する前に、history、manifest、`history/index.md`、退避内容を照合する。同じtask-idの再開前スナップショットがある場合は、`rules/history-initialization.md`の追記スナップショットを作成・照合する。hisi更新とdocs/result初期化を同一処理として扱わない。
 2. 照合成功後かつOwnerが削除対象を明示承認した場合だけ、現行taskの`docs/`・`result/`内の対象ファイルを削除する。ディレクトリは残してよい。承認がない場合は削除せず停止する。
@@ -43,7 +45,7 @@ scope: all-workers
 
 ## 接続ゲート
 
-要件定義中は、必須10観点の各質問・回答・実測後に`issue-memo.md`の更新成功を確認する。未解決、未確認、不一致、更新失敗、Owner判断残件が一つでもある場合はPlanner接続を停止し、6項目（期待値、実際値、根拠、影響、停止理由、再開条件）を記録する。
+要件定義中は、必須10観点の各質問・人間の回答・実測後にOwnerが`issue-memo.md`の更新成功を確認する。未解決、未確認、不一致、更新失敗、または人間の明示的な計画作成指示がない場合はPlanner接続を停止する。Coordinatorによる質問集約、回答代行、event化、再試行でこの停止を回避してはならない。
 
 Planner接続では作業ブランチ未決定を許可する。Owner承認済み計画を入力としてImplementerへ接続する直前に限り、作業ブランチを決定し、実体、`current-task.md`、承認済み`plan.md`を照合する。照合不能・不一致なら接続を停止する。
 
@@ -58,7 +60,7 @@ Plannerまたは後続workerへ接続するには、次の全項目を実施済�
 [ ] 必要資料の新規作成
 [ ] 全資料のtask-id・目的・状態・Owner判断の照合
 [ ] issue-memo.mdの最新決定事項反映
-[ ] owner-jadge.mdの作成・OJ反映・issue-memoとの一致
+[ ] owner-judge.mdの作成・OJ反映・issue-memoとの一致
 [ ] issue-memo.mdの現状・要求状態比較表（固定7列）
 [ ] operation-check.mdの対応前後比較・根拠・未確認区分
 [ ] 初期化ゲートの実施結果・確認者・確認日時
@@ -75,7 +77,7 @@ Plannerまたは後続workerへ接続するには、次の全項目を実施済�
 Ownerがタスクの作業完了を判断した場合、次タスクの開始を待たず、同一の完了処理として次を実施する。
 
 1. `current-task.md`へ完了日時と最終状態を記録する。後続改善候補はOwner管理IRまたは新規im候補へ分離する。
-2. 現行`docs/`と`result/`の一覧、task-id、projectId、thread、状態、Owner判断、未確認事項、次工程を照合する。
+2. 現行`docs/`と`result/`の一覧、task-id、実行コンテキストID、thread、状態、Owner判断、未確認事項、次工程を照合する。
 3. `history/<task-id>/`が存在しないことを確認し、現行`docs/`と`result/`をコピーしてmanifestを作成する。同一task-idの履歴が存在する場合は上書きせず停止する。
 4. 退避先、manifest、`history/index.md`、退避ファイルの内容と件数を相互照合する。部分成功、不一致、欠落、読取不能の場合は現行領域を初期化しない。
 5. 照合成功とOwner承認後、現行`docs/`と`result/`の旧task資料を削除する。削除直後に履歴の全IRから対応済みIRだけを除外し、未完了IRがある場合は未完了全件を新規の`docs/improvement-reminders.md`へ継承する。未完了IRが0件の場合は同ファイルを作成しない。

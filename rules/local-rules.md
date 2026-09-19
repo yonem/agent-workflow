@@ -9,7 +9,7 @@ status: active
 
 共通 `rules/` に採用できない作業リポジトリ固有、利用シーン固有、期間限定、または機密境界付きのルールは、`rules/local/` に分離して管理する。`rules/` は全project共通の安全基準・停止条件・worker手順の正本であり、`rules/local/` は適用条件が限定されたルール本文の正本である。
 
-`README.md`、`AGENTS.md`、worker定義、task資料は参照先と責務を案内する。個別ローカルルールの本文を複製せず、適用中の状態・条件・証跡は対象taskの `docs/task-progress.md` または担当workerの `result/` に記録する。Owner判断は `docs/owner-jadge.md`、対応前後の確認は `docs/operation-check.md` を正本とする。
+`README.md`、`AGENTS.md`、worker定義、task資料は参照先と責務を案内する。個別ローカルルールの本文を複製せず、適用中の状態・条件・証跡は対象taskの `docs/task-progress.md` または担当workerの `result/` に記録する。Owner判断は `docs/owner-judge.md`、対応前後の確認は `docs/operation-check.md` を正本とする。
 
 ## 配置・Git管理・命名
 
@@ -105,4 +105,4 @@ status: active
 - worker固有の読込・証跡責務：`worker-definitions/`
 - 対応前後比較と根拠区分：`rules/operation-check-report.md`
 - taskの状態・適用証跡：`threads/<thread-name>/docs/task-progress.md`
-- Owner判断：`threads/<thread-name>/docs/owner-jadge.md`
+- Owner判断：`threads/<thread-name>/docs/owner-judge.md`

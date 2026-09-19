@@ -7,9 +7,18 @@ status: active
 
 ## 目的と適用範囲
 
-このルールは、改善事項を発見してからOwner判断、計画、実装、Reviewer受入、記録更新、Owner完了判断までを、プロジェクトをまたいで同じ意味で扱うための共通仕様である。実運用上の観測は任意の改善材料であり、タスク完了・履歴退避・次task接続の条件にしない。個別タスクの詳細、実装ログ、Ownerの個別判断は対象スレッドのresultへ記録し、ルートの改善記録へ混在させない。
+このルールは、改善事項を発見してからOwner判断、計画、実装、Reviewer受入、記録更新、Owner完了判断までを、プロジェクトをまたいで同じ意味で扱うための共通仕様である。運用中の不具合・改善点は、発生時のOwner依頼として`rules/quick-operation.md`の適格性を新たに判定し、現行taskの完了・履歴退避・次task接続の条件にしない。個別タスクの詳細、実装ログ、Ownerの個別判断は対象スレッドのresultへ記録し、ルートの改善記録へ混在させない。
 
 改善サイクルは、F-xxx、IMP-xxx、drafts、特定のproject/thread、特定workerの存在を、工程の分岐条件・必須入力・完了条件にしない。これらは既存資料との照合に使える場合があるが、共通サイクルの成立条件ではない。
+
+## IM段階の人間直接対話
+
+IM段階は、改善事項を採用し計画作成を指示するまでの、Ownerと人間による直接の一問一答である。Workflow Coordinator、worker、実行バックエンドのevent・heartbeatはこの段階に介入しない。
+
+- IMの各質問と回答は、人間が直接確認・回答する。Coordinatorが質問を生成、集約、代行、回答推定、優先順位付け、または自動承認してはならない。
+- 一問一答は判断回数、通知回数、トークン量、エスカレーションの最適化対象から除外する。既回答を再掲しない規則は、同じ質問の重複提示を防ぐためだけに用い、質問の省略・統合・代替には用いない。
+- IM段階で作成・更新する`issue-memo.md`と`owner-judge.md`は、Ownerが人間との直接対話で確定した内容を記録する。Coordinatorは通常工程の台帳、Worker Registry、handoff eventを作成・claim・更新しない。
+- 人間がIMを確定し、Plannerへの計画作成を明示指示した時点でだけ、要件定義をPlanner入力へ凍結してタスク初期化へ進める。計画承認前は自律サイクルを開始しない。
 
 ## 技術非依存性・媒体中立性
 
@@ -54,8 +63,9 @@ Ownerの適用可否判断・記録元:
 ```text
 改善事項の発見
   ↓
+Ownerと人間によるIMの直接一問一答
+  ↓ 人間が計画作成を指示
 Plannerによる汎用性・影響・適用範囲・停止条件の評価
-  ↓ Owner判断
 計画作成
   ↓ Owner承認
 Implementerによる承認範囲の実装
@@ -80,16 +90,16 @@ Reviewer受入は、計画・実装・受入条件・証跡・適用範囲の独
 | --- | --- | --- |
 | 未着手 | 改善候補として把握されているが、Owner承認済みの計画・実装・受入に着手していない | Owner承認後に計画・実装・受入へ進める場合は`対応中`、適用しない場合またはOwner判断が必要な場合は`適用外`へ移る |
 | 対応中 | Owner承認後の計画・実装・受入・記録を進行中 | Owner完了判断で`対応完了`へ移る |
-| 対応完了 | Reviewer受入、Documenter記録、Owner完了判断まで完了 | Owner確認後に維持する |
+| 対応完了 | Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了判断まで完了 | Owner確認後に維持する |
 | 適用外 | Ownerが適用しないと判断した | 根拠と後続扱いを記録して維持する |
 
 `計画承認待ち`、`実装中`、`Reviewer受入待ち`などの細部工程は、公開ステータスへ変換せず、`current-task.md`、`task-progress.md`、各resultに記録する。`未着手`から`対応中`へ根拠なく直接変更せず、Owner承認と計画・実装・受入の証跡を確認する。
 
-IRの更新・管理はOwner Agentだけが行う。`development-improvement.md`は汎用的な改善知見の記録であり、現行taskの完了ゲート、IR同期、全件照合の正本にしない。
+IRの更新・管理はWorkflow Coordinatorだけが行う。`development-improvement.md`は汎用的な改善知見の記録であり、現行taskの完了ゲート、IR同期、全件照合の正本にしない。
 
 ## IMP状態の証跡ベース同期
 
-汎用改善記録を更新する場合は、サマリー、対象詳細、該当するtask-log、Owner判断を同一の更新境界で照合する。IRの状態・採番・全件同期はOwner Agentの責務であり、改善記録をtask完了ゲートにしない。状態だけを先に変更せず、次の項目を同時に記録する。
+汎用改善記録を更新する場合は、サマリー、対象詳細、該当するtask-log、Owner判断を同一の更新境界で照合する。IRの状態・採番・全件同期はWorkflow Coordinatorの責務であり、改善記録をtask完了ゲートにしない。状態だけを先に変更せず、次の項目を同時に記録する。
 
 - 公開ステータスと内部worker状態
 - 要約と詳細の一致
@@ -98,7 +108,7 @@ IRの更新・管理はOwner Agentだけが行う。`development-improvement.md`
 - 次回確認条件、担当、確認日または次回確認日
 - 未確認事項、影響、再評価条件
 
-サマリーと詳細の状態、要約、更新理由、証跡が一致しない場合は、改善記録の更新を停止する。現行taskの完了・履歴退避・次task接続は、Reviewer受入、Documenter記録、Owner完了判断で判定する。
+サマリーと詳細の状態、要約、更新理由、証跡が一致しない場合は、改善記録の更新を停止する。現行taskの完了・履歴退避・次task接続は、Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了判断で判定する。
 
 ### 一意に判定できる状態遷移の自動更新
 
@@ -113,7 +123,7 @@ IRの更新・管理はOwner Agentだけが行う。`development-improvement.md`
 | 前提となる確認済み事実 | 自動更新後の公開ステータス | 必須証跡 |
 | --- | --- | --- |
 | Owner承認済み計画に基づく対応を開始した | `対応中` | 承認済み計画、対象IMP、開始記録 |
-| Reviewer受入、Documenter記録、Owner完了判断が明示済みである | `対応完了` | Reviewer記録、task-log、Owner完了判断 |
+| Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner完了判断が明示済みである | `対応完了` | Reviewer記録、Documenter開始承認、task-log、Owner完了判断 |
 
 自動更新時は、対象IMP、変更前後、更新理由、証跡パスと確認結果、更新日時、対象task-id、更新責任者、次回確認条件を同じ更新境界で記録する。`対応完了`はOwnerの完了確認が記録上明示されている場合だけ許可し、Reviewer受入または効果確認済みだけでは更新しない。
 
@@ -133,7 +143,7 @@ IRの更新・管理はOwner Agentだけが行う。`development-improvement.md`
 
 1. タスク開始：全対象IMPの現行状態、期待遷移、5条件、実施結果、証跡、次回確認条件を記録する。
 2. 対応開始：承認済み計画に基づく対応開始を確認し、適用可能な`未着手`→`対応中`を更新・記録する。
-3. Reviewer受入後：Documenter記録とOwner完了判断の対象を確認し、必要な汎用改善記録だけを更新する。
+3. Reviewer受入後：OwnerによるDocumenter開始承認、Documenter記録とOwner完了判断の対象を確認し、必要な汎用改善記録だけを更新する。Owner承認前にDocumenterを開始しない。
 4. Documenter記録前後：Documenterが全対象IMPの判定表、更新結果、記録更新、次回確認条件を前後で照合する。
 
 各境界で5条件が成立しない場合は、未成立条件、更新不能理由、影響、再開条件を記録し、改善記録の更新だけを停止する。記録の不足だけを理由に承認済み範囲の次工程へ進行を止めない。`対応完了`、`適用外`、承認範囲外の是正は自動更新せず、改善記録上のOwner判断待ちとして記録する。
@@ -163,13 +173,13 @@ Documenterは、適用可能な遷移を実行して記録するか、5条件不
 
 1. 現行taskの状態を固定し、全IMPのサマリー・詳細・証跡・Owner判断を再読する。
 2. 別IMPの変更を`変更なし`・`外部更新`・`競合`・`検証不能`へ分類する。
-3. Reviewer受入、Documenter記録、Owner確認の不足と、Owner管理IRまたは新規im候補を確認する。
+3. Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、Documenter記録、Owner確認の不足と、Owner管理IRまたは新規im候補を確認する。
 4. 条件不足がなければ現行taskを更新する。
 5. Owner指示と対象資料を確認したうえで履歴manifestを作成・確認する。
 6. `history/index.md`へ履歴状態を反映する。
 7. 前項までの整合性確認後にだけ次taskの`current-task.md`と`task-progress.md`を接続する。
 
-Owner判断待ち、競合、検証不能、manifestと`history/index.md`の不一致、active taskの重複があれば自動終了・自動接続・自動統合を行わず、停止理由、影響、再開条件を記録する。任意の運用観測はIRまたは新規im候補へ分離する。
+Owner判断待ち、競合、検証不能、manifestと`history/index.md`の不一致、active taskの重複があれば自動終了・自動接続・自動統合を行わず、停止理由、影響、再開条件を記録する。運用中に不具合または改善点が発生した場合は、過去の記録を振り返る工程を起動せず、新たなOwner依頼として`rules/quick-operation.md`の適格性を判定する。
 
 ## 内部工程状態と必須記録
 
@@ -197,7 +207,7 @@ Owner判断待ち、競合、検証不能、manifestと`history/index.md`の不�
 - Owner：適用可否、優先度、計画、範囲変更、効果不足、新TASK開始を判断する。
 - Implementer：Owner承認済みの範囲だけを実装し、変更・最低限の確認・未確認事項を記録する。
 - Reviewer：計画、実装、受入条件、証跡、適用範囲を独立して確認する。
-- Documenter：受入後の記録、判断、教訓、汎用改善記録を永続化する。IR管理はOwner Agentが行う。
+- Documenter：受入後の記録、判断、教訓、汎用改善記録を永続化する。IR管理はWorkflow Coordinatorが行う。
 
 Documenterは最後のworkerであってもタスク完了を確定しない。Documenter記録後、未採番の改善候補がない場合は`Documenter記録完了・Owner完了確認待ち`、候補がある場合は`Documenter記録完了・Owner判断待ち`として、Ownerのclose確認または判断を受けるまで対応完了、履歴退避、次タスク切替、新規IMP採番を行わない。候補がない場合もOwnerのclose確認を必須とする。対応完了は、効果確認、記録更新、候補処理、Owner確認がすべて完了した後だけとする。
 
@@ -213,7 +223,7 @@ Documenterは最後のworkerであってもタスク完了を確定しない。D
 - 適用範囲と優先順位、正本、更新責任、記録先が確認できる
 - `current-task.md`と`task-progress.md`を初期作成できる
 - Planner、Implementer、Reviewer、Documenterの役割・入力・出力が確認できる
-- Owner承認、Reviewer受入、実運用効果確認、Documenter記録の境界が確認できる
+- Owner承認、Reviewer受入、Reviewer受入結果に対するOwnerのDocumenter開始承認、実運用効果確認、Documenter記録の境界が確認できる
 - 改善事項の共通記録とタスク固有ログを分離できる
 - 次タスク開始時、効果確認中、承認範囲外の是正時の停止条件を確認できる
 - 特定の過去task、F-ID、IMP-ID、drafts、project/threadがなくても初回サイクルを開始できる
