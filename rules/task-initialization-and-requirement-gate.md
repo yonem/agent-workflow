@@ -9,7 +9,7 @@ scope: all-workers
 ## 初期登録時（要件定義開始前）
 
 - Ownerがファイル側threadの登録だけを明示した場合は、`threads/<thread-name>/`と未指定または空の後続入力領域だけを準備する。
-- この段階ではCodex会話、クルー会話、worker、Codexプロジェクト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境、history台帳を作成・接続・採番・推測しない。
+- この段階ではユーザー向け実行会話、クルー会話、worker、実行コンテキスト、task、TASK-ID、OJ-ID、Issue、PR、branch、対象環境、history台帳を作成・接続・採番・推測しない。製品固有の会話・projectは、選択した実行バックエンドの能力契約で必要な場合だけ扱う。
 - 要件定義開始が明示されていない補足・相談・確認では、task資料・task-id・historyを作成または変更しない。
 - 初期登録と要件定義開始を区別できない、対象領域が未確認、既存active taskとの境界が不明な場合は停止する。
 
@@ -75,7 +75,7 @@ Plannerまたは後続workerへ接続するには、次の全項目を実施済�
 Ownerがタスクの作業完了を判断した場合、次タスクの開始を待たず、同一の完了処理として次を実施する。
 
 1. `current-task.md`へ完了日時と最終状態を記録する。後続改善候補はOwner管理IRまたは新規im候補へ分離する。
-2. 現行`docs/`と`result/`の一覧、task-id、projectId、thread、状態、Owner判断、未確認事項、次工程を照合する。
+2. 現行`docs/`と`result/`の一覧、task-id、実行コンテキストID、thread、状態、Owner判断、未確認事項、次工程を照合する。
 3. `history/<task-id>/`が存在しないことを確認し、現行`docs/`と`result/`をコピーしてmanifestを作成する。同一task-idの履歴が存在する場合は上書きせず停止する。
 4. 退避先、manifest、`history/index.md`、退避ファイルの内容と件数を相互照合する。部分成功、不一致、欠落、読取不能の場合は現行領域を初期化しない。
 5. 照合成功とOwner承認後、現行`docs/`と`result/`の旧task資料を削除する。削除直後に履歴の全IRから対応済みIRだけを除外し、未完了IRがある場合は未完了全件を新規の`docs/improvement-reminders.md`へ継承する。未完了IRが0件の場合は同ファイルを作成しない。

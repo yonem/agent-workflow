@@ -36,6 +36,9 @@
 - 履歴概要は `history/index.md`、詳細は各履歴の`manifest.md`、`docs/`、`result/`を参照する
 - 改善事項の発見から効果確認、再評価、記録更新、移行先有効化までの共通サイクルは `rules/development-improvement-record.md` を正本とする
 - 自動化操作、受入要求の自動起動、外部接続・worker作成の安全ゲート、監査証跡、停止・再開条件は `rules/automation-operation.md` を正本とする
+- 実行環境の移植性、実行バックエンドの能力、handoff event、イベント駆動の工程遷移、復旧監査の境界は `rules/execution-portability.md` を正本とする
+- handoff event台帳の必須項目、状態遷移、claim、処理確定点は `rules/handoff-event-contract.md` を正本とする
+- 選択した実行バックエンド固有の能力対応、復旧監査起動機構、固有証跡の境界は、対応するバックエンド規約を正本とする。Codex選択時の規約は `rules/codex-execution-backend.md` を参照する
 - 読み取り専用の正本整合チェックと承認ゲートの入力、判定、出力、人の判断境界は `rules/read-only-automation-gates.md` を正本とする
 - 共通rules、worker定義、テンプレート、README、移行確認手順を変更する場合の影響確認は `rules/workflow-consistency-check.md`、`rules/workflow-integrity-check.md`、`rules/operation-check-report.md` を順に参照する
 - Reviewer修正依頼の総合報告、一括修正、全正本横断照合、再レビュー接続は `rules/worker-task-settings.md` と `rules/worker-evidence.md` を参照する

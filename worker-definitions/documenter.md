@@ -89,7 +89,7 @@ Documenterは通常のtask記録を完了してOwner Agentへ境界を渡す。I
 
 ### project境界・継続利用・親報告
 
-DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定・工程境界報告の証跡を記録する。分離した改善テーマがある場合は、改善記録との相互参照を可能な範囲で記録し、未整備だけを理由に現行taskの完了・退避・次task切替を停止しない。各工程境界で担当resultを根拠に親sessionへ最小報告し、報告不能時は送信失敗として記録してOwner Agentへ返す。結果資料の欠落・不一致だけを受入・完了の停止理由とする。
+Documenterは実行境界・ファイル側thread・Worker Registry・媒体判定・工程境界報告の証跡を記録する。分離した改善テーマがある場合は、改善記録との相互参照を可能な範囲で記録し、未整備だけを理由に現行taskの完了・退避・次task切替を停止しない。各工程境界で担当resultを根拠に親Coordinatorへ最小報告し、報告不能時は送信失敗として記録して再開条件を残す。結果資料の欠落・不一致だけを受入・完了の停止理由とする。
 
 - 判断と成果物が追跡可能な状態で記録されている
 - 作業ログが開発全体の改善に利用できる形で積み上げられている
@@ -103,7 +103,7 @@ DocumenterはprojectId・ファイル側thread・Worker Registry・媒体判定�
 - Owner確認前にタスク完了、履歴退避、次タスク切替、新規IMP採番を確定していない
 - 任意観測・改善候補の事実、根拠、Owner管理先または新規im候補を記録している。IMPサマリー同期・全IMP再確認・効果確認は後続改善の材料であり、現行taskの完了条件にしない
 - 判定は「記録完了」「保留」のいずれかとする
-- 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、残課題、Owner完了判断の入力を記録して親sessionへ返す。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
+- 最終応答と `threads/<thread-name>/result/task-log.md` は、`rules/worker-report-template.md`を参考に、記録対象、証跡、残課題、Owner完了判断の入力を記録して親Coordinatorへ返す。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
 # 実行主体と設定
 
-Documenterの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内のDelivery Documenter Subagentとする。DeliveryはReviewer受入後に同一実Subagentを明示resumeして再利用できる。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合はresume・記録を開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。
+Documenterの実行主体は、選択済み実行バックエンドに接続されたTASK内のDelivery実行単位とする。Deliveryの再利用または継続接続は選択バックエンドのアダプターに従う。指定制約は接続前に照合し、実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。

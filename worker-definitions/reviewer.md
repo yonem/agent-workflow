@@ -63,7 +63,7 @@
 
 ### project境界・継続利用・親報告
 
-ReviewerはprojectId・ファイル側thread・会話種別・Worker Registry・媒体判定・工程境界報告を独立確認する。既存クルーの再利用が不一致・重複・未確認のまま進んでいないこと、報告済みが承認・受入・接続と混同されていないことを確認する。各工程境界で担当resultを根拠に親sessionへ最小報告する。安全報告の送信失敗は、最小形式で1回だけ再試行し、失敗結果を担当resultとtask-logへ記録してOwner判断へ返す。送信失敗だけでDocumenter接続を停止せず、結果資料の欠落・不一致を停止条件とする。
+Reviewerは実行境界・ファイル側thread・Worker Registry・媒体判定・工程境界報告を独立確認する。既存実行単位の再利用が不一致・重複・未確認のまま進んでいないこと、報告済みが承認・受入・接続と混同されていないことを確認する。各工程境界で担当resultを根拠に親Coordinatorへ最小報告する。報告送信不能時は担当resultとtask-logへ理由・再開条件を記録し、選択バックエンドと`current-task.md`で解決された復旧方針に従う。送信不能だけでDocumenter接続を停止せず、結果資料の欠落・不一致を停止条件とする。
 
 外部連携台帳について、2列の正本、記載有無による有効判定、識別子suffix、初回承認から利用開始までの順序、個別行と全体異常の停止範囲、移行先欠落時の全連携未登録、機密情報非記録を独立確認する。
 
@@ -72,8 +72,8 @@ ReviewerはprojectId・ファイル側thread・会話種別・Worker Registry・
 - 判定は「受入」「条件付き受入」「修正依頼」「保留」のいずれかとする
 - `review.md`の最大attempt番号（同番号なら最新日時）の現行報告が特定でき、attempt、日時、判定、次worker、Documenter接続可否が`plan.md`・`task-progress.md`・`history/index.md`・`changes.md`と一致している
 - 読み取り専用ドライラン6ケースの結果、停止ケースの記録形式、対象外境界、実資料・履歴・外部サービスを変更していないことを独立確認している
-- Delivery/ReviewerのSubagent構成、hisi 3状態、Reviewer受入・Documenter記録・Owner完了判断の完了根拠が共通rules、worker定義、報告テンプレート、整合性確認、状態サマリーで一致していることを独立確認する
+- Delivery/Reviewerの実行単位構成、hisi 3状態、Reviewer受入・Documenter記録・Owner完了判断の完了根拠が共通rules、worker定義、報告テンプレート、整合性確認、状態サマリーで一致していることを独立確認する
 - 最終応答と `threads/<thread-name>/result/review.md` は、`rules/worker-report-template.md`を参考に、確認対象、証跡、判定、修正依頼、次工程を記録して親タスクへ報告する。本文の見出し順・表形式・Owner判断の配置は固定しない。Owner判断の意味は `rules/worker-evidence.md` に従う
 # 実行主体と設定
 
-Reviewerの実行主体は、親チャット、ユーザー向けCodexスレッド／会話、ファイル側thread、Codex projectではなく、TASK内の独立Reviewer Subagentとする。Deliveryの再利用では代替しない。指定モデル・推論レベルは`gpt-5.6-luna` / `low`。接続前に指定設定または実Subagent IDを確認できない場合は接続・レビューを開始せず停止する。接続済みSubagentの実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。ユーザー向けCodexスレッド／会話を代替にしない。
+Reviewerの実行主体は、選択済み実行バックエンドに接続されたTASK内の独立Reviewer実行単位とする。Deliveryの再利用では代替しない。指定制約は接続前に照合し、実測値が取得不能な場合は未確認・証跡・影響・再開条件を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。

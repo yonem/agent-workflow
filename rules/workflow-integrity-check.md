@@ -19,7 +19,7 @@ current-task.md
 
 ## 入力条件
 
-照合開始前に、対象リポジトリ、Codex実行ディレクトリ、ベースブランチ、作業ブランチ、対象スレッド、CodexプロジェクトID、task-id、タスク名、目的が `current-task.md` と親タスクの指示で一致していることを確認する。不一致または確認不能なら照合を完了扱いにしない。新規運用ではhistory-key/run-idを入力にしない。
+照合開始前に、対象リポジトリ、実行ディレクトリ、ベースブランチ、作業ブランチ、対象スレッド、実行コンテキストID、task-id、タスク名、目的が `current-task.md` と親タスクの指示で一致していることを確認する。実行コンテキストの形式は選択したバックエンドから取得し、特定製品のproject IDを共通必須値にしない。不一致または確認不能なら照合を完了扱いにしない。新規運用ではhistory-key/run-idを入力にしない。
 
 最低限、次の資料を同じタスク境界で読む。
 
@@ -28,7 +28,7 @@ current-task.md
 | `threads/<thread-name>/result/current-task.md` | 6項目、task-id、タスク名、目的、Task Definition、Worker Registry、Draft Policy |
 | `threads/<thread-name>/result/plan.md` | 承認済み対象、対象外、受入条件、Owner判断 |
 | `threads/<thread-name>/result/changes.md` | 現行workerの実施内容、未確認事項、次worker |
-| `threads/<thread-name>/result/review.md` | 末尾へ追記されたattempt番号・日時付きレビュー報告。最大attempt番号（同番号なら最新日時）を現行判定として照合 |
+| `threads/<thread-name>/result/review.md` | 末尾へ追記されたattempt番号・日時付きレビュー報告、初回のレビュー基準スナップショット、再レビューの変更差分。最大attempt番号（同番号なら最新日時）を現行判定として照合 |
 | `threads/<thread-name>/docs/task-progress.md` | 進行中タスクの共通台帳、資産区分、Owner判断、後続候補 |
 | `history/index.md` | ローカル統合判断台帳。新ルール台帳はtask-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要、状態、最終更新を保持し、統合判定には状態・最終更新を除く8項目だけを使用 |
 | `history/<task-id>/manifest.md` | 履歴の所属・task-id・タスク名・目的・project/thread・状態・原典パス |
@@ -46,7 +46,7 @@ current-task.md
 
 1. `タスク開始`：`current-task.md`の識別情報、Task Definition、Task Lifecycle、project/thread、実行環境、branch、`task-progress.md`、plan、`history/index.md`の参照関係を確認する。
 2. `Owner承認`：planの対象・対象外・完了条件、Owner判断の記録元、未回答・保留・不明、承認範囲を確認する。回答済み判断を再掲しない。
-3. `worker接続`：projectId、対象リポジトリ、実行ディレクトリ、branch、worker役割、入力result、出力result、current-task、task-progressを確認する。
+3. `worker接続`：実行コンテキストIDまたは代替境界証跡、対象リポジトリ、実行ディレクトリ、branch、worker役割、入力result、出力result、current-task、task-progressを確認する。
 4. `タスク切替`：旧taskの最終判定、未確認事項、Owner判断、manifest、index、現行正本、切替先task-id、切替先のcurrent-task・task-progressを確認する。資料の移動・削除・上書きはしない。
 5. `履歴退避`：Owner指示、対象資料、manifest必須項目、index行、履歴パス、読み取り専用状態、候補・復旧対象外の扱いを確認する。退避操作は実行しない。
 6. `タスク終了`：Reviewer判定、Documenter記録、task-progress、未完了事項、Owner判断残件、履歴要否、次task可否を確認する。受入、任意の運用観測、close、履歴退避、切替を混同しない。
@@ -116,17 +116,17 @@ current-task.md
 
 次の順番を変えずに、各行へ根拠パスを付けて確認する。
 
-1. `current-task.md` のスレッド名、projectId、実行ディレクトリ、対象リポジトリ、ベースブランチ、作業ブランチを計画承認記録と照合する。
+1. `current-task.md` のスレッド名、実行コンテキストID、実行ディレクトリ、対象リポジトリ、ベースブランチ、作業ブランチを計画承認記録と照合する。
 2. task-id、タスク名、目的、元スレッド名、project、対象、原典パスを `current-task.md`、`plan.md`、`changes.md`、該当manifestで照合する。
 3. `history/`の初期化状態を`rules/history-initialization.md`に従って確認する。新規運用で未初期化なら、空の履歴領域と10項目の`history/index.md`を準備して初回タスクを登録する。通常の履歴スナップショットや不明な資料があるのに台帳がない場合は推測で再構成せず停止する。今回の特殊な保全領域である`history/task-legacy-history-backup/`は初期化判定から除外し、内容を変更しない。初期化後は現行 `result/` と履歴 `result/` を混在させず、現行の正本パスを一つに固定する。統合候補の判定入力は8項目（task-id、タスク名、目的、対象リポジトリ、ローカルパス、ベースブランチ、機能・レイヤー、タスク概要）に限定する。状態、候補可否、Owner判断、履歴パス、正本・根拠は操作整合性のためにローカル`history/index.md`とmanifestへ照合し、判定入力には含めない。旧timestamp形式のhistoryとbackupは通常候補・復旧から分離する。
 4. 計画対象、対象外、整合性チェッカー・状態サマリー・進行中タスク台帳の責務境界、未接続workerを照合する。
-5. `Owner判断` 表のID、要約、Owner回答、ステータス、根拠と本文のコピー可能な `OJ-xxx（要約: ...）=yes` 形式を照合する。IDなし、不明、重複、対象外、不一致は自動適用しない。Reviewerの判定が修正依頼・保留・未確認の場合、Owner判断残件と回答プロンプトを`なし`にしてはならない。修正依頼の対象、根拠、影響、停止理由、再開条件を記録し、Owner判断が必要な論点にはOJ-IDを付与する。未解決Reviewer指摘と`Owner判断残件：なし`の併存は正本矛盾として停止する。
-6. Worker Registryの論理責務、Subagent種別、subagentId、親session、projectIdと、次workerの指定を照合する。Registryの記録はlive状態の証明とはみなさない。
+5. `Owner判断` 表のID、要約、Owner回答、工程影響、ステータス、根拠と本文のコピー可能な `OJ-xxx（要約: ...）=yes` 形式を照合する。IDなし、不明、重複、対象外、不一致は自動適用しない。Reviewerの判定が修正依頼・保留・未確認の場合、工程影響が`停止`のOwner判断残件と回答プロンプトを`なし`にしてはならない。修正依頼の対象、根拠、影響、停止理由、再開条件を記録し、Owner判断が必要な論点にはOJ-IDと工程影響を付与する。未解決Reviewer指摘と`停止`判断の`Owner判断残件：なし`の併存は正本矛盾として停止する。
+6. Worker Registryの論理責務、実行単位種別、実行単位ID、親Coordinatorコンテキスト、所属実行コンテキストと、次workerの指定を照合する。Registryの記録はlive状態の証明とはみなさない。
 7. 参照先、既存result/history/rulesの変更境界を確認する。Owner承認済みの旧history backup移動は許可するが、内容改変・旧タスク個別へのtask-id遡及・自動統合は行わない。task-idは候補行の識別子であり、同一性や統合可否の単独根拠にしない。8項目の比較条件が一致しない、またはOwner承認に統合先・共通範囲・固有範囲・完了条件・履歴処理・競合方針が不足する場合は自動統合しない。
 8. `history/index.md`が存在しない、読み取れない、現行資料と不一致の場合は統合判断を完了扱いにせず、Ownerへ確認を求める。
 9. 正本候補が複数、参照切れ、更新責任の重複、更新境界不明、または正本と要約の値が不一致の場合は、補正せず`changes.md`へ停止理由を記録する。
 
-10. Reviewer再接続前に、親タスクが`review.md`、`changes.md`、`task-progress.md`、`plan.md`の更新責任に従って4正本を同期したことを確認する。同期責任者が不明、複数workerが同一正本を補正、または同一原因の不一致が2回連続している場合は、Reviewerを再接続せずOwner判断へ停止する。
+10. Reviewer再接続前に、親タスクが`review.md`、`changes.md`、`task-progress.md`、`plan.md`の更新責任に従って4正本を同期したことを確認する。同期責任者が不明、複数workerが同一正本を補正、または同一原因の不一致が`current-task.md`で解決した再試行上限に達している場合は、Reviewerを再接続せずOwner判断へ停止する。
 
 ## ルール変更の影響確認ゲート
 
@@ -156,9 +156,9 @@ current-task.md
 
 次の場合は整合性確認の判定を完了にせず、`changes.md`へ停止理由とOwner判断プロンプトを記録する。
 
-- 6項目、task-id、タスク名、目的、projectId、対象、原典パスのいずれかが欠落・不一致
+- 6項目、task-id、タスク名、目的、実行コンテキストまたは代替境界証跡、対象、原典パスのいずれかが欠落・不一致
 - 現行resultと履歴resultの正本が特定できない
-- Owner判断が `要判断`、`未回答`、`保留`、不明、ID重複、本文と表の不一致
+- 工程影響が`停止`のOwner判断が `要判断`、`未回答`、`保留`、不明、ID重複、本文と表の不一致、または工程影響が未分類
 - 次workerがWorker Registryにない、またはworkerの所属が確認できない
 - Owner承認のない既存履歴・既存rulesの削除、上書き、移動が必要になる
 - `history/index.md`の必須項目が欠落・読取不能・古い、またはcurrent-task、task-progress、現行result、manifestと不一致
@@ -184,7 +184,7 @@ current-task.md
 | ケース | 入力状態 | 期待判定 | 停止 |
 | --- | --- | --- | --- |
 | 正常 | 統合判定8項目、current-taskの6項目、task-id、タスク名、目的、manifest、result、Owner判断、次workerが一致 | `確認済み` | いいえ |
-| project不一致 | current-taskのprojectIdとworkerの所属が不一致 | `矛盾` | はい |
+| 実行境界不一致 | current-taskの実行コンテキストまたは代替境界証跡とworkerの所属が不一致 | `矛盾` | はい |
 | 履歴欠落 | task-idに対応するmanifestを確認できない | `未確認` | はい |
 | OJ重複 | 同一Owner判断IDが表に2回ある | `矛盾` | はい |
 | 次worker不明 | 次workerがWorker Registryにない | `未確認` | はい |
@@ -203,7 +203,7 @@ Markdownの最小形式:
 - task-id: <task-id>
 - タスク名: <task-name>
 - 目的: <purpose>
-- 対象project/thread: <projectId>/<thread-name>
+- 対象実行コンテキスト/thread: <execution-context-id>/<thread-name>
 - 正本: <current-taskと現行resultのパス>
 
 | 判定 | 期待値 | 実際値 | 根拠 | 停止要否 |
@@ -220,7 +220,7 @@ JSONの最小形式:
   "taskId": "<task-id>",
   "taskName": "<task-name>",
   "purpose": "<purpose>",
-  "project": "<projectId>",
+  "executionContext": "<execution-context-id または not-applicable>",
   "thread": "<thread-name>",
   "checks": [
     {
@@ -236,7 +236,7 @@ JSONの最小形式:
 
 ## Owner判断プロンプト
 
-判断残件がある場合は、未回答・保留・不明な判断と今回新たに発生した増分判断だけを同じ順序で一度ずつ列挙し、`rules/worker-evidence.md`に従ってOJ行だけのOwner回答ブロックを`changes.md`に記録する。回答済みの判断は再掲しない。既定の回答値は`yes`とする。計画関連の場合は必須4項目を別ブロックへ記載する。残件がない場合は `Owner判断残件：なし`、`回答プロンプト：なし` と記録する。
+`停止`判断の残件がある場合は、未回答・保留・不明な判断と今回新たに発生した増分判断だけを同じ順序で一度ずつ列挙し、`rules/worker-evidence.md`に従ってOJ行だけのOwner回答ブロックを`changes.md`に記録する。`非停止`判断はIRまたは新規im候補の記録先を示す。回答済みの判断は再掲しない。既定の回答値は`yes`とする。計画関連の場合は必須4項目を別ブロックへ記載する。停止残件がない場合は `Owner判断残件：なし`、`回答プロンプト：なし` と記録する。
 
 ```text
 OJ-xxx（要約: 整合性確認の<未確定事項>）=yes
@@ -246,7 +246,7 @@ OJ-xxx（要約: 整合性確認の<未確定事項>）=yes
 
 ```text
 対象リポジトリ: <絶対パス>
-Codex実行ディレクトリ: <絶対パス>
+実行ディレクトリ: <絶対パス>
 ベースブランチ: <branch>
 作業ブランチ: <branch>
 ```

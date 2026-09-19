@@ -5,6 +5,8 @@ status: active
 
 # ワークフロー整合性チェック
 
+本書の照合対象は選択した実行バックエンドの実行コンテキスト、実行ディレクトリ、worker能力である。以下のCodex固有表記はCodex選択時だけ適用し、別バックエンドでは同じ意味の識別子・能力へ読み替える。Codex固有値を共通必須条件として要求しない。
+
 ## TASK-034 第4段階の横断照合境界（CHG-034-01）
 
 IR-005の横断照合では、`current-task.md`、`docs/task-progress.md`、現行`result/`、Owner判断、作業ブランチ、project/thread/task境界、次工程、Worker Registryを入力とする。各項目を「一致」「不一致」「未確認」「対象外」に分類する。必須境界の不一致、既知の不一致・重複、結果資料欠落、承認不足は接続・更新・次工程を停止するが、API観測値の取得不能だけは代替証跡に矛盾がない限り`未確認`として継続する。照合結果は担当`result/changes.md`へ記録し、履歴原本・外部サービス・秘密情報を入力へ追加しない。
@@ -17,7 +19,7 @@ IR-006のルール変更影響分析は、変更対象、直接参照、記録�
 
 IR-007の状態表示は読み取り専用とし、task/thread/project/branch、次工程、OJ、Subagent状態を「正常」「警告」「未確認」「停止」に分類する。表示は正本を変更せず、状態の更新責任は各正本の所有者に残す。表示値と正本が一致しない場合は警告または停止として記録し、表示から承認・接続・完了を自動実行しない。
 
-worker接続前および作業開始前に、`current-task.md`、`docs/task-progress.md`、スレッドの結果ファイル、workerの実行環境が同じタスクを指していることを確認するための共通手順。
+worker接続前および作業開始前に、`current-task.md`、`docs/task-progress.md`、スレッドの結果ファイル、workerの実行バックエンドと実行環境が同じタスクを指していることを確認するための共通手順。
 
 本書は記載値と実環境の照合手順を正本とする。用語の標準的な意味と取り違え防止は`rules/glossary.md`を正本とする。6項目とTask Definition/Task Lifecycleの記載形式は `rules/current-task-template.md`、計画関連Owner回答の記録は `rules/plan-approval-required-info.md`、project/thread/taskのライフサイクルは `rules/thread-operation.md`に従う。共通台帳の正本は次タスク以降`docs/task-progress.md`とする。
 
@@ -26,7 +28,7 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 | 資料 | 正本として扱う情報 | 更新責任 | 更新境界・参照先 |
 | --- | --- | --- | --- |
 | `docs/issue-memo.md` | 要件、決定事項、現状・要求状態比較 | 要件定義担当／Owner | 要件定義中。詳細計画は`result/plan.md`へ参照する |
-| `result/current-task.md` | task識別、Task Lifecycle、Registryの期待値 | Ownerまたは指定作成責任者 | Planner接続入力。実測状態を上書きしない |
+| `result/current-task.md` | task識別、Task Lifecycle、実行バックエンド、進捗監査方針、修正・再レビュー予算、Registryの期待値 | Ownerまたは指定作成責任者 | Planner接続入力。実測状態を上書きしない |
 | `docs/task-progress.md` | 現行taskの状態、工程、停止・再開条件 | 工程担当 | 要約のみ。詳細証跡は`result/`へ置く |
 | `result/plan.md` | 承認済み計画、対象・対象外 | Planner／Owner | 実装範囲の入力。実装結果で書き換えない |
 | `result/changes.md`等 | workerの詳細な実施・確認結果 | 担当worker | 現行taskの結果のみ。履歴原本を統合しない |
@@ -36,7 +38,7 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 
 Registryは期待値、一覧・個別読取・Owner確認はそれぞれ独立した確認値として扱い、相互に代替しない。
 
-ファイル側threadの初期登録は資料保存領域の準備だけであり、Codex会話、クルー会話、worker、project、task、識別子、history台帳を発生させない。接続前照合・Worker Registry・active taskの確認は、要件定義開始とtask識別情報が確定した後に行う。初期登録とtask開始を区別できない場合はdocs/result/historyの更新と接続を停止する。
+ファイル側threadの初期登録は資料保存領域の準備だけであり、ユーザー向け実行会話、クルー会話、worker、実行コンテキスト、task、識別子、history台帳を発生させない。接続前照合・Worker Registry・active taskの確認は、要件定義開始とtask識別情報が確定した後に行う。初期登録とtask開始を区別できない場合はdocs/result/historyの更新と接続を停止する。
 
 ## ルール変更時の影響確認
 
@@ -73,18 +75,18 @@ Registryは期待値、一覧・個別読取・Owner確認はそれぞれ独立�
 threads/<thread-name>/result/current-task.md
 threads/<thread-name>/docs/task-progress.md
 threads/<thread-name>/result/*.md
-worker自身のCodexプロジェクト所属・実行環境
+worker自身の実行コンテキスト所属・実行環境
 ```
 
 用語を判定条件、状態、役割、資料名として扱う場合は、`rules/glossary.md`の登録語・標準的な意味・取り違え防止の意味を照合する。未登録語、同音異義語、造語、略語、意味衝突、デフォルト解釈不能が残る場合は、整合性確認を完了扱いにせずOwnerへ確認を求める。
 
 ## project境界・会話種別・Worker Registryの照合
 
-現在のCodex projectId、対象リポジトリ、実行ディレクトリを照合する。ファイル側thread名・thread IDは資料の保存先と履歴追跡の補助情報として記録するが、worker接続、受入、次工程、完了の必須一致条件から除外する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
+選択したバックエンドの実行コンテキストID、対象リポジトリ、実行ディレクトリを照合する。ファイル側thread名・thread IDは資料の保存先と履歴追跡の補助情報として記録するが、worker接続、受入、次工程、完了の必須一致条件から除外する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
 
-Worker Registryは`current-task.md`を期待値の正本、Subagent実測・health-check・接続差分を実測の根拠とする。既存Subagentを先に照合し、役割、Subagent ID、親session、モデル・推論レベル、実行ディレクトリ、状態、担当resultを比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。独立sidebar workerや新規チャットを正規経路として扱わない。
+Worker Registryは`current-task.md`を期待値の正本、選択したバックエンドの実測・health-check・接続差分を実測の根拠とする。既存worker実行単位を先に照合し、役割、実行単位ID、親Coordinatorコンテキスト、指定・実測制約、実行ディレクトリ、状態、担当resultを比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。選択バックエンドの正規経路外の実行単位を正規経路として扱わない。
 
-projectId、対象リポジトリ、実行ディレクトリの必須境界が未確認・不一致、会話種別を区別不能、または既知のRegistryと実測の不一致・重複がある場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止する。Codex APIによるSubagent ID、親session、状態、モデル・推論、一覧、アーカイブ情報の取得不能だけは`未確認`として記録し、代替証跡に矛盾がなければ停止理由にしない。ファイル側thread名・thread IDの不一致だけでも停止せず、実際値と履歴注記を記録して継続する。
+実行コンテキストID、対象リポジトリ、実行ディレクトリの必須境界が未確認・不一致、会話種別を区別不能、または既知のRegistryと実測の不一致・重複がある場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止する。選択したバックエンドの観測値取得不能は`未確認`として記録し、代替証跡に矛盾がなければ停止理由にしない。ファイル側thread名・thread IDの不一致だけでも停止せず、実際値と履歴注記を記録して継続する。
 
 ## 実装媒体・承認範囲の照合
 
@@ -96,9 +98,9 @@ projectId、対象リポジトリ、実行ディレクトリの必須境界が�
 | --- | --- |
 | 必須項目 | `current-task.md`に6項目がすべて記載されている |
 | スレッド名 | 記載されたスレッド名と保存先の`<thread-name>`が一致する |
-| CodexプロジェクトID | 値が空でなく、対象スレッドの専用プロジェクトを示している |
+| 実行コンテキストID | バックエンドが提供する場合は値が記載され、対象taskの実行境界を示している。提供しない場合は`該当なし`と境界証跡がある |
 | 対象リポジトリ | 絶対パスで記載され、対象として参照可能である |
-| Codex実行ディレクトリ | 値が記載され、workerがアクセス可能である。対象リポジトリと異なっていてよい |
+| 実行ディレクトリ | 値が記載され、workerがアクセス可能である。対象リポジトリと異なっていてよい |
 | ベースブランチ | 値が記載されている |
 | 作業ブランチ | ブランチ名、または`記述ルールに従い新規作成`が記載されている |
 | Task Lifecycle | 履歴退避・復旧・再検証を扱う場合、開始日時、task-id、退避元project/thread、状態が記載されている。新規運用ではhistory-key/run-idを使用しない |
@@ -109,10 +111,10 @@ projectId、対象リポジトリ、実行ディレクトリの必須境界が�
 
 ファイルだけでは確認できない次の項目は、worker自身とOwnerが確認する。
 
-- workerのCodexプロジェクトIDが`current-task.md`と一致している
-- workerが対象スレッドの専用Codexプロジェクトに所属している
+- workerの実行コンテキストIDまたは代替境界証跡が`current-task.md`と一致している
+- workerが選択したバックエンドの対象スレッド専用実行コンテキストに所属している
 - workerが対象リポジトリを参照できる
-- workerのCodex実行ディレクトリが記載値と一致している
+- workerの実行ディレクトリが記載値と一致している
 - 作業ブランチの実体が記載値と一致している
 - 履歴を扱う場合、通常の履歴は`history/<task-id>/manifest.md`のtask-id、元project/thread、対象リポジトリ、状態と一致している。`history/task-legacy-history-backup/`を扱う場合はbackup manifest、旧配置対応、候補・復旧対象外の記載を確認し、旧値を新規task-idへ遡及利用しない
 
@@ -144,7 +146,7 @@ API観測値の取得不能のみ
   → 代替証跡に矛盾がなければ作業継続
 ```
 
-不一致時は、誤った結果ファイルを作成・更新しない。projectIdの所属や外部サービスの認証状態を推測で補完してはならない。
+不一致時は、誤った結果ファイルを作成・更新しない。実行コンテキストの所属や外部サービスの認証状態を推測で補完してはならない。
 
 ## Worker接続前チェックリスト
 
@@ -154,17 +156,21 @@ OwnerはPlannerまたは各workerを接続する前に、次の項目を確認�
 # Worker接続前チェック
 
 - 対象スレッド：
-- CodexプロジェクトID：
+- 実行コンテキストIDまたは代替境界証跡：
 - 対象リポジトリ：
 - 作業ブランチ：
 
 ## 確認項目
 
-- [ ] Codexプロジェクトが対象スレッド専用である
-- [ ] projectIdがcurrent-task.mdと一致している
-- [ ] workerが対象プロジェクトに所属している
+- [ ] 実行コンテキストまたは代替境界証跡が対象task専用である
+- [ ] 実行コンテキストIDまたは代替境界証跡がcurrent-task.mdと一致している
+- [ ] workerが選択バックエンドの対象実行コンテキストに所属している
 - [ ] 対象リポジトリへアクセスできる
-- [ ] Codex実行ディレクトリを確認した
+- [ ] 実行ディレクトリを確認した
+- [ ] handoff event台帳、通知方式、Coordinator、復旧監査方式、進捗監査方針、修正・再レビュー予算を確認した
+- [ ] 同一工程・異なる結果フィンガープリントが自動選別でなく`blocked`として扱われることを確認した
+- [ ] 再レビュー時はレビュー基準スナップショット、変更差分、全量横断確認へ戻す条件を確認した
+- [ ] Owner判断ごとの工程影響（停止 / 非停止）と、非停止判断のIRまたは新規im候補の記録先を確認した
 - [ ] current-task.mdの必須6項目が揃っている
 - [ ] 履歴を扱う場合、Task Lifecycle、manifest、history/index.mdの対応を確認した
 

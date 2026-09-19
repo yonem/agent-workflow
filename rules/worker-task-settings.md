@@ -1,20 +1,20 @@
 # Workerタスク設定
 
-各 worker の Codex タスクは、モデルを `gpt-5.6-luna`、推論レベルを `low` に統一する。設定はSubagentの生成時または再接続時に適用し、実行中Subagentへ途中変更を行わない。
+各workerの実行バックエンド固有設定は、適用中のローカルルールまたは選択したバックエンドの能力契約から解決する。共通rulesは特定モデル、推論レベル、製品の生成方式を固定しない。設定が必要なバックエンドでは、生成時または再接続時に適用し、実行中のworkerへ途中変更を行わない。
 
 | Worker | モデル | 推論レベル | 主な用途 |
 | --- | --- | --- | --- |
-| Planner | `gpt-5.6-luna` | `low` | 現状調査、要件分解、実装計画 |
-| Implementer | `gpt-5.6-luna` | `low` | 承認済み計画の実装 |
-| Tester | `gpt-5.6-luna` | `low` | 定型テスト、Lint、静的解析、ビルドの実行と結果整理 |
-| Security Operator | `gpt-5.6-luna` | `low` | 秘密情報、外部操作、安全性の確認 |
-| Reviewer | `gpt-5.6-luna` | `low` | 要件、設計、検証、安全性の独立レビュー |
-| Documenter | `gpt-5.6-luna` | `low` | 判断、教訓、ライフサイクル改善の記録 |
+| Planner | `<バックエンド指定>` | `<バックエンド指定>` | 現状調査、要件分解、実装計画 |
+| Implementer | `<バックエンド指定>` | `<バックエンド指定>` | 承認済み計画の実装 |
+| Tester | `<バックエンド指定>` | `<バックエンド指定>` | 定型テスト、Lint、静的解析、ビルドの実行と結果整理 |
+| Security Operator | `<バックエンド指定>` | `<バックエンド指定>` | 秘密情報、外部操作、安全性の確認 |
+| Reviewer | `<バックエンド指定>` | `<バックエンド指定>` | 要件、設計、検証、安全性の独立レビュー |
+| Documenter | `<バックエンド指定>` | `<バックエンド指定>` | 判断、教訓、ライフサイクル改善の記録 |
 
 ## 運用ルール
 
 - Planner、Implementer、Reviewer、Documenterの実行主体は、親チャットやファイル側threadではなく、実際に接続・再開されたSubagentとする。Deliveryは同一Subagentを明示resumeして論理責務を切り替え、Reviewerは独立Subagentとする。
-- Subagent ID、役割、task-id、親Subagentまたは親session、指定モデル、実測モデル、推論レベル、状態、result証跡をWorker Registryへ記録する。ユーザー向けCodexスレッド／会話ID、ファイル側thread名、Codex project IDをSubagent IDとして扱わない。
+- worker実行単位ID、役割、task-id、親実行単位または親Coordinator、指定制約、実測制約、状態、result証跡をWorker Registryへ記録する。ユーザー向け実行会話ID、ファイル側thread名、実行コンテキストIDをworker実行単位IDとして扱わない。
 - 接続前に指定モデル・推論を確認できない場合は、接続・resume・作業を開始しない。指定済みSubagentの実測値を取得できない場合は、実測値を`未確認`として根拠をresult/task-logへ記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。親チャット・ファイル側thread・新規ユーザー向けスレッドを代替実行主体にしない。
 
 - 役割ごとの標準モデル・推論レベルは本表を正本とする。ただし、適用条件が完全一致し、共通rulesの保護対象と競合しない`rules/local/`のOwner確認済みルールは、対象taskのモデル・推論レベルを具体化できる。適用結果とRegistryとの照合をresultへ記録し、切替を確認できない場合は作業を開始しない
@@ -37,8 +37,8 @@ Delivery（Planner） → Owner承認 → Delivery（Implementer）
 - TesterとSecurity Operatorは標準工程に含めない。外部接続、高リスク変更、または独立検証が計画に明記され、Ownerが例外承認した場合だけ、必要な方を順番に接続する。
 - PlannerはOwner承認前に実装を開始しない。各workerは接続前に `rules/workflow-consistency-check.md` の入力ゲートを通る
 - 接続したTesterまたはSecurity Operatorの結果が必要な場合だけ、当該結果を入力としてReviewerへ接続する
-- Reviewerが修正依頼と判定した場合は、確認可能な指摘を1回の総合報告へ集約し、対象、根拠、影響、対応責任、再確認条件を全件提示する。Implementerは全件を一括修正し、親タスクは全正本を横断照合してから必要なTester、Security Operator、Reviewerの確認を再実行する。修正中に新しい重大不整合が発生した場合だけ追加指摘を許可する
-- 上記の総合報告後、親タスクが全正本の照合表を記録するまでReviewerを再接続しない。初回確認漏れや資料間未同期を都度指摘として扱わず、同一原因の修正依頼が2回連続した場合はリトライを停止してOwnerの継続承認またはルール修正を待つ。
+- Reviewerが修正依頼と判定した場合は、確認可能な指摘を一つの総合報告へ集約し、対象、根拠、影響、対応責任、再確認条件、指摘フィンガープリント、既存指摘との関係を全件提示する。Implementerは全件を一括修正し、親タスクはレビュー基準スナップショットとの差分と工程境界資料を照合してから、必要な確認だけを再実行する。全量横断確認へ戻す条件は`rules/worker-evidence.md`に従う。
+- 上記の総合報告後、親タスクがスナップショット比較の照合表を記録するまでReviewerを再接続しない。修正・再レビューは`current-task.md`の予算を消費して管理し、初回確認漏れや資料間未同期を都度の新規指摘として扱わない。予算到達時は、追加接続ではなく指摘・修正・再検証を集約して`blocked`とし、Ownerの追加ラウンド承認または範囲変更を待つ。詳細な判定と記録は`rules/worker-evidence.md`に従う。
 - Reviewerの受入後にDocumenterへ接続し、Documenterは `operation-check.md`、`task-log.md`、汎用改善記録を更新してOwnerへ報告する。`operation-check.md`が存在しない、または固定構造を満たさない場合は、Documenter記録完了・Owner完了確認・次タスク切替へ進めない
 - Reviewer受入後にDeliveryがDocumenter責務として`operation-check.md`、`task-log.md`、汎用改善記録を更新し、Owner完了判断を要求する。任意の運用観測や承認範囲外の是正は、task完了を止めずOwner管理IRまたは新規im候補へ分離する。
 - Documenterを移行先で省略する場合は、導入時に記録責任者と記録先を明示する。責任または記録先が不明な状態では有効化完了としない

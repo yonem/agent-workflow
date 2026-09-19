@@ -17,11 +17,20 @@ status: active
 ## Task Context
 
 - スレッド名：
-- CodexプロジェクトID：
+- Workflow Coordinator：
+- 実行バックエンド：<明示指定または適用中ローカルルールから解決した値>
+- 実行バックエンドの解決根拠：<明示指定またはローカルルールの絶対パス>
+- 実行コンテキストID：
 - 対象リポジトリ：
-- Codex実行ディレクトリ：
+- 実行ディレクトリ：
+- handoff eventの通知方式：
+- handoff event台帳：`result/handoff-events.md`
+- 復旧監査の起動方式：
+- 進捗監査方針：<進捗証跡、無進捗の判定回数、復旧手順、解決根拠>
+- 修正・再レビュー予算：<初回レビュー後の上限、上限到達時の状態・集約先、解決根拠>
 - ベースブランチ：
 - 作業ブランチ：Planner接続時は未決定可。Implementer接続前に確定・実体照合
+- 実行環境固有の補助証跡（任意）：
 
 ## Task Definition
 
@@ -39,44 +48,46 @@ status: active
 - 論理タスクID：
 - 開始日時（Asia/Tokyo）：
 - 完了日時（未完了時は空欄）：
-- 退避元CodexプロジェクトID：
+- 退避元実行コンテキストID：
 - 退避元スレッド名：
 
 ## Worker Registry
 
-Worker Registryは、接続前の指定設定と、接続後に取得できる実測値・状態を分けて記録する正本である。ユーザー向けCodexスレッド／会話、ファイル側thread、同一task内のSubagent、Codex projectを混同しない。接続前の指定設定が確認できない場合は接続しない。指定済みSubagentの実測値を取得できない場合は`未確認`として記録するが、それだけで自律オーケストレーション・受入・完了を停止せず、親チャット、会話、ファイル側threadを実Subagentの代替にしない。
+Worker Registryは、接続前の指定制約と、接続後に取得できる実測値・状態を分けて記録する正本である。ユーザー向け会話、ファイル側thread、worker実行単位、実行バックエンドを混同しない。接続前の指定制約が確認できない場合は接続しない。指定済みworker実行単位の実測値を取得できない場合は`未確認`として記録するが、それだけで自律オーケストレーション・受入・完了を停止せず、親会話、会話、ファイル側threadをworker実行単位の代替にしない。
 
-| 論理責務 | Subagent種別 | 実Subagent ID | 親Orchestrator session | 所属Codex project ID | 指定モデル・推論 | 実測モデル・推論 | 実行ディレクトリ | 状態 | 確認日時・証跡 | 更新責任者 |
+| 論理責務 | 実行単位種別 | 実行単位ID | 親Coordinatorコンテキスト | 所属実行コンテキスト | 指定制約 | 実測制約 | 実行ディレクトリ | 状態 | 確認日時・証跡 | 更新責任者 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Planner | Delivery |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
-| Implementer | Delivery（Planner完了後に明示resume） |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
-| Documenter | Delivery（Reviewer受入後に明示resume） |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
-| Reviewer | 独立Reviewer Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 準備中 |  | Orchestrator |
-| Tester | 例外Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 対象外 |  | Orchestrator |
-| Security Operator | 例外Subagent |  |  |  | `gpt-5.6-luna` / `low` |  |  | 対象外 |  | Orchestrator |
+| Planner | Delivery |  |  |  |  |  |  | 準備中 |  | Workflow Coordinator |
+| Implementer | Delivery（Planner完了後に再開または同等の継続接続） |  |  |  |  |  |  | 準備中 |  | Workflow Coordinator |
+| Documenter | Delivery（Reviewer受入後に再開または同等の継続接続） |  |  |  |  |  |  | 準備中 |  | Workflow Coordinator |
+| Reviewer | 独立Reviewer実行単位 |  |  |  |  |  |  | 準備中 |  | Workflow Coordinator |
+| Tester | 例外worker実行単位 |  |  |  |  |  |  | 対象外 |  | Workflow Coordinator |
+| Security Operator | 例外worker実行単位 |  |  |  |  |  |  | 対象外 |  | Workflow Coordinator |
 
-### 親session返却先
+### Coordinator返却先
 
 | 項目 | 値 |
 | --- | --- |
-| 親Orchestrator session |  |
-| 報告対象 | 親Orchestrator session。Owner判断はOrchestratorがOwnerへ提示する |
+| 親Coordinatorコンテキスト |  |
+| 報告対象 | Workflow Coordinator。Owner判断はCoordinatorがOwnerへ提示する |
 
-workerは親Orchestrator sessionの実Subagentとして接続されたことを確認する。標準SubagentはDelivery 1件と独立Reviewer 1件であり、Deliveryは同一task内で明示resumeしてPlanner、Implementer、Documenterの論理責務を順次担当する。Reviewerは独立した実Subagentである。ユーザー向けCodexスレッド／会話ID、ファイル側thread名、Codex project ID、親session IDは実Subagent IDの代替に使用しない。親Orchestrator sessionまたは接続前の指定設定が確認不能なら接続を開始しない。実測値が取得不能なら未確認として証跡を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。TesterとSecurity Operatorは、承認済み計画に外部接続、高リスク変更、または独立検証が明記され、Owner例外承認がある場合だけ`対象外`から更新する。
+workerは親Coordinatorコンテキストに属する実行単位として接続されたことを確認する。標準worker実行単位はDelivery 1件と独立Reviewer 1件であり、Deliveryは同一task内で再開または同等の継続接続によりPlanner、Implementer、Documenterの論理責務を順次担当する。Reviewerは独立したworker実行単位である。ユーザー向け会話ID、ファイル側thread名、実行コンテキストID、親CoordinatorコンテキストIDは実行単位IDの代替に使用しない。親Coordinatorコンテキストまたは接続前の指定制約が確認不能なら接続を開始しない。実測値が取得不能なら未確認として証跡を記録するが、それだけで自律オーケストレーション・受入・完了を停止しない。TesterとSecurity Operatorは、承認済み計画に外部接続、高リスク変更、または独立検証が明記され、Owner例外承認がある場合だけ`対象外`から更新する。
 ```
 
 ## 記載ルール
 
-- `Task Context`の6項目は必須とする
-- `CodexプロジェクトID`、スレッド名、対象リポジトリは、実際の所属・対象と一致させる
-- `Codex実行ディレクトリ`はworkerの実行場所であり、対象リポジトリと異なっていてよい
+- `Task Context`の識別、実行バックエンド、解決根拠、実行コンテキスト、対象リポジトリ、実行ディレクトリ、handoff event通知方式・台帳、復旧監査起動方式、進捗監査方針、修正・再レビュー予算、ブランチは必須とする。実行バックエンド、進捗監査方針、修正・再レビュー予算は明示指定または完全一致するローカルルールから解決し、その解決根拠を記録する。実行コンテキストを提供しないバックエンドでは`該当なし`と境界証跡を記録する
+- `進捗監査方針`は、少なくとも進捗として扱う結果資料・Registry・eventの変化、連続無進捗を停止候補にする基準、復旧の担当・証跡を記載する。時間経過だけを進捗または失敗と判定しない
+- `修正・再レビュー予算`は、初回Reviewer判定後に許容する修正・再レビューの上限、同一指摘の統合方法、上限到達時の`blocked`・集約エスカレーションを記載する。上限の値は共通rulesから推測せず、選択したバックエンド規約またはローカルルールの値を記録する
+- 実行コンテキスト、スレッド名、対象リポジトリは、実際の所属・対象と一致させる
+- `実行ディレクトリ`はworkerの実行場所であり、対象リポジトリと異なっていてよい
 - Planner接続時の`作業ブランチ`は未決定または候補を許容する。Implementer接続前にOwner承認済み計画と実体を照合し、確定値を記録する。
 - Worker Registryの状態は`準備中`、`ready`、`接続済み`、`完了・close済み`、`失敗`、`中断`、`対象外`を区別する。不明・重複候補・確定前は再作成せずOwner確認へ停止する。
 - 新規作成した作業ブランチ名は、作成後に `current-task.md` と担当結果ファイルへ記録する
 - `Task Definition`はPlannerが計画を作成できる具体性で記載する
 - `Task Lifecycle`はタスクの開始、完了、退避、復旧を追跡するために記載する。履歴へ退避しない場合も、未実施理由を結果ファイルへ記録する
-- Worker RegistryはOrchestratorがDelivery、Reviewer、例外workerの接続・再利用方針を承認済み計画と照合して更新する。Deliveryの論理責務行は同一実Subagent IDを共有してよい。各Subagentは開始前に指定モデル・推論を確定して接続ツールへ渡し、確定不能なら接続・作業を停止する。接続後に実測値が取得不能またはworker報告と異なる場合は、接続ツールの実測値を正本へ同期し、差分を履歴注記として記録して継続する。接続ツール結果自体のproject・親session・実行ディレクトリ不一致は停止する。
-- Reviewerの実Subagent IDはレビューAttempt単位で記録する。再接続後は現行AttemptのIDをWorker Registryと現行`review.md`へ記録し、過去AttemptのIDは履歴として保持する。過去AttemptとのID差分、またはID変更だけを理由に工程状態を不一致・未受入へ戻さない。
+- Worker RegistryはWorkflow CoordinatorがDelivery、Reviewer、例外workerの接続・再利用方針を承認済み計画と照合して更新する。Deliveryの論理責務行は同一実行単位IDを共有してよい。各worker実行単位は開始前に実行バックエンドの指定制約を確定して接続要求へ渡し、確定不能なら接続・作業を停止する。接続後に実測値が取得不能またはworker報告と異なる場合は、接続要求・完了／close結果などの代替証跡を正本へ同期し、差分を履歴注記として記録して継続する。実行コンテキスト・親Coordinatorコンテキスト・実行ディレクトリの既知の不一致は停止する。
+- Reviewerの実行単位IDはレビューAttempt単位で記録する。再接続後は現行AttemptのIDをWorker Registryと現行`review.md`へ記録し、過去AttemptのIDは履歴として保持する。過去AttemptとのID差分、またはID変更だけを理由に工程状態を不一致・未受入へ戻さない。
 - `current-task.md`は識別情報・対象・Task Lifecycleの正本とし、共通進捗は`task-progress.md`、承認済み計画は`result/plan.md`、Implementer結果は`result/changes.md`、Reviewer判定は`result/review.md`を正本とする。`history/index.md`は要約・候補の参照であり、これらのresultを代替しない
 - 各資料の更新責任と更新境界は`rules/thread-operation.md`の資料マップに従う。正本候補が複数、参照切れ、責務重複、更新境界不明の場合は推測で補正せず停止する
 - `タスクID`は新規タスクの論理識別子として必須とし、Task DefinitionとTask Lifecycleで同じ値を記録する。タスク名だけで別タスクを統合しない
