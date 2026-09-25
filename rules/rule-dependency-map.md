@@ -35,17 +35,18 @@ status: active
 
 | 要件 | 正本 | 参照先 | 更新責任 | 変更時の確認 |
 | --- | --- | --- | --- | --- |
-| 指摘を品質修正、接続同期差分、工程境界不備へ分類する | `rules/automation-operation.md` | `rules/worker-evidence.md`、`rules/issue-classification-cases.md`、`rules/worker-task-settings.md`、`worker-definitions/reviewer.md` | 共通ルール変更担当 | 同一事実が複数分類へ固定されないこと |
+| 指摘を品質修正、接続同期差分、工程境界不備へ分類する | `rules/automation-operation.md` | `rules/worker-evidence.md`、`rules/issue-classification-cases.md`、`rules/worker-task-settings.md`、`worker-definitions/reviewer.md` | 共通ルール変更担当 | 結果パス不一致を接続同期差分へ含めず、同一事実が複数分類へ固定されないこと |
 | 品質修正だけがImplementer→Reviewerの修正ラウンドと予算対象 | `rules/worker-evidence.md` | `rules/automation-operation.md`、`rules/worker-task-settings.md`、`worker-definitions/reviewer.md` | 共通ルール変更担当 | 接続同期差分・工程境界不備が予算を消費しないこと |
-| 接続同期差分は一度の同期と同一工程境界の再照合だけ | `rules/automation-operation.md` | `rules/worker-evidence.md`、`rules/issue-classification-cases.md`、`rules/worker-task-settings.md` | 共通ルール変更担当 | 再接続、再レビュー、event再発行を伴わないこと |
-| 工程境界不備はeventをblockedにし、Owner判断または別IMへ分離する | `rules/worker-evidence.md` | `rules/automation-operation.md`、`rules/handoff-event-contract.md`、`rules/issue-classification-cases.md`、`rules/worker-task-settings.md`、`rules/workflow-integrity-check.md` | 共通ルール変更担当 | 自動再接続・品質修正化・状態巻戻しがないこと |
+| 完了通知、担当result、handoff eventの証跡役割を分離する | `rules/handoff-event-contract.md` | `rules/automation-operation.md`、`rules/execution-portability.md`、`rules/workflow-consistency-check.md`、`rules/current-task-template.md`、`rules/worker-health-check.md`、選択バックエンド規約 | 共通ルール変更担当 | 完了通知がresultの内容・判定を上書きせず、通知だけで次工程を開始しないこと |
+| 接続同期差分は一度の同期と同一工程境界の再照合だけ | `rules/automation-operation.md` | `rules/handoff-event-contract.md`、`rules/workflow-consistency-check.md`、`rules/current-task-template.md`、`rules/worker-evidence.md`、`rules/issue-classification-cases.md`、選択バックエンド規約 | 共通ルール変更担当 | task ID・担当責務・結果パス・内容フィンガープリントが一致する場合だけ同期し、再接続、再レビュー、event再発行を伴わないこと |
+| 工程境界不備はeventをblockedにし、固定した再開条件とOwner判断へ分離する | `rules/handoff-event-contract.md` | `rules/automation-operation.md`、`rules/workflow-consistency-check.md`、`rules/current-task-template.md`、`rules/worker-evidence.md`、`rules/issue-classification-cases.md`、選択バックエンド規約 | 共通ルール変更担当 | 訂正責任者・訂正対象・再照合資料・Owner再判断要否を記録し、自動再接続・品質修正化・状態巻戻しがないこと |
 | 同一原因の修正・再レビューには上限と集約エスカレーションを適用する | `rules/worker-evidence.md` | `rules/automation-operation.md`、`rules/worker-task-settings.md`、選択バックエンド規約 | 共通ルール変更担当 | 同一原因をattempt番号だけで新規扱いしないこと |
 
 ## event・実行バックエンド・移植性
 
 | 要件 | 正本 | 参照先 | 更新責任 | 変更時の確認 |
 | --- | --- | --- | --- | --- |
-| handoff eventの状態、claim、重複抑止、復旧境界 | `rules/handoff-event-contract.md` | `rules/automation-operation.md`、`rules/execution-portability.md`、`rules/worker-evidence.md`、選択バックエンド規約 | 共通ルール変更担当 | 同一eventの二重接続・状態巻戻しがないこと |
+| handoff eventの状態、claim、重複抑止、復旧境界、既存台帳の移行 | `rules/handoff-event-contract.md` | `rules/automation-operation.md`、`rules/execution-portability.md`、`rules/workflow-consistency-check.md`、`rules/current-task-template.md`、`rules/worker-evidence.md`、選択バックエンド規約 | 共通ルール変更担当 | 同一eventの二重接続・状態巻戻しがなく、既存eventを削除・上書き・再発行せずに補完または限定停止できること |
 | 共通工程は実行バックエンド中立で、結果eventを主経路とする | `rules/execution-portability.md` | `rules/automation-operation.md`、`rules/handoff-event-contract.md`、`rules/worker-task-settings.md`、`README.md` | 共通ルール変更担当 | 特定製品・API・常駐プログラムを共通前提にしないこと |
 | バックエンド選択、能力不足時の停止、移植導入の確認 | `rules/execution-portability.md` | `rules/local-rules.md`、`rules/worker-task-settings.md`、`rules/workflow-integrity-check.md`、選択バックエンド規約 | 共通ルール変更担当 | 共通rulesへ固有実体値を固定しないこと |
 | 定期監視は復旧監査だけであり、通常経路を代替しない | `rules/handoff-event-contract.md` | `rules/execution-portability.md`、`rules/automation-operation.md`、選択バックエンド規約 | 共通ルール変更担当 | 監視停止だけで通常event経路を停止しないこと |

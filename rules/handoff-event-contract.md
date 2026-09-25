@@ -9,6 +9,8 @@ status: active
 
 通常工程の引継ぎを定期監視から独立させ、結果資料の確定から次工程開始までを再実行安全に記録する。実行バックエンドはこの契約の意味を満たす通知・記録方法を選べるが、固有IDやAPI値を必須化してはならない。
 
+完了通知は実行単位の接続・終了状態だけを示す補助証跡、担当resultは担当作業の内容・判定・次工程入力の正本、handoff eventは工程遷移の排他制御と処理証跡である。完了通知だけでeventを発行・claim・次工程接続してはならず、担当resultの判定と次工程入力ゲートを確定した後に処理する。
+
 ## 台帳と記録責任
 
 現行taskの通常経路の正本は`threads/<thread-name>/result/handoff-events.md`とする。完了したworker実行単位は結果資料を確定し、Workflow Coordinatorは証跡照合後にイベントを台帳へ記録・処理する。復旧監査の起動機構はこの台帳を読み取るだけで、通常経路の台帳を兼用しない。
@@ -21,11 +23,24 @@ status: active
 | task ID / 工程 | 対象taskと完了または停止した工程 |
 | 発生元 | 論理責務と、取得できる場合だけ実行単位ID |
 | 結果資料・フィンガープリント | 正本パスと内容同一性を確認する根拠 |
+| 完了通知・接続証跡 | 接続・終了状態の補助証跡。resultの内容・判定を上書きしない |
+| 差分分類 | `接続同期差分`または`工程境界不備`。分類根拠を記録する |
 | 判定・次の処理 | 次工程開始、Owner判断要求、または停止のいずれか |
 | 状態 | `queued`、`processing`、`completed`、`blocked`、`cancelled` のいずれか |
 | claim | 処理責任者、claim時刻、処理Attempt番号 |
 | 処理証跡 | 接続・resume・Owner提示など、実際に行った処理の根拠 |
 | 再開条件 | `blocked`または未完了時に必要な判断・証跡・操作 |
+
+新規taskの台帳は、上記の必須項目をすべて列または同等に対応付けられる項目として作成する。列順・表形式は固定しないが、必須項目を省略してはならない。
+
+## 既存台帳の移行境界
+
+進行中taskの既存`handoff-events.md`へ必須項目がない場合、形式不足だけを理由に既存event、結果資料、履歴原本を削除・上書き・再発行してはならない。
+
+- Workflow Coordinatorは、既存eventと接続・終了証跡、担当result、Registry、task-logから追加項目を一意に確認できる場合だけ、既存eventへ追記して補完する。追記は既存の事実を変更せず、補完根拠を同じeventへ記録する。
+- 必須項目を一意に確認できない場合は、eventを推測で分類せず`blocked`とする。訂正責任者、訂正対象、再照合資料、Owner再判断の要否を記録し、当該eventだけを停止する。
+- 形式不足だけで、接続同期差分として継続可能な別eventまたは次工程候補を一律に停止してはならない。各eventを独立に照合し、必要な工程境界だけを`blocked`にする。
+- 履歴原本は変更しない。既存eventの補完は現行taskの台帳に限り、台帳全体を新形式へ作り直さない。
 
 ## 状態遷移と確定点
 
@@ -40,7 +55,7 @@ Ownerが再開を承認 → queued
 
 - Coordinatorだけが`queued`を`processing`としてclaimし、同一eventを並行処理しない。
 - 次工程の接続またはOwner提示の結果を台帳へ記録できた時だけ`completed`にする。Reviewer受入eventはDocumenter開始用のOwner判断を提示・記録した時点で`completed`とし、Owner承認後に別のDocumenter開始eventを作成する。接続後の記録前に中断した場合は、接続結果を先に照合し、実施済みなら`completed`、判定不能なら`blocked`にする。推測で再接続しない。
-- 結果資料欠落、承認不足、対象境界不一致、既知の矛盾、または復旧不能は`blocked`とし、Owner判断なしに`queued`へ戻さない。
+- 結果資料欠落、担当resultの正本パスまたは内容フィンガープリントの不一致、承認不足、対象境界不一致、既知の矛盾、または復旧不能は`blocked`とし、Owner判断なしに`queued`へ戻さない。`blocked`の再開条件には、正本resultまたは接続証跡の訂正責任者、訂正対象、再照合資料、Owner再判断の要否を必ず記録する。
 - `cancelled`はOwnerが当該taskまたは工程を明示的に中止した場合だけ使用する。過去eventを削除・上書きしない。
 
 ## ACE-001：単一工程eventの重複検出
@@ -54,12 +69,14 @@ Ownerが再開を承認 → queued
 
 ## 発行・受領の順序
 
-1. worker実行単位が担当結果資料と完了報告を確定する。
-2. Coordinatorが入力ゲート、結果資料、承認、実行環境境界を照合する。
-3. Coordinatorが`queued` eventを追記し、同一eventの既存状態を確認する。
-4. Coordinatorが同一工程境界のevent IDと結果フィンガープリントを照合し、重複なら既存eventを再利用し、矛盾なら`blocked`としてから処理対象をclaimする。Reviewer受入後はDocumenterを接続せず、Owner承認の記録をDocumenter開始eventの入力とする。
-5. Coordinatorがclaimを記録してから、承認済みの次工程を接続・resumeする、またはOwner判断を提示する。
-6. 接続結果または提示結果を記録し、状態を`completed`または`blocked`へ確定する。
+1. worker実行単位が担当resultを確定し、完了通知または接続・終了証跡を返す。
+2. Coordinatorが完了通知を接続・終了状態の証跡として、担当resultを内容・判定・次工程入力の正本として分離して照合する。
+3. task ID、担当責務、結果パス、内容フィンガープリントが一致し、時刻、表示状態、通知本文、観測取得可否だけが異なる場合は`接続同期差分`とする。接続状態だけをRegistryとtask-logへ一度だけ同期し、result、event、修正・再レビュー予算を変更せず入力ゲートを再照合する。
+4. task ID、担当責務、結果パス、内容フィンガープリント、承認範囲、親Coordinator、実行ディレクトリの不一致、結果資料の欠落または判定不能は`工程境界不備`とし、eventを`blocked`としてOwner判断を求める。
+5. Coordinatorが`queued` eventを追記し、同一eventの既存状態を確認する。
+6. Coordinatorが同一工程境界のevent IDと結果フィンガープリントを照合し、重複なら既存eventを再利用し、矛盾なら`blocked`としてから処理対象をclaimする。Reviewer受入後はDocumenterを接続せず、Owner承認の記録をDocumenter開始eventの入力とする。
+7. Coordinatorがclaimを記録してから、承認済みの次工程を接続・resumeする、またはOwner判断を提示する。
+8. 接続結果または提示結果を記録し、状態を`completed`または`blocked`へ確定する。
 
 通知機構が一時的に利用不能でも、結果資料と台帳を直接照合できる限り通常工程を停止しない。Coordinatorの次回実行または復旧監査は未処理eventを照合して再開できる。ただし、通知不能を理由にeventを新規作成・置換してはならない。
 

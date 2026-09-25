@@ -24,8 +24,8 @@ status: active
 | 接続 | Coordinatorが承認済みの論理責務を担うSubagentへ接続またはresumeする | 接続ツール結果、Worker Registry、`task-log.md` | 既存実行単位の継続可否を確認し、代替作成はOwner承認なしに行わない |
 | 再開 | 同一taskのclose済みDeliveryをresumeし、次の論理責務を明示する | resume結果、担当result、`task-log.md` | resume不能を記録し、Owner本体による継続またはOwner判断へ分岐する |
 | 観測 | 接続ツール結果、Codex API観測値、Worker Registry、結果資料を照合する | 取得範囲と代替証跡を含む`task-log.md` | API観測不能は`未確認`。既知の矛盾がなければ通常遷移を止めない |
-| 完了証跡 | Subagentの完了報告、担当result、完了・close結果を照合する | 担当result、close結果、`task-log.md` | 結果資料または完了根拠が欠ける場合は停止する |
-| handoff event通知 | Coordinatorが完了証跡の確定直後にイベントを記録・claimし、次工程を接続する | `result/handoff-events.md`、接続結果、`task-log.md` | 通知不能時だけ復旧監査の対象にする |
+| 完了証跡 | 完了・close結果を接続・終了状態の証跡、担当resultを内容・判定・次工程入力の正本として分離して照合する | 担当result、close結果、`task-log.md` | 接続同期差分は一度の同期後に継続し、結果資料欠落・判定不能・工程境界不備は停止する |
+| handoff event通知 | Coordinatorが完了証跡の確定直後にイベントを記録・claimし、次工程を接続する | `result/handoff-events.md`、接続結果、`task-log.md` | 新規taskは共通契約の必須項目を記録し、既存eventは移行境界に従う |
 | 復旧監査 | Codex heartbeatが未処理・残留eventだけを照合し、必要時だけCoordinatorを再開する | heartbeat設定、`handoff-events.md`、`task-progress.md` | heartbeatを使えない場合は、Coordinatorの明示再開時に同じ台帳を照合する |
 
 ## 通常経路：結果イベントによる次工程接続
@@ -34,11 +34,13 @@ Codexバックエンドの通常経路はheartbeatではない。CoordinatorはS
 
 Codex外の常駐ディスパッチャー、独自スクリプト、追加の言語ランタイムは使用しない。Coordinatorは承認後に継続するCodex task内でSubagentの完了を待機し、完了通知または結果資料確定を受けた同じ実行内でeventを処理する。Coordinatorが中断された場合だけ、Codex heartbeatを復旧監査として使用する。
 
-1. 接続結果、担当result、`task-log.md`、Worker Registry、必要なOwner判断を照合する。
-2. task-id、発生元責務、工程、結果資料、内容フィンガープリントからhandoff event IDを確定し、共通契約に従って`handoff-events.md`へ`queued`で記録する。
-3. 同一event IDが既に存在する場合は新規接続を行わない。同一工程境界に異なる結果フィンガープリントがある場合は`blocked`として記録し、Ownerへ提示する。矛盾がないeventだけをclaimし、重複・並行処理を行わない。
-4. 承認済み範囲と次工程の入力ゲートを満たす場合、追加の開始指示やheartbeat実行を待たず、次のSubagent接続またはresumeを行う。
-5. 接続結果と処理結果を記録してeventを`completed`へ更新する。Owner判断、停止、または結果欠落の場合は`blocked`と再開条件を記録し、次工程を接続しない。状態遷移と中断時の照合は`rules/handoff-event-contract.md`に従う。
+1. 完了・close結果を接続・終了状態の証跡、担当resultを内容・判定・次工程入力の正本として分離し、`task-log.md`、Worker Registry、必要なOwner判断と照合する。完了通知だけでは次工程を開始しない。
+2. task ID、担当責務、結果パス、内容フィンガープリントが一致し、時刻、表示状態、通知本文、API観測の取得可否だけが異なる場合は、接続状態だけをRegistryとtask-logへ一度同期して入力ゲートを再照合する。担当result、event、修正・再レビュー予算を変更しない。
+3. task ID、担当責務、結果パス、内容フィンガープリント、承認範囲、親Coordinator、実行ディレクトリの不一致、結果資料の欠落または判定不能は工程境界不備としてeventを`blocked`にし、訂正責任者、訂正対象、再照合資料、Owner再判断の要否を記録する。
+4. task-id、発生元責務、工程、結果資料、内容フィンガープリントからhandoff event IDを確定し、共通契約に従って`handoff-events.md`へ`queued`で記録する。
+5. 同一event IDが既に存在する場合は新規接続を行わない。同一工程境界に異なる結果フィンガープリントがある場合は`blocked`として記録し、Ownerへ提示する。矛盾がないeventだけをclaimし、重複・並行処理を行わない。
+6. 承認済み範囲と次工程の入力ゲートを満たす場合、追加の開始指示やheartbeat実行を待たず、次のSubagent接続またはresumeを行う。
+7. 接続結果と処理結果を記録してeventを`completed`へ更新する。Owner判断、停止、または結果欠落の場合は`blocked`と再開条件を記録し、次工程を接続しない。状態遷移と中断時の照合は`rules/handoff-event-contract.md`に従う。
 
 ```text
 Subagent完了

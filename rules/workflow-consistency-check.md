@@ -32,6 +32,8 @@ worker接続前および作業開始前に、`current-task.md`、`docs/task-prog
 | `docs/task-progress.md` | 現行taskの状態、工程、停止・再開条件 | 工程担当 | 要約のみ。詳細証跡は`result/`へ置く |
 | `result/plan.md` | 承認済み計画、対象・対象外 | Planner／Owner | 実装範囲の入力。実装結果で書き換えない |
 | `result/changes.md`等 | workerの詳細な実施・確認結果 | 担当worker | 現行taskの結果のみ。履歴原本を統合しない |
+| 実行バックエンドの完了通知 | 実行単位の接続・終了状態 | 選択バックエンド／Coordinator | 担当resultの内容・判定を上書きしない。接続同期差分時はRegistryとtask-logだけを一度同期する |
+| `result/handoff-events.md` | 工程遷移の排他制御、claim、処理証跡 | Workflow Coordinator | 完了通知だけでは処理せず、担当resultの判定と入力ゲートを確認してからclaimする |
 | `docs/owner-judge.md` | Owner判断、OJ-ID、回答 | Owner／関連worker | Owner判断のみ。進捗を複製しない |
 | `docs/health-check.md` | workerの照合結果 | OwnerまたはPlanner | 明示トリガー時のみ。Registryを代替しない |
 | `history/index.md`・manifest | 履歴台帳メタデータ | Owner | 履歴操作時のみ。history原本は読み取り専用 |
@@ -85,6 +87,10 @@ worker自身の実行コンテキスト所属・実行環境
 選択したバックエンドの実行コンテキストID、対象リポジトリ、実行ディレクトリを照合する。ファイル側thread名・thread IDは資料の保存先と履歴追跡の補助情報として記録するが、worker接続、受入、次工程、完了の必須一致条件から除外する。Owner会話は判断・承認の記録元、クルー会話はworkerの実行単位、ファイル側threadは`docs/`と`result/`を保存する作業領域であり、同じ「スレッド」として扱わない。
 
 Worker Registryは`current-task.md`を期待値の正本、選択したバックエンドの実測・health-check・接続差分を実測の根拠とする。既存worker実行単位を先に照合し、役割、実行単位ID、親Coordinatorコンテキスト、指定・実測制約、実行ディレクトリ、状態、担当resultを比較する。候補の新規追加は、不足を確認しOwnerが明示指示した場合だけ行う。選択バックエンドの正規経路外の実行単位を正規経路として扱わない。
+
+完了通知と担当resultの照合では、task ID、担当責務、結果パス、内容フィンガープリントが一致し、時刻、表示状態、通知本文、観測取得可否だけが異なる場合を接続同期差分とする。接続状態だけをRegistryとtask-logへ一度だけ同期し、担当result、handoff event、修正・再レビュー予算を変更せず、同じ入力ゲートを再照合する。それ以外のtask ID、担当責務、結果パス、内容フィンガープリント、承認範囲、親Coordinator、実行ディレクトリの不一致、結果資料の欠落または判定不能は工程境界不備としてeventを`blocked`にし、訂正責任者、訂正対象、再照合資料、Owner再判断の要否を記録する。
+
+handoff event台帳の照合では、新規taskが`rules/handoff-event-contract.md`の必須項目をすべて記録できることを確認する。進行中taskの既存eventに追加項目がない場合は、形式不足だけを停止理由にせず、同契約の移行境界に従って一意に確認できる項目だけを補完する。一意に確認できないeventだけを`blocked`にし、履歴原本または既存eventを削除・上書き・再発行してはならない。
 
 実行コンテキストID、対象リポジトリ、実行ディレクトリの必須境界が未確認・不一致、会話種別を区別不能、または既知のRegistryと実測の不一致・重複がある場合は、docs/result/historyの参照・更新、worker接続、履歴操作、task切替を停止する。選択したバックエンドの観測値取得不能は`未確認`として記録し、代替証跡に矛盾がなければ停止理由にしない。ファイル側thread名・thread IDの不一致だけでも停止せず、実際値と履歴注記を記録して継続する。
 
@@ -168,6 +174,8 @@ OwnerはPlannerまたは各workerを接続する前に、次の項目を確認�
 - [ ] 対象リポジトリへアクセスできる
 - [ ] 実行ディレクトリを確認した
 - [ ] handoff event台帳、通知方式、Coordinator、復旧監査方式、進捗監査方針、修正・再レビュー予算を確認した
+- [ ] 完了通知が接続・終了状態の証跡、担当resultが内容・判定・次工程入力の正本、handoff eventが排他制御・処理証跡であることを確認した
+- [ ] 完了通知だけで次工程を開始せず、result判定と入力ゲート確認後にeventを処理することを確認した
 - [ ] 同一工程・異なる結果フィンガープリントが自動選別でなく`blocked`として扱われることを確認した
 - [ ] 再レビュー時はレビュー基準スナップショット、変更差分、全量横断確認へ戻す条件を確認した
 - [ ] Owner判断ごとの工程影響（停止 / 非停止）と、非停止判断のIRまたは新規im候補の記録先を確認した

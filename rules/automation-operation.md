@@ -47,18 +47,18 @@ Ownerが計画を承認した場合、Workflow Coordinatorは追加の開始指�
 
 計画承認後からReviewer受入までは、Workflow Coordinatorが自律的に工程を継続する。人間へ処理を返す状態は、(1)承認済み範囲では解決できない続行不能事項についてOwner判断を求める状態、または(2)Reviewer受入結果に対するDocumenter開始承認を求める状態だけとする。「次工程待ち」「Reviewer待ち」「再接続待ち」を理由に人間へ続行指示を求めてはならず、必要なworker接続、再接続、結果照合、品質上の修正サイクルをこのtask内で実行する。Reviewer受入後のDocumenter接続だけは例外であり、Ownerの明示承認を必要とする。
 
-worker自身の報告にある「接続機能なし」「実行不可」等の環境主張は、Workflow Coordinatorの接続結果を覆さない。Coordinatorは、選択バックエンドが返した実行単位ID、状態、接続、close相当の結果を接続事実の正本とする。worker報告と接続結果が食い違う場合は「報告不整合」としてtask-logへ記録し、接続結果をWorker Registryと担当resultへ同期して継続する。報告不整合だけでは停止しない。接続結果自体の欠落、実行コンテキスト・親Coordinatorコンテキスト・作業ディレクトリの不一致、または作成前に指定・確定した制約の欠落だけを停止条件とする。
+完了通知は実行単位の接続・終了状態の証跡、担当resultは担当作業の内容・判定・次工程入力の正本、handoff eventは工程遷移の排他制御と処理証跡である。完了通知は担当resultの内容または判定を上書きせず、担当resultは完了通知の接続・終了状態を代替しない。worker自身の報告にある「接続機能なし」「実行不可」等の環境主張は、Workflow Coordinatorの接続結果を覆さない。Coordinatorは、選択バックエンドが返した実行単位ID、状態、接続、close相当の結果を接続事実の正本とする。
 
 ### agent-workflow起因の輻輳分離
 
 ReviewerまたはCoordinatorが検出した事項は、最初に`品質修正`、`接続同期差分`、`工程境界不備`へ分類する。完全一致する代表ケースは`rules/issue-classification-cases.md`の固定処理を適用し、複数一致・根拠不足・定義との矛盾は工程境界不備として停止する。`品質修正`だけが、承認済み計画の成果物を是正するImplementer→Reviewerの修正ラウンド対象である。
 
-- `接続同期差分`は、選択バックエンドの接続・close結果を正本としてRegistry、担当result、task-logへ一度だけ同期すれば解消できるID・状態・結果パスの差分である。Coordinatorが同期後に同じ工程境界の入力ゲートだけを再照合し、Implementer・Reviewerの再接続、修正ラウンド、予算消費を行わない。
-- `工程境界不備`は、結果資料の欠落、接続要求・親Coordinator・実行ディレクトリ・承認範囲の既知の不一致、正本の複数候補、eventのclaimまたは状態の矛盾、接続前指定制約の未確定をいう。Coordinatorは当該eventを`blocked`にし、原因、期待値、実際値、根拠、影響、再開条件を一件の集約報告へ記録する。現行taskの品質修正ラウンドへ混在させず、Implementer・Reviewer・Documenterを自動再接続しない。
+- `接続同期差分`は、task ID、担当責務、担当resultの正本パス、内容フィンガープリントが一致し、時刻、表示状態、完了通知本文、観測値の取得可否だけが異なる場合に限る。Coordinatorは接続・終了状態を接続結果の正本としてWorker Registryと`task-log.md`へ一度だけ同期し、担当resultの内容・判定を変更しない。同期後に同じ工程境界の入力ゲートを再照合して継続し、Implementer・Reviewerの再接続、修正ラウンド、予算消費、eventの再発行を行わない。
+- `工程境界不備`は、task ID、担当責務、担当resultの正本パス、内容フィンガープリント、承認範囲、親Coordinator、実行ディレクトリの既知の不一致、結果資料の欠落または判定不能、正本の複数候補、eventのclaimまたは状態の矛盾、接続前指定制約の未確定をいう。Coordinatorは当該eventを`blocked`にし、原因、期待値、実際値、根拠、影響、停止理由、再開条件を一件の集約報告へ記録する。再開条件には、正本resultまたは接続証跡の訂正責任者、訂正対象、再照合する資料、Owner再判断の要否を必ず含める。現行taskの品質修正ラウンドへ混在させず、Implementer・Reviewer・Documenterを自動再接続しない。
 - `工程境界不備`の是正が必要な場合は、Ownerの明示判断により、現行taskを再開可能にする最小の記録同期か、agent-workflowの別imとして扱う。Coordinator、Reviewer、Implementerは自己判断でルール・接続設計・正本境界を変更して品質修正として処理しない。
 - 一つの報告に品質修正と工程境界不備が併存する場合は、指摘ID・根拠・影響・再開条件を分離して記録する。工程境界不備が品質修正の入力または証跡の信頼性に影響する場合は、品質修正も開始せず`blocked`にする。影響しない場合だけ、品質修正を既存予算内で継続できる。
 
-Workflow Coordinatorは計画承認後、Delivery実行単位を再開または継続接続してImplementer責務を接続する。Delivery完了後はclose相当の状態へ遷移し独立Reviewerを接続する。Reviewerが受入と判定した時点で自律工程を終了し、Coordinatorは受入根拠とDocumenter開始用のOwner判断を提示する。Ownerが受入結果を明示承認した場合だけ、Deliveryを再開または継続接続してDocumenter責務を接続する。workerの完了通知を受けた時だけ、担当result、`task-log.md`、Owner判断、入力ゲートを照合する。人間のOwnerとWorkflow Coordinatorの間に自動接続は作らず、承認要求はCoordinatorから人間へ提示する。
+Workflow Coordinatorは計画承認後、Delivery実行単位を再開または継続接続してImplementer責務を接続する。Delivery完了後はclose相当の状態へ遷移し独立Reviewerを接続する。Reviewerが受入と判定した時点で自律工程を終了し、Coordinatorは受入根拠とDocumenter開始用のOwner判断を提示する。Ownerが受入結果を明示承認した場合だけ、Deliveryを再開または継続接続してDocumenter責務を接続する。完了通知だけでは次工程を開始せず、担当resultの内容・判定を確定し、`task-log.md`、Owner判断、入力ゲートを照合した後にhandoff eventを処理する。人間のOwnerとWorkflow Coordinatorの間に自動接続は作らず、承認要求はCoordinatorから人間へ提示する。
 
 worker実行単位は実際に接続・再開された実行主体であり、親会話、ユーザー向け実行会話、ファイル側thread、実行コンテキストでは代替できない。Deliveryは同一task内でPlanner→Implementer→Documenterの論理責務を担当し、必要な切替は同じDelivery実行単位の再開または継続接続で行う。Reviewerは独立した実行単位として接続する。worker固有の指定制約は、選択したバックエンドと適用中ローカルルールから接続前に指定・照合する。指定設定が確認できない場合は接続・作業を停止する。指定済み実行単位の実測値が取得不能な場合は未確認として証跡を記録するが、それだけを理由に自律オーケストレーション、受入、記録完了を停止しない。新規ユーザー向け実行会話の作成をworker接続の代替手段にしてはならない。
 
@@ -67,8 +67,8 @@ worker実行単位は実際に接続・再開された実行主体であり、�
 ### 接続後報告不整合の継続基準
 
 - worker接続前に、指定制約を確定し、選択バックエンドの接続要求へ渡す。作成前に確定できない場合は接続しない。
-- 接続後にworker報告のID、状態、結果パスが接続結果と異なる場合、接続結果を実測正本としてWorker Registry、担当result、task-logへ同期する。
-- 上記の報告差分だけでは停止しない。接続結果自体の欠落、実行コンテキスト・親Coordinatorコンテキスト・実行ディレクトリの不一致、作成前指定制約の未確定だけを停止条件とする。
+- 接続後の差分は、`接続同期差分`と`工程境界不備`の定義に従って分類する。接続同期差分では接続結果を接続状態の実測正本としてWorker Registryとtask-logへ一度だけ同期し、担当resultを更新しない。
+- task ID、担当責務、結果パス、内容フィンガープリント、承認範囲、親Coordinatorコンテキスト、実行ディレクトリの既知の不一致、結果資料の欠落または判定不能は工程境界不備として停止する。
 - Reviewerの実行単位IDはレビューAttempt単位の値とする。再接続で新しいIDが発行されることは正常であり、過去AttemptのIDを現行資料の不一致として扱わない。現行AttemptのIDだけを接続結果・現行`review.md`・Worker Registryへ同期し、過去AttemptのIDは履歴として保持する。
 - タスク工程状態（次worker、Documenter接続可否、受入状態）はReviewer IDと別に管理する。ID変更だけでは工程状態を未同期・不受入と判定しない。
 
@@ -95,9 +95,9 @@ handoff eventは通常遷移の排他制御を行い、復旧監査の起動方�
 5. 矛盾のない未処理eventだけを`processing`としてclaimしてから結果照合・次工程接続を行う。処理終了後に`completed`へ更新する。
 6. イベントID、台帳、状態、claimのいずれかを照合できない場合は、推測で再実行せず停止する。競合を実行バックエンド固有の監査設定の再作成・複製・状態変更で回避してはならない。
 
-`handoff-events.md`は少なくともevent ID、task-id、発生元、結果資料、内容フィンガープリント、状態、claim責任、処理結果、再開条件を保持する。状態は`queued`、`processing`、`completed`、`blocked`、`cancelled`を使用する。`processing`が残る場合は同一eventを再実行せず、接続結果を照合して`completed`または`blocked`へ確定するまで後続eventを進めない。台帳不整合または復旧不能だけをOwner判断の停止理由とする。
+`handoff-events.md`は`rules/handoff-event-contract.md`の必須項目を保持する。新規taskは完全な必須項目で台帳を作成し、進行中taskの既存eventは同契約の移行境界に従って補完または当該eventだけを`blocked`にする。状態は`queued`、`processing`、`completed`、`blocked`、`cancelled`を使用する。`processing`が残る場合は同一eventを再実行せず、接続結果を照合して`completed`または`blocked`へ確定するまで後続eventを進めない。台帳不整合または復旧不能だけをOwner判断の停止理由とする。
 
-工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→OwnerによるReviewer受入結果の承認→Documenter→Workflow CoordinatorのIRリマインド・完了判断要求とする。Reviewer受入で自律工程を終了し、DocumenterはOwner承認後の別工程として扱う。人間はWorkflow Coordinatorへ指示し、worker間の任意送信を正式な引継ぎにしない。次工程の接続前に、直前workerの接続要求・終了相当結果、完了状態、結果ファイル、Owner判断、Registry更新を照合し、選択バックエンドの実行単位IDが取得できる場合は照合する。実行単位IDの取得不能だけでは停止せず、代替証跡に矛盾がある場合、結果ファイルが欠落している場合、または承認・実行境界・実行ディレクトリが不一致の場合に停止する。停止・再開の扱いはOwner判断または記録完了の工程境界でのみ確定する。
+工程遷移は、Planner→Implementer→必要なTester / Security Operator→Reviewer→OwnerによるReviewer受入結果の承認→Documenter→Workflow CoordinatorのIRリマインド・完了判断要求とする。Reviewer受入で自律工程を終了し、DocumenterはOwner承認後の別工程として扱う。人間はWorkflow Coordinatorへ指示し、worker間の任意送信を正式な引継ぎにしない。次工程の接続前に、直前workerの完了通知、担当result、Owner判断、Registry更新を、それぞれの正本範囲で照合する。完了通知だけではhandoff eventを処理せず、担当resultの内容・判定と入力ゲートを確定してからclaimする。実行単位IDの取得不能だけでは停止せず、接続同期差分は一度の同期後に継続する。工程境界不備、結果資料の欠落、承認不足、または代替証跡間の既知の矛盾は停止する。停止・再開の扱いはOwner判断または記録完了の工程境界でのみ確定する。
 
 実行単位の完了通知が取得不能な場合は、Workflow Coordinatorの次回実行時に現行resultと`task-log.md`を照合して未接続工程を復旧する。通知送信の失敗や実行画面の表示だけでは工程を停止しない。結果資料の欠落、不一致、停止判定、または工程影響が`停止`のOwner判断残件は停止条件とする。
 
@@ -142,4 +142,4 @@ Agentの受入要求起動、Reviewer受入、Documenter開始のOwner承認、D
 
 ## 再開条件
 
-停止後は、原因、影響、修正、再発防止、承認範囲、復旧方法を確認し、Reviewer再確認とOwner承認が揃うまで自動実行を再開しない。
+停止後は、原因、影響、修正、再発防止、承認範囲、復旧方法を確認し、Reviewer再確認とOwner承認が揃うまで自動実行を再開しない。工程境界不備からの再開では、正本resultまたは接続証跡の訂正責任者、訂正対象、再照合資料、Owner再判断の要否を記録し、これらが満たされた事実を確認するまで推測でeventを`queued`へ戻さない。
